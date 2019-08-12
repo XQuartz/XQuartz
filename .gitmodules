@@ -598,3 +598,6 @@
 [submodule "src/freeglut"]
 	path = src/freeglut
 	url = git@github.com:dcnieho/FreeGLUT.git
+[submodule "src/xterm"]
+	path = src/xterm
+	url = git@github.com:ThomasDickey/xterm-snapshots.git
