@@ -583,3 +583,15 @@
 [submodule "src/cairo"]
 	path = src/cairo
 	url = git://anongit.freedesktop.org/git/cairo
+[submodule "src/libpng/libpng12"]
+	path = src/libpng/libpng12
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "src/libpng/libpng14"]
+	path = src/libpng/libpng14
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "src/libpng/libpng15"]
+	path = src/libpng/libpng15
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "src/libpng/libpng16"]
+	path = src/libpng/libpng16
+	url = git://git.code.sf.net/p/libpng/code
