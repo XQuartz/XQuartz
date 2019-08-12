@@ -604,3 +604,6 @@
 [submodule "src/freetype2"]
 	path = src/freetype2
 	url = git://git.savannah.gnu.org/freetype/freetype2.git
+[submodule "src/fontconfig"]
+	path = src/fontconfig
+	url = git@gitlab.freedesktop.org:fontconfig/fontconfig.git
