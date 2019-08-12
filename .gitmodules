@@ -577,3 +577,9 @@
 [submodule "src/mesa/demos"]
 	path = src/mesa/demos
 	url = git@gitlab.freedesktop.org:mesa/demos.git
+[submodule "src/pixman"]
+	path = src/pixman
+	url = git@gitlab.freedesktop.org:pixman/pixman
+[submodule "src/cairo"]
+	path = src/cairo
+	url = git://anongit.freedesktop.org/git/cairo
