@@ -601,3 +601,6 @@
 [submodule "src/xterm"]
 	path = src/xterm
 	url = git@github.com:ThomasDickey/xterm-snapshots.git
+[submodule "src/freetype2"]
+	path = src/freetype2
+	url = git://git.savannah.gnu.org/freetype/freetype2.git
