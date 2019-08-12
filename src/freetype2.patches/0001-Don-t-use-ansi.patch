@@ -1,0 +1,54 @@
+From 2c8862999d1970946ce970538f5cc6b3c3dcc641 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Tue, 5 Jan 2021 14:44:54 -0800
+Subject: [PATCH 1/4] Don't use -ansi
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ builds/compiler/gcc-dev.mk | 2 +-
+ builds/compiler/gcc.mk     | 2 +-
+ builds/unix/configure.raw  | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/builds/compiler/gcc-dev.mk b/builds/compiler/gcc-dev.mk
+index 46dad39f3..db27f3c87 100644
+--- a/builds/compiler/gcc-dev.mk
++++ b/builds/compiler/gcc-dev.mk
+@@ -83,7 +83,7 @@ endif
+ 
+ # ANSIFLAGS: Put there the flags used to make your compiler ANSI-compliant.
+ #
+-ANSIFLAGS := -ansi -pedantic
++ANSIFLAGS := -pedantic
+ 
+ 
+ # Library linking
+diff --git a/builds/compiler/gcc.mk b/builds/compiler/gcc.mk
+index b1ee409a7..d878bfee1 100644
+--- a/builds/compiler/gcc.mk
++++ b/builds/compiler/gcc.mk
+@@ -65,7 +65,7 @@ CFLAGS ?= -c -g -O3 -Wall
+ 
+ # ANSIFLAGS: Put there the flags used to make your compiler ANSI-compliant.
+ #
+-ANSIFLAGS := -ansi -pedantic
++ANSIFLAGS := -pedantic
+ 
+ 
+ # Library linking
+diff --git a/builds/unix/configure.raw b/builds/unix/configure.raw
+index a1a6dbeb2..ff95ce723 100644
+--- a/builds/unix/configure.raw
++++ b/builds/unix/configure.raw
+@@ -264,7 +264,7 @@ if test "x$GCC" = xyes; then
+     fi
+ 
+     XX_ANSIFLAGS=""
+-    for a in $XX_PEDANTIC -ansi
++    for a in $XX_PEDANTIC
+     do
+       AC_MSG_CHECKING([gcc compiler flag ${a} to assure ANSI C works correctly])
+       orig_CFLAGS="${CFLAGS}"
+-- 
+2.24.3 (Apple Git-128)
+

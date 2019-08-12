@@ -1,0 +1,14 @@
+--disable-dri --disable-glx --disable-shave --disable-nls \
+--with-fontdir=${PREFIX}/share/fonts \
+--with-default-font-path=${FONTPATH} \
+--disable-glamor \
+--disable-xquartz \
+--enable-xorg \
+--enable-kdrive \
+--enable-xfake \
+--disable-xephyr \ 
+--disable-sdl \
+--enable-xnest \
+--enable-xvfb \
+--disable-specs \
+--disable-devel-docs --disable-docs  

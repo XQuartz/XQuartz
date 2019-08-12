@@ -1,0 +1,48 @@
+From e53e0ac030e1b14a97c471b8f7a9dca3929c5ee6 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Tue, 5 Jan 2021 14:46:33 -0800
+Subject: [PATCH 3/4] Use raccess_guess_darwin_newvfs
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ src/base/ftrfork.c | 24 +-----------------------
+ 1 file changed, 1 insertion(+), 23 deletions(-)
+
+diff --git a/src/base/ftrfork.c b/src/base/ftrfork.c
+index 73b7eb0de..ecd64c8b4 100644
+--- a/src/base/ftrfork.c
++++ b/src/base/ftrfork.c
+@@ -596,29 +596,7 @@
+     /*
+       Only meaningful on systems with hfs+ drivers (or Macs).
+      */
+-    FT_Error   error;
+-    char*      newpath = NULL;
+-    FT_Memory  memory;
+-    FT_Long    base_file_len = (FT_Long)ft_strlen( base_file_name );
+-
+-    FT_UNUSED( stream );
+-
+-
+-    memory = library->memory;
+-
+-    if ( base_file_len + 6 > FT_INT_MAX )
+-      return FT_THROW( Array_Too_Large );
+-
+-    if ( FT_ALLOC( newpath, base_file_len + 6 ) )
+-      return error;
+-
+-    FT_MEM_COPY( newpath, base_file_name, base_file_len );
+-    FT_MEM_COPY( newpath + base_file_len, "/rsrc", 6 );
+-
+-    *result_file_name = newpath;
+-    *result_offset    = 0;
+-
+-    return FT_Err_Ok;
++    return raccess_guess_darwin_newvfs( library, stream, base_file_name, result_file_name, result_offset );
+   }
+ 
+ 
+-- 
+2.24.3 (Apple Git-128)
+

@@ -3,3 +3,10 @@
 *.rej
 *.orig
 *.o
+submodules.initialized
+products
+applied
+XQuartz-*.d
+XQuartz-*.dSYMS.tar.bz2*
+XQuartz-*.dmg*
+XQuartz-*.pkg*

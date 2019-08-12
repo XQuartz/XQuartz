@@ -1,0 +1,2 @@
+--with-launchd-id-prefix=${IDENTIFIER_PREFIX} \
+--with-launchagent-xserver=${PREFIX}/bin/Xquartz

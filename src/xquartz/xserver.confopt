@@ -1,0 +1,10 @@
+--disable-shave --disable-nls \
+--enable-xcsecurity --enable-record \
+--with-fontdir=${PREFIX}/share/fonts \
+--with-default-font-path=${FONTPATH} \
+--with-bundle-id-prefix=${IDENTIFIER_PREFIX} \
+--with-apple-application-name=XQuartz \
+--with-apple-applications-dir=${APPLICATION_PATH} \
+--with-bundle-version=${APPLICATION_VERSION} \
+--with-bundle-version-string=${APPLICATION_VERSION_STRING} \
+--enable-sparkle --with-sparkle-feed-url=${SPARKLE_FEED_URL}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <!-- <welcome file="INTRODUCTION.txt"/> -->
+    <license file="LICENSE.txt"/>
+    <readme file="README.txt"/>
+    <pkg-ref id="org.xquartz.X11"/>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+    <volume-check>
+        <allowed-os-versions>
+            <os-version min="10.9"/>
+        </allowed-os-versions>
+    </volume-check>
+    <choices-outline>
+        <line choice="default">
+            <line choice="org.xquartz.X11"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="org.xquartz.X11" visible="false">
+        <pkg-ref id="org.xquartz.X11"/>
+    </choice>
+    <pkg-ref id="org.xquartz.X11" version="2.8.0" onConclusion="none">XQuartzComponent.pkg</pkg-ref>
+</installer-gui-script>

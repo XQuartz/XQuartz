@@ -1,0 +1,1 @@
+--mandir=${PREFIX}/share/man --enable-wide-chars --enable-luit --enable-256-color --enable-logging --enable-load-vt-fonts --x-include=${PREFIX}/include --x-lib=${PREFIX}/lib --with-app-defaults=${PREFIX}/share/X11/app-defaults

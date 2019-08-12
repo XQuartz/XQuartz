@@ -1,0 +1,66 @@
+From f17d9a8d921063f16ea76981817caf1ae458dbd2 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Wed, 6 Jan 2021 16:12:35 -0800
+Subject: [PATCH 1/2] Add bsdiff and ed25519 as dependencies of Sparkle
+
+https://github.com/sparkle-project/Sparkle/issues/1716
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ Sparkle.xcodeproj/project.pbxproj | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/Sparkle.xcodeproj/project.pbxproj b/Sparkle.xcodeproj/project.pbxproj
+index 6b57ae9c..edaf600b 100644
+--- a/Sparkle.xcodeproj/project.pbxproj
++++ b/Sparkle.xcodeproj/project.pbxproj
+@@ -397,6 +397,20 @@
+ 			remoteGlobalIDString = 55C14BB6136EEF1500649790;
+ 			remoteInfo = Autoupdate;
+ 		};
++		3F64D40F25A6895D00BF9F2D /* PBXContainerItemProxy */ = {
++			isa = PBXContainerItemProxy;
++			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
++			proxyType = 1;
++			remoteGlobalIDString = EA4311E9229D651300A5503D;
++			remoteInfo = bsdiff;
++		};
++		3F64D41D25A689C800BF9F2D /* PBXContainerItemProxy */ = {
++			isa = PBXContainerItemProxy;
++			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
++			proxyType = 1;
++			remoteGlobalIDString = EA43119F229D5FBC00A5503D;
++			remoteInfo = ed25519;
++		};
+ 		55C14F96136F044100649790 /* PBXContainerItemProxy */ = {
+ 			isa = PBXContainerItemProxy;
+ 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+@@ -1958,6 +1972,8 @@
+ 			);
+ 			dependencies = (
+ 				55C14F97136F044100649790 /* PBXTargetDependency */,
++				3F64D41025A6895D00BF9F2D /* PBXTargetDependency */,
++				3F64D41E25A689C800BF9F2D /* PBXTargetDependency */,
+ 			);
+ 			name = Sparkle;
+ 			productInstallPath = "$(HOME)/Library/Frameworks";
+@@ -2548,6 +2564,16 @@
+ 			target = 55C14BB6136EEF1500649790 /* Autoupdate */;
+ 			targetProxy = 1495006B195FB8A600BC5B5B /* PBXContainerItemProxy */;
+ 		};
++		3F64D41025A6895D00BF9F2D /* PBXTargetDependency */ = {
++			isa = PBXTargetDependency;
++			target = EA4311E9229D651300A5503D /* bsdiff */;
++			targetProxy = 3F64D40F25A6895D00BF9F2D /* PBXContainerItemProxy */;
++		};
++		3F64D41E25A689C800BF9F2D /* PBXTargetDependency */ = {
++			isa = PBXTargetDependency;
++			target = EA43119F229D5FBC00A5503D /* ed25519 */;
++			targetProxy = 3F64D41D25A689C800BF9F2D /* PBXContainerItemProxy */;
++		};
+ 		55C14F97136F044100649790 /* PBXTargetDependency */ = {
+ 			isa = PBXTargetDependency;
+ 			target = 55C14BB6136EEF1500649790 /* Autoupdate */;
+-- 
+2.24.3 (Apple Git-128)
+

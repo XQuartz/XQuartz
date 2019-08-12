@@ -1,0 +1,1 @@
+--x-include=${PREFIX}/include --x-lib=${PREFIX}/lib

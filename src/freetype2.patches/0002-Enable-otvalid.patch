@@ -1,0 +1,26 @@
+From d4726b9208c2d3ca51c47893b983573c3d3dcc87 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Tue, 5 Jan 2021 14:45:35 -0800
+Subject: [PATCH 2/4] Enable otvalid
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ modules.cfg | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules.cfg b/modules.cfg
+index dc6c8d42d..ae1c4eb39 100644
+--- a/modules.cfg
++++ b/modules.cfg
+@@ -130,7 +130,7 @@ AUX_MODULES += bzip2
+ 
+ # OpenType table validation.  Needs `ftotval.c' below.
+ #
+-# AUX_MODULES += otvalid
++AUX_MODULES += otvalid
+ 
+ # Auxiliary PostScript driver component to share common code.
+ #
+-- 
+2.24.3 (Apple Git-128)
+

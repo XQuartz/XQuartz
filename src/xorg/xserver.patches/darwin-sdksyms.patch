@@ -1,0 +1,48 @@
+diff --git a/hw/xfree86/sdksyms.sh b/hw/xfree86/sdksyms.sh
+index 7897aae22..479aab99c 100755
+--- a/hw/xfree86/sdksyms.sh
++++ b/hw/xfree86/sdksyms.sh
+@@ -300,7 +300,7 @@ cat > sdksyms.c << EOF
+ 
+ EOF
+ 
+-topdir=$(readlink -f $1)
++topdir=$(readlink $1)
+ shift
+ LC_ALL=C
+ export LC_ALL
+@@ -329,7 +329,7 @@ BEGIN {
+     if ($3 in canonicalized) {
+ 	c = canonicalized[$3]
+     } else {
+-	cmd = "readlink -f " $3
++	cmd = "readlink " $3
+ 	cmd | getline c
+ 	close(cmd)
+         canonicalized[$3] = c
+@@ -351,7 +351,7 @@ BEGIN {
+ }
+ 
+ /^extern[ 	]/  {
+-    if (sdk) {
++    if (sdk && header !~ /MacOSX.*\.sdk/ && header !~ /font.h/) {
+ 	n = 3;
+ 
+         # skip line numbers GCC 5 adds before __attribute__
+@@ -404,6 +404,16 @@ BEGIN {
+ 	if ($n ~ /^([^a-zA-Z0-9_]+)?const$/)
+ 	    n++;
+ 
++	# match
++	#	extern long long int name ...
++	while ($n ~ /^(char|int|long|float|double)$/)
++	    n++;
++
++        # match
++        #     extern long name __asm("_" "namealias" );
++        if ($n ~ /^__asm/)
++            n--;
++
+ 	# actual name may be in the next line, as in
+ 	#   extern _X_EXPORT type
+ 	# possibly ending with a *

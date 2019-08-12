@@ -1,0 +1,129 @@
+diff -Naurp libXaw-1.0.4.orig/Makefile.am libXaw-1.0.4/Makefile.am
+--- libXaw-1.0.4.orig/Makefile.am	2007-01-03 21:13:17 -0800
++++ libXaw-1.0.4/Makefile.am	2008-11-23 12:51:11 -0800
+@@ -9,21 +9,33 @@ pkgconfig_DATA = 
+ if BUILD_XAW6
+ 
+ pkgconfig_DATA += xaw6.pc
+-DEFAULT_LIB = libXaw6.so
++if PLATFORM_DARWIN
++DEFAULT_LIB = libXaw.6.@LIBEXT@
++else
++DEFAULT_LIB = libXaw6.@LIBEXT@
++endif
+ 
+ endif
+ 
+ if BUILD_XAW7
+ 
+ pkgconfig_DATA += xaw7.pc
+-DEFAULT_LIB = libXaw7.so
++if PLATFORM_DARWIN
++DEFAULT_LIB = libXaw.7.@LIBEXT@
++else
++DEFAULT_LIB = libXaw7.@LIBEXT@
++endif
+ 
+ endif
+ 
+ if BUILD_XAW8
+ 
+ pkgconfig_DATA += xaw8.pc
+-DEFAULT_LIB = libXaw8.so
++if PLATFORM_DARWIN
++DEFAULT_LIB = libXaw.8.@LIBEXT@
++else
++DEFAULT_LIB = libXaw8.@LIBEXT@
++endif
+ 
+ endif
+ 
+@@ -38,7 +50,7 @@ EXTRA_DIST = xaw6.pc.in \
+ 
+ if !PLATFORM_WIN32
+ install-exec-hook:
+-	cd $(DESTDIR)$(libdir) && rm -f libXaw.so && ln -s $(DEFAULT_LIB) libXaw.so
++	cd $(DESTDIR)$(libdir) && rm -f libXaw.@LIBEXT@ && ln -s $(DEFAULT_LIB) libXaw.@LIBEXT@
+ endif
+ 
+ MAINTAINERCLEANFILES=ChangeLog
+diff -Naurp libXaw-1.0.4.orig/configure.ac libXaw-1.0.4/configure.ac
+--- libXaw-1.0.4.orig/configure.ac	2007-08-21 13:18:48 -0700
++++ libXaw-1.0.4/configure.ac	2008-11-23 12:49:32 -0800
+@@ -38,16 +38,22 @@ EOF
+ 	AC_MSG_RESULT([fixed])
+ fi
+ 
+-# Win32 DLL rules are different.
++# OSX/Win32 rules are different.
++platform_win32=no
++platform_darwin=no
++LIBEXT=so
+ case $host_os in
+     cygwin*|mingw*)
+ 	platform_win32=yes
+ 	;;
+-    *)
+-	platform_win32=no
++    darwin*)
++	LIBEXT=dylib
++	platform_darwin=yes
+ 	;;
+ esac
++AC_SUBST(LIBEXT)
+ AM_CONDITIONAL(PLATFORM_WIN32, test "x$platform_win32" = "xyes")
++AM_CONDITIONAL(PLATFORM_DARWIN, test "x$platform_darwin" = "xyes")
+ 
+ # Whether to build Xaw6
+ 
+diff -Naurp libXaw-1.0.4.orig/src/Makefile.am libXaw-1.0.4/src/Makefile.am
+--- libXaw-1.0.4.orig/src/Makefile.am	2006-07-11 11:04:58 -0700
++++ libXaw-1.0.4/src/Makefile.am	2008-11-23 12:53:25 -0800
+@@ -77,8 +77,13 @@ libXaw6_la_LIBADD = $(XAW6_LIBS)
+ 
+ if !PLATFORM_WIN32
+ install-exec-hook::
+-	-rm -f $(DESTDIR)$(libdir)/libXaw.so.6
+-	(cd $(DESTDIR)$(libdir) && ln -s libXaw6.so.6 libXaw.so.6)
++if PLATFORM_DARWIN
++	-rm -f $(DESTDIR)$(libdir)/libXaw.6.@LIBEXT@
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw6.6.@LIBEXT@ libXaw.6.@LIBEXT@)
++else
++	-rm -f $(DESTDIR)$(libdir)/libXaw.@LIBEXT@.6
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw6.@LIBEXT@.6 libXaw.@LIBEXT@.6)
++endif
+ endif
+ 
+ endif
+@@ -101,8 +106,13 @@ libXaw7_la_LIBADD = $(XAW7_LIBS)
+ 
+ if !PLATFORM_WIN32
+ install-exec-hook::
+-	-rm -f $(DESTDIR)$(libdir)/libXaw.so.7
+-	(cd $(DESTDIR)$(libdir) && ln -s libXaw7.so.7 libXaw.so.7)
++if PLATFORM_DARWIN
++	-rm -f $(DESTDIR)$(libdir)/libXaw.7.@LIBEXT@
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw7.7.@LIBEXT@ libXaw.7.@LIBEXT@)
++else
++	-rm -f $(DESTDIR)$(libdir)/libXaw.@LIBEXT@.7
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw7.@LIBEXT@.7 libXaw.@LIBEXT@.7)
++endif
+ endif
+ 
+ endif
+@@ -125,8 +135,13 @@ libXaw8_la_LIBADD = $(XAW8_LIBS)
+ 
+ if !PLATFORM_WIN32
+ install-exec-hook::
+-	-rm -f $(DESTDIR)$(libdir)/libXaw.so.8
+-	(cd $(DESTDIR)$(libdir) && ln -s libXaw8.so.8 libXaw.so.8)
++if PLATFORM_DARWIN
++	-rm -f $(DESTDIR)$(libdir)/libXaw.8.@LIBEXT@
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw8.8.@LIBEXT@ libXaw.8.@LIBEXT@)
++else
++	-rm -f $(DESTDIR)$(libdir)/libXaw.@LIBEXT@.8
++	(cd $(DESTDIR)$(libdir) && ln -s libXaw8.@LIBEXT@.8 libXaw.@LIBEXT@.8)
++endif
+ endif
+ 
+ endif

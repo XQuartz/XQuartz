@@ -1,0 +1,10 @@
+--- bitmap-1.0.4/Makefile.am.orig	2009-10-13 11:27:37.000000000 -0700
++++ bitmap-1.0.4/Makefile.am	2009-10-13 11:27:45.000000000 -0700
+@@ -96,7 +96,6 @@ dist_bitmap_DATA =	\
+ 	Right		\
+ 	RotateLeft	\
+ 	RotateRight	\
+-	Stipple		\
+ 	Term		\
+ 	Up
+ 

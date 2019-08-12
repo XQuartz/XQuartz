@@ -1,0 +1,28 @@
+If we don't have the m4 directory and ACLOCAL is set with additional -I directories,
+aclocal will error out on first invocation.
+
+diff --git a/Makefile.am b/Makefile.am
+index db5db86..790c67e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -26,8 +26,6 @@ pkgconfig_DATA = xpresent.pc
+ 
+ MAINTAINERCLEANFILES = ChangeLog INSTALL
+ 
+-ACLOCAL_AMFLAGS=-I m4
+-
+ .PHONY: ChangeLog INSTALL
+ 
+ INSTALL:
+diff --git a/configure.ac b/configure.ac
+index 233c7ee..7043c34 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -37,7 +37,6 @@ AC_INIT(libXpresent, [1.0.0],
+ AC_CONFIG_SRCDIR([Makefile.am])
+ AC_CONFIG_HEADERS([config.h])
+ AC_CONFIG_AUX_DIR([.])
+-AC_CONFIG_MACRO_DIR([m4])
+ 
+ # Initialize Automake
+ AM_INIT_AUTOMAKE([foreign dist-bzip2])

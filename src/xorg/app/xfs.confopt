@@ -1,0 +1,1 @@
+--sysconfdir=${PREFIX}/lib --disable-devel-docs
