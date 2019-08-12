@@ -595,3 +595,6 @@
 [submodule "src/libpng/libpng16"]
 	path = src/libpng/libpng16
 	url = git://git.code.sf.net/p/libpng/code
+[submodule "src/freeglut"]
+	path = src/freeglut
+	url = git@github.com:dcnieho/FreeGLUT.git
