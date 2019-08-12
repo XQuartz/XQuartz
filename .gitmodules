@@ -607,3 +607,6 @@
 [submodule "src/fontconfig"]
 	path = src/fontconfig
 	url = git@gitlab.freedesktop.org:fontconfig/fontconfig.git
+[submodule "src/Sparkle"]
+	path = src/Sparkle
+	url = git@github.com:sparkle-project/Sparkle.git
