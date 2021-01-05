@@ -610,3 +610,6 @@
 [submodule "src/Sparkle"]
 	path = src/Sparkle
 	url = git@github.com:sparkle-project/Sparkle.git
+[submodule "src/xquartz/xserver"]
+	path = src/xquartz/xserver
+	url = git@github.com:XQuartz/xorg-server.git
