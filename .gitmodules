@@ -613,3 +613,6 @@
 [submodule "src/xquartz/xserver"]
 	path = src/xquartz/xserver
 	url = git@github.com:XQuartz/xorg-server.git
+[submodule "src/xkeyboard-config"]
+	path = src/xkeyboard-config
+	url = git@github.com:freedesktop/xkeyboard-config.git
