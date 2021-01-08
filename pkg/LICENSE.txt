@@ -1,0 +1,7 @@
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE COPYRIGHT HOLDER(S), THE XQUARTZ PROJECT, OR APPLE INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+The software contained in this package are licensed under multiple licenses.  It is not feasible to include all of the licenses here in a precise manner.  For clarification on licensing issues, please contact the OS X X11 Users mailing list (http://www.xquartz.org/Mailing-Lists.html).  What comes below is an attempt to give a brief overview of some of the relevant licenses.
+
+libXplugin is not open source.  It is licensed to you under the same conditions as any Apple Software Update (although lacking any warranty, since this is *NOT* an official Apple release).
+
+All other software installed is made available under an OSI approved license (see http://www.opensource.org/licenses/alphabetical) including, but not necessarily limited to the following licenses: MIT, BSD, APSL-2, GPL-2, and LGPL-2.
