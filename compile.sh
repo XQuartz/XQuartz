@@ -321,7 +321,8 @@ do_dist() {
     fi
 
     echo "Commits For the release page:"
-    git submodule | egrep -v '(cairo|libpng1[245]|libXaw8|libXevie|libXfontcache|libxkbui|libXp |libXt-flatnamespace|libXTrap|libXTrap|libXxf86misc|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):' | pbcopy
+    cd "${BASE_DIR}"
+    git submodule | egrep -v '(cairo|libpng1[245]|libXaw8|libXevie|libXfontcache|libxkbui|libXp |libXt-flatnamespace|libXTrap|libXTrap|libXxf86misc|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
