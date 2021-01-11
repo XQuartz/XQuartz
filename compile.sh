@@ -46,8 +46,8 @@ CODESIGN_ASC_PROVIDER="NA574AWV7E"
 CODESIGN_IDENTITY_APP="Developer ID Application: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 
-APPLICATION_VERSION=2.8.0
-APPLICATION_VERSION_STRING=2.8.0_alpha1
+APPLICATION_VERSION=2.8.1
+APPLICATION_VERSION_STRING=2.8.0_alpha2
 SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/alpha.xml"
 #SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
 #SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
@@ -319,6 +319,9 @@ do_dist() {
         echo "         <enclosure url=\"https://dl.bintray.com/xquartz/downloads/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" length=\"${SIZE}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA}\" />"
         echo "      </item>"
     fi
+
+    echo "Commits For the release page:"
+    git submodule | egrep -v '(cairo|libpng1[245]|libXaw8|libXevie|libXfontcache|libxkbui|libXp |libXt-flatnamespace|libXTrap|libXTrap|libXxf86misc|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):' | pbcopy
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
