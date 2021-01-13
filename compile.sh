@@ -69,12 +69,17 @@ DESTDIR=${PRODUCTS_DIR}/XQuartz.dest
 PKG_ROOT=${PRODUCTS_DIR}/XQuartz.signed
 SYM_ROOT=${PRODUCTS_DIR}/XQuartz.symbols
 
+WARNING_FLAGS="-Werror=unguarded-availability-new"
+
+# timespec_get() was added in macOS 10.15
+export ac_cv_func_timespec_get=no
+
 export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX}/bin:${PATH}"
 export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
 export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX}/share/aclocal"
 export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-export CFLAGS="${ARCH_FLAGS} ${OPT_FLAGS} ${DEBUG_FLAGS}"
+export CFLAGS="${ARCH_FLAGS} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}"
 export CXXFLAGS="${CFLAGS}"
 export OBJCFLAGS="${CFLAGS}"
 export LDFLAGS="${ARCH_FLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
