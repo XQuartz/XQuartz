@@ -577,7 +577,11 @@ do_build src/xorg/font/sun-misc
 do_build src/xorg/font/winitzki-cyrillic
 do_build src/xorg/font/xfree86-type1
 
+# Setting this globally messes up fontconfig, xkeyboard-config, and maybe others that also want PYTHON to point to python3
+export PYTHON=${BUILD_TOOLS_PREFIX}/bin/python2.7
 do_build src/mesa/mesa
+unset PYTHON
+
 do_build src/mesa/glu
 
 do_build src/freeglut
