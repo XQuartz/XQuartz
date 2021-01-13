@@ -1,0 +1,27 @@
+From bb685dcacd76148d493ebc0a3ce729df42f47c72 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Tue, 12 Jan 2021 17:44:02 -0800
+Subject: [PATCH 2/2] Disable use of inflateValidate() as it was added in macOS
+ 10.13
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ pngrutil.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pngrutil.c b/pngrutil.c
+index 4db3de990..c1f86263b 100644
+--- a/pngrutil.c
++++ b/pngrutil.c
+@@ -422,7 +422,7 @@ png_inflate_claim(png_structrp png_ptr, png_uint_32 owner)
+             png_ptr->flags |= PNG_FLAG_ZSTREAM_INITIALIZED;
+       }
+ 
+-#if ZLIB_VERNUM >= 0x1290 && \
++#if 0 && ZLIB_VERNUM >= 0x1290 && \
+    defined(PNG_SET_OPTION_SUPPORTED) && defined(PNG_IGNORE_ADLER32)
+       if (((png_ptr->options >> PNG_IGNORE_ADLER32) & 3) == PNG_OPTION_ON)
+          /* Turn off validation of the ADLER32 checksum in IDAT chunks */
+-- 
+2.24.3 (Apple Git-128)
+
