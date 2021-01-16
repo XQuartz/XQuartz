@@ -122,7 +122,7 @@ do_patches() {
 #   SCAN_BUILD can be set for static analysis
 #   SKIP_CLEAN can be set to YES
 #   SKIP_AUTORECONF can be set to YES
-do_build() {
+do_autotools_build() {
     local PROJECT_DIR="${BASE_DIR}/${1}"
     local PROJECT_PATCHES_DIR="${PROJECT_DIR}.patches"
     local CONFOPT_FILE="${PROJECT_DIR}.confopt"
@@ -365,226 +365,225 @@ sudo ditto ${DESTDIR}.Sparkle ${DESTDIR}
 sudo ditto ${DESTDIR}.Sparkle /
 
 # Bincompat versions of libpng
-#do_build src/libpng/libpng12
-#do_build src/libpng/libpng14
-#do_build src/libpng/libpng15
+#do_autotools_build src/libpng/libpng12
+#do_autotools_build src/libpng/libpng14
+#do_autotools_build src/libpng/libpng15
 #sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/bin/libpng*-config
 #sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng1?.dylib
 #sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng12.0.*.dylib
 #sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
 
-do_build src/libpng/libpng16
+do_autotools_build src/libpng/libpng16
 
-do_build src/freetype2
-do_build src/pixman
+do_autotools_build src/freetype2
+do_autotools_build src/pixman
 
-do_build src/fontconfig
+do_autotools_build src/fontconfig
 
-do_build src/xorg/util/macros
+do_autotools_build src/xorg/util/macros
 
-do_build src/xorg/doc/xorg-docs
-do_build src/xorg/doc/xorg-sgml-doctools
+do_autotools_build src/xorg/doc/xorg-docs
+do_autotools_build src/xorg/doc/xorg-sgml-doctools
 
-do_build src/xorg/proto/xorgproto
-do_build src/xorg/proto/xcbproto
+do_autotools_build src/xorg/proto/xorgproto
+do_autotools_build src/xorg/proto/xcbproto
 
-do_build src/xorg/util/bdftopcf
-do_build src/xorg/util/lndir
+do_autotools_build src/xorg/util/bdftopcf
+do_autotools_build src/xorg/util/lndir
 
-do_build src/xorg/font/util
+do_autotools_build src/xorg/font/util
 
-do_build src/xorg/lib/libxtrans
-do_build src/xorg/lib/pthread-stubs
+do_autotools_build src/xorg/lib/libxtrans
+do_autotools_build src/xorg/lib/pthread-stubs
 
-do_build src/xorg/lib/libXau
+do_autotools_build src/xorg/lib/libXau
 
-do_build src/xorg/lib/libxcb
-do_build src/xorg/lib/libxcb-util
-do_build src/xorg/lib/libxcb-render-util
-do_build src/xorg/lib/libxcb-image
-do_build src/xorg/lib/libxcb-cursor
-do_build src/xorg/lib/libxcb-errors
-do_build src/xorg/lib/libxcb-keysyms
-do_build src/xorg/lib/libxcb-wm
+do_autotools_build src/xorg/lib/libxcb
+do_autotools_build src/xorg/lib/libxcb-util
+do_autotools_build src/xorg/lib/libxcb-render-util
+do_autotools_build src/xorg/lib/libxcb-image
+do_autotools_build src/xorg/lib/libxcb-cursor
+do_autotools_build src/xorg/lib/libxcb-errors
+do_autotools_build src/xorg/lib/libxcb-keysyms
+do_autotools_build src/xorg/lib/libxcb-wm
 
-do_build src/xorg/lib/libXdmcp
-do_build src/xorg/lib/libX11
-do_build src/xorg/lib/libXext
-do_build src/xorg/lib/libAppleWM
-do_build src/xorg/lib/libdmx
-do_build src/xorg/lib/libfontenc
-do_build src/xorg/lib/libxshmfence
-do_build src/xorg/lib/libFS
-do_build src/xorg/lib/libICE
-do_build src/xorg/lib/libSM
-
-# Bincompat
-#do_build src/xorg/lib/libXt-flatnamespace
-
-do_build src/xorg/lib/libXt
+do_autotools_build src/xorg/lib/libXdmcp
+do_autotools_build src/xorg/lib/libX11
+do_autotools_build src/xorg/lib/libXext
+do_autotools_build src/xorg/lib/libAppleWM
+do_autotools_build src/xorg/lib/libdmx
+do_autotools_build src/xorg/lib/libfontenc
+do_autotools_build src/xorg/lib/libxshmfence
+do_autotools_build src/xorg/lib/libFS
+do_autotools_build src/xorg/lib/libICE
+do_autotools_build src/xorg/lib/libSM
 
 # Bincompat
-#do_build src/xorg/lib/libXt7-stub
+#do_autotools_build src/xorg/lib/libXt-flatnamespace
 
-do_build src/xorg/lib/libXmu
-do_build src/xorg/lib/libXpm
+do_autotools_build src/xorg/lib/libXt
 
 # Bincompat
-#do_build src/xorg/lib/libXaw8
+#do_autotools_build src/xorg/lib/libXt7-stub
 
-do_build src/xorg/lib/libXaw
-do_build src/xorg/lib/libXaw3d
-do_build src/xorg/lib/libXfixes
-do_build src/xorg/lib/libXcomposite
-do_build src/xorg/lib/libXrender
-do_build src/xorg/lib/libXdamage
-do_build src/xorg/lib/libXcursor
-do_build src/xorg/lib/libXfont
-do_build src/xorg/lib/libXfont2
-do_build src/xorg/lib/libXxf86vm
-do_build src/xorg/lib/libXft
-do_build src/xorg/lib/libXi
-do_build src/xorg/lib/libXinerama
-do_build src/xorg/lib/libxkbfile
-do_build src/xorg/lib/libXrandr
-do_build src/xorg/lib/libXpresent
-do_build src/xorg/lib/libXres
-do_build src/xorg/lib/libXScrnSaver
-do_build src/xorg/lib/libXtst
-do_build src/xorg/lib/libXv
-do_build src/xorg/lib/libXvMC
+do_autotools_build src/xorg/lib/libXmu
+do_autotools_build src/xorg/lib/libXpm
 
-do_build src/xorg/data/bitmaps
+# Bincompat
+#do_autotools_build src/xorg/lib/libXaw8
 
-do_build src/xorg/app/appres
-do_build src/xorg/app/beforelight
-do_build src/xorg/app/bitmap
-do_build src/xorg/app/editres
-do_build src/xorg/app/fonttosfnt
-do_build src/xorg/app/fslsfonts
-do_build src/xorg/app/fstobdf
-do_build src/xorg/app/iceauth
-do_build src/xorg/app/ico
-do_build src/xorg/app/listres
-do_build src/xorg/app/luit
-do_build src/xorg/app/mkfontdir
-do_build src/xorg/app/mkfontscale
-do_build src/xorg/app/oclock
-do_build src/xorg/app/quartz-wm
-do_build src/xorg/app/rgb
-do_build src/xorg/app/sessreg
-do_build src/xorg/app/setxkbmap
-do_build src/xorg/app/showfont
-do_build src/xorg/app/smproxy
-do_build src/xorg/app/twm
-do_build src/xorg/app/viewres
-do_build src/xorg/app/xauth
-do_build src/xorg/app/xbacklight
-do_build src/xorg/app/xcalc
-do_build src/xorg/app/xclipboard
-do_build src/xorg/app/xclock
-do_build src/xorg/app/xcmsdb
-do_build src/xorg/app/xcompmgr
-do_build src/xorg/app/xconsole
-do_build src/xorg/app/xcursorgen
-do_build src/xorg/app/xditview
-do_build src/xorg/app/xdm
-do_build src/xorg/app/xdpyinfo
-do_build src/xorg/app/xedit
-do_build src/xorg/app/xev
-do_build src/xorg/app/xeyes
-do_build src/xorg/app/xfd
-do_build src/xorg/app/xfontsel
-do_build src/xorg/app/xfs
-do_build src/xorg/app/xfsinfo
-do_build src/xorg/app/xgamma
-do_build src/xorg/app/xgc
-do_build src/xorg/app/xhost
-do_build src/xorg/app/xinit
-do_build src/xorg/app/xinput
-do_build src/xorg/app/xkbcomp
-do_build src/xorg/app/xkbevd
-do_build src/xorg/app/xkbprint
-do_build src/xorg/app/xkbutils
-do_build src/xorg/app/xkill
-do_build src/xorg/app/xload
-do_build src/xorg/app/xlogo
-do_build src/xorg/app/xlsatoms
-do_build src/xorg/app/xlsclients
-do_build src/xorg/app/xlsfonts
-do_build src/xorg/app/xmag
-do_build src/xorg/app/xman
-do_build src/xorg/app/xmessage
-do_build src/xorg/app/xmh
-do_build src/xorg/app/xmodmap
-do_build src/xorg/app/xmore
-do_build src/xorg/app/xpr
-do_build src/xorg/app/xprop
-do_build src/xorg/app/xrandr
-do_build src/xorg/app/xrdb
-do_build src/xorg/app/xrefresh
-do_build src/xorg/app/xscope
-do_build src/xorg/app/xset
-do_build src/xorg/app/xsetmode
-do_build src/xorg/app/xsetpointer
-do_build src/xorg/app/xsetroot
-do_build src/xorg/app/xsm
-do_build src/xorg/app/xstdcmap
-do_build src/xorg/app/xvinfo
-do_build src/xorg/app/xwd
-do_build src/xorg/app/xwininfo
-do_build src/xorg/app/xwud
+do_autotools_build src/xorg/lib/libXaw
+do_autotools_build src/xorg/lib/libXaw3d
+do_autotools_build src/xorg/lib/libXfixes
+do_autotools_build src/xorg/lib/libXcomposite
+do_autotools_build src/xorg/lib/libXrender
+do_autotools_build src/xorg/lib/libXdamage
+do_autotools_build src/xorg/lib/libXcursor
+do_autotools_build src/xorg/lib/libXfont
+do_autotools_build src/xorg/lib/libXfont2
+do_autotools_build src/xorg/lib/libXxf86vm
+do_autotools_build src/xorg/lib/libXft
+do_autotools_build src/xorg/lib/libXi
+do_autotools_build src/xorg/lib/libXinerama
+do_autotools_build src/xorg/lib/libxkbfile
+do_autotools_build src/xorg/lib/libXrandr
+do_autotools_build src/xorg/lib/libXpresent
+do_autotools_build src/xorg/lib/libXres
+do_autotools_build src/xorg/lib/libXScrnSaver
+do_autotools_build src/xorg/lib/libXtst
+do_autotools_build src/xorg/lib/libXv
+do_autotools_build src/xorg/lib/libXvMC
 
-do_build src/xterm
+do_autotools_build src/xorg/data/bitmaps
 
-do_build src/xorg/data/cursors
+do_autotools_build src/xorg/app/appres
+do_autotools_build src/xorg/app/beforelight
+do_autotools_build src/xorg/app/bitmap
+do_autotools_build src/xorg/app/editres
+do_autotools_build src/xorg/app/fonttosfnt
+do_autotools_build src/xorg/app/fslsfonts
+do_autotools_build src/xorg/app/fstobdf
+do_autotools_build src/xorg/app/iceauth
+do_autotools_build src/xorg/app/ico
+do_autotools_build src/xorg/app/listres
+do_autotools_build src/xorg/app/luit
+do_autotools_build src/xorg/app/mkfontdir
+do_autotools_build src/xorg/app/mkfontscale
+do_autotools_build src/xorg/app/oclock
+do_autotools_build src/xorg/app/quartz-wm
+do_autotools_build src/xorg/app/rgb
+do_autotools_build src/xorg/app/sessreg
+do_autotools_build src/xorg/app/setxkbmap
+do_autotools_build src/xorg/app/showfont
+do_autotools_build src/xorg/app/smproxy
+do_autotools_build src/xorg/app/twm
+do_autotools_build src/xorg/app/viewres
+do_autotools_build src/xorg/app/xauth
+do_autotools_build src/xorg/app/xbacklight
+do_autotools_build src/xorg/app/xcalc
+do_autotools_build src/xorg/app/xclipboard
+do_autotools_build src/xorg/app/xclock
+do_autotools_build src/xorg/app/xcmsdb
+do_autotools_build src/xorg/app/xcompmgr
+do_autotools_build src/xorg/app/xconsole
+do_autotools_build src/xorg/app/xcursorgen
+do_autotools_build src/xorg/app/xditview
+do_autotools_build src/xorg/app/xdm
+do_autotools_build src/xorg/app/xdpyinfo
+do_autotools_build src/xorg/app/xedit
+do_autotools_build src/xorg/app/xev
+do_autotools_build src/xorg/app/xeyes
+do_autotools_build src/xorg/app/xfd
+do_autotools_build src/xorg/app/xfontsel
+do_autotools_build src/xorg/app/xfs
+do_autotools_build src/xorg/app/xfsinfo
+do_autotools_build src/xorg/app/xgamma
+do_autotools_build src/xorg/app/xgc
+do_autotools_build src/xorg/app/xhost
+do_autotools_build src/xorg/app/xinit
+do_autotools_build src/xorg/app/xinput
+do_autotools_build src/xorg/app/xkbcomp
+do_autotools_build src/xorg/app/xkbevd
+do_autotools_build src/xorg/app/xkbprint
+do_autotools_build src/xorg/app/xkbutils
+do_autotools_build src/xorg/app/xkill
+do_autotools_build src/xorg/app/xload
+do_autotools_build src/xorg/app/xlogo
+do_autotools_build src/xorg/app/xlsatoms
+do_autotools_build src/xorg/app/xlsclients
+do_autotools_build src/xorg/app/xlsfonts
+do_autotools_build src/xorg/app/xmag
+do_autotools_build src/xorg/app/xman
+do_autotools_build src/xorg/app/xmessage
+do_autotools_build src/xorg/app/xmh
+do_autotools_build src/xorg/app/xmodmap
+do_autotools_build src/xorg/app/xmore
+do_autotools_build src/xorg/app/xpr
+do_autotools_build src/xorg/app/xprop
+do_autotools_build src/xorg/app/xrandr
+do_autotools_build src/xorg/app/xrdb
+do_autotools_build src/xorg/app/xrefresh
+do_autotools_build src/xorg/app/xscope
+do_autotools_build src/xorg/app/xset
+do_autotools_build src/xorg/app/xsetmode
+do_autotools_build src/xorg/app/xsetpointer
+do_autotools_build src/xorg/app/xsetroot
+do_autotools_build src/xorg/app/xsm
+do_autotools_build src/xorg/app/xstdcmap
+do_autotools_build src/xorg/app/xvinfo
+do_autotools_build src/xorg/app/xwd
+do_autotools_build src/xorg/app/xwininfo
+do_autotools_build src/xorg/app/xwud
 
-do_build src/xorg/font/encodings
-do_build src/xorg/font/adobe-100dpi
-do_build src/xorg/font/adobe-75dpi
-do_build src/xorg/font/adobe-utopia-100dpi
-do_build src/xorg/font/adobe-utopia-75dpi
-do_build src/xorg/font/adobe-utopia-type1
-do_build src/xorg/font/alias
-do_build src/xorg/font/arabic-misc
-do_build src/xorg/font/bh-100dpi
-do_build src/xorg/font/bh-75dpi
-do_build src/xorg/font/bh-lucidatypewriter-100dpi
-do_build src/xorg/font/bh-lucidatypewriter-75dpi
-do_build src/xorg/font/bh-ttf
-do_build src/xorg/font/bh-type1
-do_build src/xorg/font/bitstream-100dpi
-do_build src/xorg/font/bitstream-75dpi
-do_build src/xorg/font/bitstream-speedo
-do_build src/xorg/font/bitstream-type1
-do_build src/xorg/font/cronyx-cyrillic
-do_build src/xorg/font/cursor-misc
-do_build src/xorg/font/daewoo-misc
-do_build src/xorg/font/dec-misc
-do_build src/xorg/font/ibm-type1
-do_build src/xorg/font/isas-misc
-do_build src/xorg/font/jis-misc
-do_build src/xorg/font/micro-misc
-do_build src/xorg/font/misc-cyrillic
-do_build src/xorg/font/misc-ethiopic
-do_build src/xorg/font/misc-meltho
-do_build src/xorg/font/misc-misc
-do_build src/xorg/font/mutt-misc
-do_build src/xorg/font/schumacher-misc
-do_build src/xorg/font/screen-cyrillic
-do_build src/xorg/font/sony-misc
-do_build src/xorg/font/sun-misc
-do_build src/xorg/font/winitzki-cyrillic
-do_build src/xorg/font/xfree86-type1
+do_autotools_build src/xterm
+
+do_autotools_build src/xorg/data/cursors
+
+do_autotools_build src/xorg/font/encodings
+do_autotools_build src/xorg/font/adobe-100dpi
+do_autotools_build src/xorg/font/adobe-75dpi
+do_autotools_build src/xorg/font/adobe-utopia-100dpi
+do_autotools_build src/xorg/font/adobe-utopia-75dpi
+do_autotools_build src/xorg/font/adobe-utopia-type1
+do_autotools_build src/xorg/font/alias
+do_autotools_build src/xorg/font/arabic-misc
+do_autotools_build src/xorg/font/bh-100dpi
+do_autotools_build src/xorg/font/bh-75dpi
+do_autotools_build src/xorg/font/bh-lucidatypewriter-100dpi
+do_autotools_build src/xorg/font/bh-lucidatypewriter-75dpi
+do_autotools_build src/xorg/font/bh-ttf
+do_autotools_build src/xorg/font/bh-type1
+do_autotools_build src/xorg/font/bitstream-100dpi
+do_autotools_build src/xorg/font/bitstream-75dpi
+do_autotools_build src/xorg/font/bitstream-speedo
+do_autotools_build src/xorg/font/bitstream-type1
+do_autotools_build src/xorg/font/cronyx-cyrillic
+do_autotools_build src/xorg/font/cursor-misc
+do_autotools_build src/xorg/font/daewoo-misc
+do_autotools_build src/xorg/font/dec-misc
+do_autotools_build src/xorg/font/ibm-type1
+do_autotools_build src/xorg/font/isas-misc
+do_autotools_build src/xorg/font/jis-misc
+do_autotools_build src/xorg/font/micro-misc
+do_autotools_build src/xorg/font/misc-cyrillic
+do_autotools_build src/xorg/font/misc-ethiopic
+do_autotools_build src/xorg/font/misc-meltho
+do_autotools_build src/xorg/font/misc-misc
+do_autotools_build src/xorg/font/mutt-misc
+do_autotools_build src/xorg/font/schumacher-misc
+do_autotools_build src/xorg/font/screen-cyrillic
+do_autotools_build src/xorg/font/sony-misc
+do_autotools_build src/xorg/font/sun-misc
+do_autotools_build src/xorg/font/winitzki-cyrillic
+do_autotools_build src/xorg/font/xfree86-type1
 
 # Setting this globally messes up fontconfig, xkeyboard-config, and maybe others that also want PYTHON to point to python3
 export PYTHON=${BUILD_TOOLS_PREFIX}/bin/python2.7
-do_build src/mesa/mesa
+do_autotools_build src/mesa/mesa
 unset PYTHON
 
-do_build src/mesa/glu
-
-do_build src/freeglut
+do_autotools_build src/mesa/glu
+do_autotools_build src/freeglut
 
 # Manually build glxinfo and glxgears
 cd ${BASE_DIR}/src/mesa/demos/src/xdemos
@@ -602,25 +601,25 @@ sudo install -o root -g wheel -m 0755 -d ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxinfo ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxgears ${PREFIX}/bin
 
-# TODO do_build src/cairo
-# TODO do_build src/xorg/lib/xpyb
+# TODO do_autotools_build src/cairo
+# TODO do_autotools_build src/xorg/lib/xpyb
 
-do_build src/xkeyboard-config
+do_autotools_build src/xkeyboard-config
 
-do_build src/xorg/xserver
-do_build src/xorg/driver/xf86-input-void
-do_build src/xorg/driver/xf86-video-dummy
+do_autotools_build src/xorg/xserver
+do_autotools_build src/xorg/driver/xf86-input-void
+do_autotools_build src/xorg/driver/xf86-video-dummy
 
-do_build src/xquartz/xserver
+do_autotools_build src/xquartz/xserver
 
 # TODO: Do we want to do anything with the tests?
-#do_build src/xorg/test/rendercheck
-#do_build src/xorg/test/x11perf
-#do_build src/xorg/test/xhiv
-#do_build src/xorg/test/xorg-gtest
-#do_build src/xorg/test/xorg-integration-tests
-#do_build src/xorg/test/xts
-#do_build src/xorg/test/xtsttopng
+#do_autotools_build src/xorg/test/rendercheck
+#do_autotools_build src/xorg/test/x11perf
+#do_autotools_build src/xorg/test/xhiv
+#do_autotools_build src/xorg/test/xorg-gtest
+#do_autotools_build src/xorg/test/xorg-integration-tests
+#do_autotools_build src/xorg/test/xts
+#do_autotools_build src/xorg/test/xtsttopng
 
 #do_checks
 
