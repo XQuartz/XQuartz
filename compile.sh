@@ -116,7 +116,7 @@ do_patches() {
 #
 # Postcondition:
 #   Object files are left in place.
-#   Content is installed to DESTDIR and the life filesystem.
+#   Content is installed to DESTDIR and the live filesystem.
 #
 # Options:
 #   SCAN_BUILD can be set for static analysis
