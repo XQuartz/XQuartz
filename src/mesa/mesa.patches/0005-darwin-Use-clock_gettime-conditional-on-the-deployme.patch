@@ -1,0 +1,33 @@
+From a1695d86f85b058e848e3ac3f94fb4be992287ad Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sat, 16 Jan 2021 14:33:10 -0800
+Subject: [PATCH 5/5] darwin: Use clock_gettime() conditional on the deployment
+ target
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ src/util/u_queue.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/src/util/u_queue.c b/src/util/u_queue.c
+index cf550424d8e..ea34a9e3a1f 100644
+--- a/src/util/u_queue.c
++++ b/src/util/u_queue.c
+@@ -183,7 +183,13 @@ _util_queue_fence_wait_timeout(struct util_queue_fence *fence,
+    if (rel > 0) {
+       struct timespec ts;
+ 
+-#ifdef HAVE_TIMESPEC_GET
++#ifdef __MAC_OS_X_VERSION_MIN_REQUIRED
++# if __MAC_OS_X_VERSION_MIN_REQUIRED < 101500
++      clock_gettime(CLOCK_REALTIME, &ts);
++# else
++      timespec_get(&ts, TIME_UTC);
++# endif
++#elif defined(HAVE_TIMESPEC_GET)
+       timespec_get(&ts, TIME_UTC);
+ #else
+       clock_gettime(CLOCK_REALTIME, &ts);
+-- 
+2.29.2 (Apple Git-129)
+

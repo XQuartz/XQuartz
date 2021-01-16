@@ -1,0 +1,37 @@
+From e6d5a2af7870c59bcbd442d21ab791e6b1ef26ea Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Tue, 12 Jan 2021 16:44:34 -0800
+Subject: [PATCH 4/5] Fall back on clock_gettime when timespec_get() is
+ unavailable
+
+Fixes: e3a8013de8ca "util/u_queue: add util_queue_fence_wait_timeout"
+Closes: https://gitlab.freedesktop.org/mesa/mesa/-/issues/1020
+Closes: https://gitlab.freedesktop.org/mesa/mesa/-/issues/4088
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Signed-off-by: Yurii Kolesnykov <root@yurikoles.com>
+Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/8482>
+(cherry picked from commit 68a785e63fe848c7bcd48bce2095670926f97eea)
+---
+ src/util/u_queue.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/util/u_queue.c b/src/util/u_queue.c
+index b11b297a45c..cf550424d8e 100644
+--- a/src/util/u_queue.c
++++ b/src/util/u_queue.c
+@@ -183,7 +183,11 @@ _util_queue_fence_wait_timeout(struct util_queue_fence *fence,
+    if (rel > 0) {
+       struct timespec ts;
+ 
++#ifdef HAVE_TIMESPEC_GET
+       timespec_get(&ts, TIME_UTC);
++#else
++      clock_gettime(CLOCK_REALTIME, &ts);
++#endif
+ 
+       ts.tv_sec += abs_timeout / (1000*1000*1000);
+       ts.tv_nsec += abs_timeout % (1000*1000*1000);
+-- 
+2.29.2 (Apple Git-129)
+

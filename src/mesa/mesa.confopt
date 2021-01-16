@@ -1,6 +1,1 @@
---with-platforms=x11 \
---disable-egl \
---disable-gbm \
---enable-osmesa \
---disable-llvm-shared-libs \
---with-gallium-drivers=
+-Dc_std=c11

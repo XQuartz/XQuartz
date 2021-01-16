@@ -1,6 +1,8 @@
 #!/bin/sh -x -e
 
-# Before building, be sure the checkout sources and configure the system
+# Note that the build system needs to be Apple Silicon with Rosetta 2 enabled.
+#
+# Before building, be sure the checkout sources and configure the system:
 #
 # 1) Install the latest version of Xcode.
 #
@@ -9,7 +11,8 @@
 #        base $ ./configure --prefix=/opt/buildX11 && make -j$(sysctl -n hw.activecpu) && sudo make install
 #        $ sudo nano -w /opt/buildX11/etc/macports/macports.conf # Edit applications_dir        /Applications/MacPorts/BuildX11
 #        $ sudo /opt/buildX11/bin/port -v selfupdate
-#        $ sudo /opt/buildX11/bin/port -N -v install autoconf automake pkgconfig libtool py27-mako
+#        $ sudo /opt/buildX11/bin/port -N -v install autoconf automake pkgconfig libtool py38-mako meson
+#        $ sudo /opt/buildX11/bin/port select python3 python38
 #
 # 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved aside or they will interfere
 #
@@ -33,6 +36,7 @@
 #
 # TODO:
 #   * Automate installation of build tools
+#   * Support building arm64 from Intel macs via meson
 #   * build tools for documentation
 #   * Do we want to add Bincompat packages:
 #     src/xorg/lib/libXp
@@ -102,12 +106,6 @@ export CC="/usr/bin/clang"
 export CXX="/usr/bin/clang++"
 export OBJC="/usr/bin/clang"
 
-export ZLIB_CFLAGS=" "
-export ZLIB_LIBS="-lz"
-
-export EXPAT_CFLAGS=" "
-export EXPAT_LIBS="-lexpat"
-
 # For static analysis if we want to do it
 #SCAN_BUILD="scan-build-mp-10 -v -V -o clang.d --use-cc=${CC} --use-c++=${CXX}"
 
@@ -126,7 +124,7 @@ do_patches() {
     fi
 }
 
-# Precondition:
+# Precondition for all do_*_build():
 #   $1 is the module to build
 #
 # Postcondition:
@@ -181,6 +179,51 @@ do_autotools_build() {
     # Prune the .la files that we don't want
     sudo rm -f ${DESTDIR}${PREFIX}/lib/*.la
     sudo rm -f ${PREFIX}/lib/*.la
+}
+
+do_meson_build() {
+    local PROJECT_DIR="${BASE_DIR}/${1}"
+    local PROJECT_PATCHES_DIR="${PROJECT_DIR}.patches"
+    local CONFOPT_FILE="${PROJECT_DIR}.confopt"
+    [ -f "${CONFOPT_FILE}" ] || CONFOPT_FILE=/dev/null
+
+    cd "${PROJECT_DIR}" || die "Could not change directory to ${PROJECT_DIR}"
+
+    PROJECT=$(basename $(pwd))
+
+    do_patches "${PROJECT_PATCHES_DIR}"
+
+    # We need to do this hacky dance because of a bug in meson.
+    # We need to configure meson as a cross compiler to build arm64 from x86_64, or do
+    # builds on Apple Silicon until this is resolved.  See https://mesonbuild.com/Cross-compilation.html
+    # https://github.com/mesonbuild/meson/issues/8206
+    for arch in arm64 x86_64 ; do
+        CFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
+            OBJCFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
+            CXXFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
+            LDFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
+            meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
+        ninja -C build.${arch} || die "Failed to compile in $(pwd)"
+        sudo DESTDIR="${DESTDIR}.meson.${arch}" ninja -C build.${arch} install || die "Failed to install in $(pwd)"
+
+        # Prune the .la files that we don't want
+        sudo rm -f "${DESTDIR}.meson.${arch}${PREFIX}/lib"/*.la
+    done
+
+    sudo cp -a "${DESTDIR}.meson.arm64" "${DESTDIR}.meson.fat"
+
+    cd "${DESTDIR}.meson.fat"
+    find . -type f | while read file ; do
+        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+            sudo lipo -create -output "${file}" "${DESTDIR}.meson.arm64/${file}" "${DESTDIR}.meson.x86_64/${file}"
+        fi
+    done
+
+    sudo ditto "${DESTDIR}.meson.fat" "${DESTDIR}"
+    sudo ditto "${DESTDIR}.meson.fat" /
+
+    # Cleanup the meson universal hack directories
+    sudo rm -rf "${DESTDIR}".meson.*
 }
 
 do_checks() {
@@ -604,11 +647,7 @@ do_autotools_build src/xorg/font/sun-misc
 do_autotools_build src/xorg/font/winitzki-cyrillic
 do_autotools_build src/xorg/font/xfree86-type1
 
-# Setting this globally messes up fontconfig, xkeyboard-config, and maybe others that also want PYTHON to point to python3
-export PYTHON=${BUILD_TOOLS_PREFIX}/bin/python2.7
-do_autotools_build src/mesa/mesa
-unset PYTHON
-
+do_meson_build src/mesa/mesa
 do_autotools_build src/mesa/glu
 do_autotools_build src/freeglut
 
