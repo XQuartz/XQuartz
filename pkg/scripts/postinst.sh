@@ -37,8 +37,8 @@ fi
 [[ -f /opt/X11/bin/libpng14-config ]] && rm /opt/X11/bin/libpng14-config
 
 # Load the privileged_startx daemon
-/bin/launchctl unload -w /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist
-/bin/launchctl load -w /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist
+/bin/launchctl unload -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
+/bin/launchctl load -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
 
 # Cache system fonts
 /opt/X11/bin/font_cache --force --system
