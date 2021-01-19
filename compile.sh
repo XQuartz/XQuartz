@@ -46,8 +46,8 @@ CODESIGN_ASC_PROVIDER="NA574AWV7E"
 CODESIGN_IDENTITY_APP="Developer ID Application: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 
-APPLICATION_VERSION=2.8.3
-APPLICATION_VERSION_STRING=2.8.0_alpha4
+APPLICATION_VERSION=2.8.4
+APPLICATION_VERSION_STRING=2.8.0_alpha5
 SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/alpha.xml"
 #SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
 #SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
