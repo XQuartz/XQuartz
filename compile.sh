@@ -203,17 +203,26 @@ do_strip_sign_dsyms() {
 
     sudo chown -R root:wheel "${PKG_ROOT}"
 
-    find "${PKG_ROOT}" -type f | while read file ; do
+    find "${PKG_ROOT}/opt/X11" -type f | while read file ; do
         if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
             sudo strip -S "${file}"
 
-            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --force --preserve-metadata=entitlements,requirements,flags,runtime "${file}"
+            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
         fi
     done
 
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --deep --force --preserve-metadata=entitlements,requirements,flags,runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
+    find "${PKG_ROOT}/Applications" -type f | while read file ; do
+        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+            sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
+            sudo cp "${file}" "${SYM_ROOT}"
+            sudo strip -S "${file}"
+        fi
+    done
+
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
 }
 
 do_sym_tarball() {
