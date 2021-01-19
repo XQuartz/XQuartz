@@ -71,6 +71,9 @@ SYM_ROOT=${PRODUCTS_DIR}/XQuartz.symbols
 
 WARNING_FLAGS="-Werror=unguarded-availability-new"
 
+# Don't let startx use openssl from /opt/buildX11 (https://github.com/XQuartz/XQuartz/issues/29)
+export ac_cv_path_OPENSSL=/usr/bin/openssl
+
 # timespec_get() was added in macOS 10.15
 export ac_cv_func_timespec_get=no
 
