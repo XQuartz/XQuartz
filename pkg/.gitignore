@@ -1,4 +1,3 @@
-altool.password
-altool.user
+altool.*
 bintray.cred
 sparkle_priv.pem

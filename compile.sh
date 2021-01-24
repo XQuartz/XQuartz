@@ -13,13 +13,20 @@
 #
 # 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved aside or they will interfere
 #
-# 4) Add credential files to the pkg sundirectory:
-#        pkg/altool.password
-#        pkg/altool.user
+# 4) Setup authentication for altool with one of the following options:
+#    4a) Create an app-specific password for altool at appleid.apple.com.  Save this as pkg/altool.user and pkg/altool.password
+#    4b) Create an API Key as documented at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api
+#        Save this as pkg/altool.user and pkg/altool.password
+#    4c) (AppleInternal) Install cliff at pkg/altool.cliff, store the username as pkg/altool.user, and
+#        save the cliff properties file (based on pkg/altool.cliff/conf/corporate_user_cliff_properties.template)
+#        as pkg/altool.cliff.properties
+#
+# 5) Add credential files to the pkg sundirectory:
+#        pkg/altool.* (see #4 above)
 #        pkg/bintray.cred
 #        pkg/sparkle_priv.pem
 #
-# 5) Ensure the macOS keychain contains the private key for our Developer ID certificates
+# 6) Ensure the macOS keychain contains the private key for our Developer ID certificates
 #
 # To update a submodule to a newer version, just checkout the appropriate
 # branch in the submodule and then commit the changed hash at the top level.
@@ -35,7 +42,6 @@
 #     src/xorg/lib/libXTrap
 #     src/xorg/lib/libXxf86misc
 #   * If so, we don't need headers and arm64 slices for bincompat libs
-#   * notarize package
 
 PREFIX=/opt/X11
 BUILD_TOOLS_PREFIX=/opt/buildX11
@@ -271,29 +277,32 @@ do_notarize() {
     ALTOOL_USER_FILE="${BASE_DIR}"/pkg/altool.user
     ALTOOL_PASS_FILE="${BASE_DIR}"/pkg/altool.password
 
-    # <rdar://problem/52532145> Latest XQuartz is not notarized
-    if [ -f "${ALTOOL_USER_FILE}" -a -f "${ALTOOL_PASS_FILE}" ] ; then
-        ALTOOL_USER=$(cat "${ALTOOL_USER_FILE}")
-        ALTOOL_PASS=$(cat "${ALTOOL_PASS_FILE}")
+    ALTOOL_APIKEY_FILE="${BASE_DIR}"/pkg/altool.apiKey
+    ALTOOL_APIISSUER_FILE="${BASE_DIR}"/pkg/altool.apiIssuer
 
-        xcrun altool --notarize-app --primary-bundle-id org.xquartz.X11 -u "${ALTOOL_USER}" -p "${ALTOOL_PASS}" --file "${DMG}" --asc-provider "${CODESIGN_ASC_PROVIDER}"
+    ALTOOL_CLIFF_DIR="${BASE_DIR}"/pkg/altool.cliff
+    ALTOOL_CLIFF_PROPERTIES="${BASE_DIR}"/pkg/altool.cliff.properties
+
+    # <rdar://problem/52532145> Latest XQuartz is not notarized
+    if [ -f "${ALTOOL_APIKEY_FILE}" -a -f "${ALTOOL_APIISSUER_FILE}" ] ; then
+         ALTOOL_AUTH="--apiKey $(cat "${ALTOOL_APIKEY_FILE}") --apiIssuer $(cat "${ALTOOL_APIISSUER_FILE}")"
+    elif [ -f "${ALTOOL_USER_FILE}" -a -f "${ALTOOL_PASS_FILE}" ] ; then
+        ALTOOL_AUTH="-u $(cat "${ALTOOL_USER_FILE}") -p $(cat "${ALTOOL_PASS_FILE}")"
+    elif [ -f "${ALTOOL_USER_FILE}" -a -d "${ALTOOL_CLIFF_DIR}" -a -f "${ALTOOL_CLIFF_PROPERTIES}" ] ; then
+        ALTOOL_AUTH="-u $(cat "${ALTOOL_USER_FILE}") --cliff-path ${ALTOOL_CLIFF_DIR}/bin/cliff --cliff-properties-file ${ALTOOL_CLIFF_PROPERTIES}"
+    fi
+
+    if [ -n "${ALTOOL_AUTH}" ] ; then
+        xcrun altool --notarize-app --primary-bundle-id org.xquartz.X11 ${ALTOOL_AUTH} --file "${DMG}" --asc-provider "${CODESIGN_ASC_PROVIDER}"
 
         # Check the notarization with:
         echo "Check on the status of notarization with:"
-        echo "   xcrun altool --notarization-info <request-uuid> -u \"${ALTOOL_USER}\" -p \"${ALTOOL_PASS}\""
+        echo "   xcrun altool --notarization-info <request-uuid> <auth information>"
 
-        sleep 5
-        while true ; do
-            xcrun stapler staple "${DMG}"
-
-            exit_status=$?
-            if [ "${exit_status}" = "65" ] ; then
-                echo "Waiting for notarization to complete"
-                sleep 5
-            else
-                echo "Stapler status: ${exit_status}"
-                break
-            fi
+        sleep 10
+        while ! xcrun stapler staple "${DMG}" ; do
+            echo "Waiting for notarization to complete"
+            sleep 10
         done
 
         # Check the disk image with:
@@ -633,7 +642,7 @@ do_autotools_build src/xquartz/xserver
 #do_autotools_build src/xorg/test/xts
 #do_autotools_build src/xorg/test/xtsttopng
 
-#do_checks
+do_checks
 
 do_strip_sign_dsyms
 do_sym_tarball
@@ -641,5 +650,5 @@ do_pkg
 do_dmg
 
 set +x
-#do_notarize
+do_notarize
 do_dist
