@@ -1,4 +1,4 @@
-From 2dc2d8a616adf717a653b874e67d719dde9b8886 Mon Sep 17 00:00:00 2001
+From 1265ce04930ee17e4ff6e1eadbf65ec42a397090 Mon Sep 17 00:00:00 2001
 From: Jon TURNEY <jon.turney@dronecode.org.uk>
 Date: Mon, 12 May 2014 16:30:26 +0100
 Subject: [PATCH 1/2] applegl: Provide requirements of _SET_DrawBuffers
@@ -76,5 +76,5 @@ index f2248ab01a2..4abe69083c9 100644
      assert(__ogl_framework_api);
  
 -- 
-2.24.3 (Apple Git-128)
+2.29.2 (Apple Git-129)
 
