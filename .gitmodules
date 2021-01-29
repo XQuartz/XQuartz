@@ -616,3 +616,6 @@
 [submodule "src/xkeyboard-config"]
 	path = src/xkeyboard-config
 	url = git@github.com:freedesktop/xkeyboard-config.git
+[submodule "src/xorg/driver/xf86-video-nested"]
+	path = src/xorg/driver/xf86-video-nested
+	url = git@gitlab.freedesktop.org:xorg/driver/xf86-video-nested.git

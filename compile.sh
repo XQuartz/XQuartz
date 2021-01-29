@@ -630,6 +630,7 @@ do_autotools_build src/xkeyboard-config
 do_autotools_build src/xorg/xserver
 do_autotools_build src/xorg/driver/xf86-input-void
 do_autotools_build src/xorg/driver/xf86-video-dummy
+do_autotools_build src/xorg/driver/xf86-video-nested
 
 do_autotools_build src/xquartz/xserver
 
