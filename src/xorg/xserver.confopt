@@ -6,7 +6,7 @@
 --enable-xorg \
 --enable-kdrive \
 --enable-xfake \
---disable-xephyr \ 
+--enable-xephyr \
 --disable-sdl \
 --enable-xnest \
 --enable-xvfb \
