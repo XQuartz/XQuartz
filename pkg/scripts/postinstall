@@ -45,7 +45,7 @@ if [[ -f /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist ]
 fi
 
 if [[ -f /Library/LaunchAgents/org.macosforge.xquartz.startx.plist ]] ; then
-    rm /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist
+    rm /Library/LaunchAgents/org.macosforge.xquartz.startx.plist
 fi
 
 # Load the privileged_startx daemon
