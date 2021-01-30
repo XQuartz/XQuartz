@@ -61,10 +61,16 @@ SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
 ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET} -arch x86_64 -arch arm64"
-OPT_FLAGS="-Os"
 DEBUG_FLAGS="-g3 -gdwarf-2"
 MAKE="gnumake"
 MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
+
+if [ "${APPLICATION_VERSION_STRING}" == "${APPLICATION_VERSION_STRING/alpha/}" -a
+     "${APPLICATION_VERSION_STRING}" == "${APPLICATION_VERSION_STRING/beta/}" ] ; then
+     OPT_FLAGS="-Os"
+else
+     OPT_FLAGS="-O0"
+fi
 
 BASE_DIR=$(pwd)
 
