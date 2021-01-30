@@ -652,4 +652,9 @@ do_dmg
 
 set +x
 do_notarize
-do_dist
+
+echo -n "Proceed to distribution? (enter \"YES\" if so) "
+read MAYBE
+if [ "${MAYBE}" = "YES" ] ; then
+    do_dist
+fi
