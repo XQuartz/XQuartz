@@ -71,6 +71,20 @@ MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
      "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
+     # Alpha builds use sanitizers
+     SANITIZER_LIB_DIR=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+
+     SANITIZER_CFLAGS="-fsanitize=address"
+     SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+
+     SANITIZER_LDFLAGS="-Wl,-rpath,${PREFIX}/lib/asan"
+     for dylib in ${SANITIZER_LIBS} ; do
+         SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
+     done
+fi
+
+if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
+     "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
      # Alpha and Beta builds
      OPT_FLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
      HARDENING_FLAGS="-fstack-protector-all"
@@ -102,10 +116,10 @@ export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
 export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX}/share/aclocal"
 export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-export CFLAGS="${ARCH_FLAGS} ${OPT_FLAGS} ${DEBUG_FLAGS} ${HARDENING_FLAGS} ${WARNING_FLAGS}"
+export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_FLAGS} ${DEBUG_FLAGS} ${HARDENING_FLAGS} ${WARNING_FLAGS}"
 export CXXFLAGS="${CFLAGS}"
 export OBJCFLAGS="${CFLAGS}"
-export LDFLAGS="${ARCH_FLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+export LDFLAGS="${ARCH_FLAGS} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
 export CC="/usr/bin/clang"
 export CXX="/usr/bin/clang++"
 export OBJC="/usr/bin/clang"
@@ -422,6 +436,16 @@ fi
 # Install our base configs and other misc content
 sudo ditto ${BASE_DIR}/base ${DESTDIR}
 sudo ditto ${BASE_DIR}/base /
+
+if [ -n "${SANITIZER_LIBS}" ] ; then
+    sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${PREFIX}/lib/asan
+    sudo install -o root -g wheel -m 0755 -d ${PREFIX}/lib/asan
+
+    for dylib in ${SANITIZER_LIBS} ; do
+        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR}/${dylib} ${DESTDIR}${PREFIX}/lib/asan
+        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR}/${dylib} ${PREFIX}/lib/asan
+    done
+fi
 
 # Build Sparkle
 cd ${BASE_DIR}/src/Sparkle
