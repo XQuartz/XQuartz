@@ -1,7 +1,7 @@
-From e6d5a2af7870c59bcbd442d21ab791e6b1ef26ea Mon Sep 17 00:00:00 2001
+From 7eee8b7192d0863493bdc4765c258826406d286b Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 Date: Tue, 12 Jan 2021 16:44:34 -0800
-Subject: [PATCH 4/5] Fall back on clock_gettime when timespec_get() is
+Subject: [PATCH 4/6] Fall back on clock_gettime when timespec_get() is
  unavailable
 
 Fixes: e3a8013de8ca "util/u_queue: add util_queue_fence_wait_timeout"

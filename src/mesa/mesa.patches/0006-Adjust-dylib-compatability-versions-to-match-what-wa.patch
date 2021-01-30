@@ -1,0 +1,78 @@
+From d97734e63ee9b44b2edb730b76bb3d331ceaea2f Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sat, 30 Jan 2021 13:10:12 -0800
+Subject: [PATCH 6/6] Adjust dylib compatibility versions to match what was set
+ by mesa-18.3's autotools-based builds
+
+Fixes: https://gitlab.freedesktop.org/mesa/mesa/-/issues/4113
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ src/glx/meson.build                 | 1 +
+ src/mapi/es1api/meson.build         | 1 +
+ src/mapi/es2api/meson.build         | 1 +
+ src/mesa/drivers/osmesa/meson.build | 1 +
+ 4 files changed, 4 insertions(+)
+
+diff --git a/src/glx/meson.build b/src/glx/meson.build
+index d602bc14306..9274d85835b 100644
+--- a/src/glx/meson.build
++++ b/src/glx/meson.build
+@@ -162,6 +162,7 @@ libgl = shared_library(
+     dep_xcb_shm, extra_deps_libgl,
+   ],
+   version : gl_lib_version,
++  darwin_versions : '4.0.0',
+   install : true,
+ )
+ 
+diff --git a/src/mapi/es1api/meson.build b/src/mapi/es1api/meson.build
+index f8b4d045c92..8b749b1a332 100644
+--- a/src/mapi/es1api/meson.build
++++ b/src/mapi/es1api/meson.build
+@@ -49,6 +49,7 @@ libglesv1_cm = shared_library(
+   dependencies : [dep_thread, dep_libdrm, dep_m, dep_dl],
+   soversion : host_machine.system() == 'windows' ? '' : '1',
+   version : '1.1.0',
++  darwin_versions  : '3.0.0',
+   name_prefix : 'lib',
+   install : true,
+ )
+diff --git a/src/mapi/es2api/meson.build b/src/mapi/es2api/meson.build
+index 63a5a66b213..356c5760c49 100644
+--- a/src/mapi/es2api/meson.build
++++ b/src/mapi/es2api/meson.build
+@@ -49,6 +49,7 @@ libgles2 = shared_library(
+   dependencies : [dep_thread, dep_libdrm, dep_m, dep_dl],
+   soversion : host_machine.system() == 'windows' ? '' : '2',
+   version : '2.0.0',
++  darwin_versions : '3.0.0',
+   name_prefix : 'lib',
+   install : true,
+ )
+diff --git a/src/mesa/drivers/osmesa/meson.build b/src/mesa/drivers/osmesa/meson.build
+index 6c84182c11b..9e0d73a6fdc 100644
+--- a/src/mesa/drivers/osmesa/meson.build
++++ b/src/mesa/drivers/osmesa/meson.build
+@@ -38,6 +38,7 @@ libosmesa = shared_library(
+   name_prefix : host_machine.system() == 'windows' ? '' : 'lib',  # otherwise mingw will create libosmesa.dll
+   soversion : host_machine.system() == 'windows' ? '' : '8',
+   version : '8.0.0',
++  darwin_versions : '9.0.0',
+   install : true,
+ )
+ 
+-- 
+2.29.2 (Apple Git-129)
+
+diff --git a/src/gallium/targets/osmesa/meson.build b/src/gallium/targets/osmesa/meson.build
+index b17131f1cbe..3a421b58526 100644
+--- a/src/gallium/targets/osmesa/meson.build
++++ b/src/gallium/targets/osmesa/meson.build
+@@ -60,6 +60,7 @@ libosmesa = shared_library(
+   name_prefix : host_machine.system() == 'windows' ? '' : 'lib',  # otherwise mingw will create libosmesa.dll
+   soversion : host_machine.system() == 'windows' ? '' : '8',
+   version : '8.0.0',
++  darwin_versions : '9.0.0',
+   install : true,
+ )
+ 

@@ -1,7 +1,7 @@
-From a1695d86f85b058e848e3ac3f94fb4be992287ad Mon Sep 17 00:00:00 2001
+From 803f033a94150dc0dc9c9b615592774f3b74a077 Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 Date: Sat, 16 Jan 2021 14:33:10 -0800
-Subject: [PATCH 5/5] darwin: Use clock_gettime() conditional on the deployment
+Subject: [PATCH 5/6] darwin: Use clock_gettime() conditional on the deployment
  target
 
 Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
