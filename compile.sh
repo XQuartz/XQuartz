@@ -696,10 +696,19 @@ do_pkg
 do_dmg
 
 set +x
+
+/bin/echo -n "Proceed with notarization? (enter \"YES\" to notarize) "
+read MAYBE
+if [ "${MAYBE}" != "YES" ] ; then
+    exit 0
+fi
+
 do_notarize
 
-echo -n "Proceed to distribution? (enter \"YES\" if so) "
+/bin/echo -n "Proceed with distribution? (enter \"YES\" to notarize) "
 read MAYBE
-if [ "${MAYBE}" = "YES" ] ; then
-    do_dist
+if [ "${MAYBE}" != "YES" ] ; then
+    exit 0
 fi
+
+do_dist
