@@ -679,6 +679,12 @@ do_autotools_build src/xorg/driver/xf86-video-nested
 
 do_autotools_build src/xquartz/xserver
 
+# We want X to be Xquartz by default
+sudo rm -f ${DESTDIR}${PREFIX}/bin/X
+sudo ln -s Xquartz ${DESTDIR}${PREFIX}/bin/X
+sudo rm -f ${PREFIX}/bin/X
+sudo ln -s Xquartz ${PREFIX}/bin/X
+
 # TODO: Do we want to do anything with the tests?
 #do_autotools_build src/xorg/test/rendercheck
 #do_autotools_build src/xorg/test/x11perf
