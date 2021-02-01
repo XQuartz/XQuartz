@@ -83,11 +83,11 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -
      done
 
      OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
-     HARDENING_CFLAGS="-fstack-protector-all"
+     HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
 else
      # Release-candidate and Release builds
      OPT_CFLAGS="-Os"
-     HARDENING_CFLAGS="-fstack-protector-strong"
+     HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
 fi
 
 BASE_DIR=$(pwd)
