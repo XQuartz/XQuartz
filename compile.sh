@@ -71,7 +71,7 @@ MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
      "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
-     # Alpha builds use sanitizers
+     # Alpha and Beta builds
      SANITIZER_LIB_DIR=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
 
      SANITIZER_CFLAGS="-fsanitize=address"
@@ -81,11 +81,7 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -
      for dylib in ${SANITIZER_LIBS} ; do
          SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
      done
-fi
 
-if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
-     "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
-     # Alpha and Beta builds
      OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
      HARDENING_CFLAGS="-fstack-protector-all"
 else
