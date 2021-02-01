@@ -65,7 +65,7 @@ SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
 ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET} -arch x86_64 -arch arm64"
-DEBUG_FLAGS="-g3 -gdwarf-2"
+DEBUG_CFLAGS="-g3 -gdwarf-2"
 MAKE="gnumake"
 MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
 
@@ -86,12 +86,12 @@ fi
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
      "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
      # Alpha and Beta builds
-     OPT_FLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
-     HARDENING_FLAGS="-fstack-protector-all"
+     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
+     HARDENING_CFLAGS="-fstack-protector-all"
 else
      # Release-candidate and Release builds
-     OPT_FLAGS="-Os"
-     HARDENING_FLAGS="-fstack-protector-strong"
+     OPT_CFLAGS="-Os"
+     HARDENING_CFLAGS="-fstack-protector-strong"
 fi
 
 BASE_DIR=$(pwd)
@@ -103,7 +103,7 @@ DESTDIR=${PRODUCTS_DIR}/XQuartz.dest
 PKG_ROOT=${PRODUCTS_DIR}/XQuartz.signed
 SYM_ROOT=${PRODUCTS_DIR}/XQuartz.symbols
 
-WARNING_FLAGS="-Werror=unguarded-availability-new"
+WARNING_CFLAGS="-Werror=unguarded-availability-new"
 
 # Don't let startx use openssl from /opt/buildX11 (https://github.com/XQuartz/XQuartz/issues/29)
 export ac_cv_path_OPENSSL=/usr/bin/openssl
@@ -116,7 +116,7 @@ export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
 export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX}/share/aclocal"
 export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_FLAGS} ${DEBUG_FLAGS} ${HARDENING_FLAGS} ${WARNING_FLAGS}"
+export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
 export CXXFLAGS="${CFLAGS}"
 export OBJCFLAGS="${CFLAGS}"
 export LDFLAGS="${ARCH_FLAGS} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
@@ -216,9 +216,9 @@ do_meson_build() {
     # builds on Apple Silicon until this is resolved.  See https://mesonbuild.com/Cross-compilation.html
     # https://github.com/mesonbuild/meson/issues/8206
     for arch in arm64 x86_64 ; do
-        CFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
-            OBJCFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
-            CXXFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_FLAGS} ${DEBUG_FLAGS} ${WARNING_FLAGS}" \
+        CFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
+            OBJCFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
+            CXXFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
             LDFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
             meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
         ninja -C build.${arch} || die "Failed to compile in $(pwd)"
