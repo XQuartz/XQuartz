@@ -1,585 +1,585 @@
 [submodule "src/xorg/app/appres"]
 	path = src/xorg/app/appres
-	url = git@gitlab.freedesktop.org:xorg/app/appres.git
+	url = https://gitlab.freedesktop.org/xorg/app/appres.git
 [submodule "src/xorg/app/beforelight"]
 	path = src/xorg/app/beforelight
-	url = git@gitlab.freedesktop.org:xorg/app/beforelight.git
+	url = https://gitlab.freedesktop.org/xorg/app/beforelight.git
 [submodule "src/xorg/app/bitmap"]
 	path = src/xorg/app/bitmap
-	url = git@gitlab.freedesktop.org:xorg/app/bitmap.git
+	url = https://gitlab.freedesktop.org/xorg/app/bitmap.git
 [submodule "src/xorg/app/editres"]
 	path = src/xorg/app/editres
-	url = git@gitlab.freedesktop.org:xorg/app/editres.git
+	url = https://gitlab.freedesktop.org/xorg/app/editres.git
 [submodule "src/xorg/app/fonttosfnt"]
 	path = src/xorg/app/fonttosfnt
-	url = git@gitlab.freedesktop.org:xorg/app/fonttosfnt.git
+	url = https://gitlab.freedesktop.org/xorg/app/fonttosfnt.git
 [submodule "src/xorg/app/fslsfonts"]
 	path = src/xorg/app/fslsfonts
-	url = git@gitlab.freedesktop.org:xorg/app/fslsfonts.git
+	url = https://gitlab.freedesktop.org/xorg/app/fslsfonts.git
 [submodule "src/xorg/app/fstobdf"]
 	path = src/xorg/app/fstobdf
-	url = git@gitlab.freedesktop.org:xorg/app/fstobdf.git
+	url = https://gitlab.freedesktop.org/xorg/app/fstobdf.git
 [submodule "src/xorg/app/iceauth"]
 	path = src/xorg/app/iceauth
-	url = git@gitlab.freedesktop.org:xorg/app/iceauth.git
+	url = https://gitlab.freedesktop.org/xorg/app/iceauth.git
 [submodule "src/xorg/app/ico"]
 	path = src/xorg/app/ico
-	url = git@gitlab.freedesktop.org:xorg/app/ico.git
+	url = https://gitlab.freedesktop.org/xorg/app/ico.git
 [submodule "src/xorg/app/listres"]
 	path = src/xorg/app/listres
-	url = git@gitlab.freedesktop.org:xorg/app/listres.git
+	url = https://gitlab.freedesktop.org/xorg/app/listres.git
 [submodule "src/xorg/app/luit"]
 	path = src/xorg/app/luit
-	url = git@gitlab.freedesktop.org:xorg/app/luit.git
+	url = https://gitlab.freedesktop.org/xorg/app/luit.git
 [submodule "src/xorg/app/mkfontdir"]
 	path = src/xorg/app/mkfontdir
-	url = git@gitlab.freedesktop.org:xorg/app/mkfontdir.git
+	url = https://gitlab.freedesktop.org/xorg/app/mkfontdir.git
 [submodule "src/xorg/app/mkfontscale"]
 	path = src/xorg/app/mkfontscale
-	url = git@gitlab.freedesktop.org:xorg/app/mkfontscale.git
+	url = https://gitlab.freedesktop.org/xorg/app/mkfontscale.git
 [submodule "src/xorg/app/oclock"]
 	path = src/xorg/app/oclock
-	url = git@gitlab.freedesktop.org:xorg/app/oclock.git
+	url = https://gitlab.freedesktop.org/xorg/app/oclock.git
 [submodule "src/xorg/app/quartz-wm"]
 	path = src/xorg/app/quartz-wm
-	url = git@gitlab.freedesktop.org:xorg/app/quartz-wm.git
+	url = https://gitlab.freedesktop.org/xorg/app/quartz-wm.git
 [submodule "src/xorg/app/rgb"]
 	path = src/xorg/app/rgb
-	url = git@gitlab.freedesktop.org:xorg/app/rgb.git
+	url = https://gitlab.freedesktop.org/xorg/app/rgb.git
 [submodule "src/xorg/app/sessreg"]
 	path = src/xorg/app/sessreg
-	url = git@gitlab.freedesktop.org:xorg/app/sessreg.git
+	url = https://gitlab.freedesktop.org/xorg/app/sessreg.git
 [submodule "src/xorg/app/setxkbmap"]
 	path = src/xorg/app/setxkbmap
-	url = git@gitlab.freedesktop.org:xorg/app/setxkbmap.git
+	url = https://gitlab.freedesktop.org/xorg/app/setxkbmap.git
 [submodule "src/xorg/app/showfont"]
 	path = src/xorg/app/showfont
-	url = git@gitlab.freedesktop.org:xorg/app/showfont.git
+	url = https://gitlab.freedesktop.org/xorg/app/showfont.git
 [submodule "src/xorg/app/smproxy"]
 	path = src/xorg/app/smproxy
-	url = git@gitlab.freedesktop.org:xorg/app/smproxy.git
+	url = https://gitlab.freedesktop.org/xorg/app/smproxy.git
 [submodule "src/xorg/app/twm"]
 	path = src/xorg/app/twm
-	url = git@gitlab.freedesktop.org:xorg/app/twm.git
+	url = https://gitlab.freedesktop.org/xorg/app/twm.git
 [submodule "src/xorg/app/viewres"]
 	path = src/xorg/app/viewres
-	url = git@gitlab.freedesktop.org:xorg/app/viewres.git
+	url = https://gitlab.freedesktop.org/xorg/app/viewres.git
 [submodule "src/xorg/app/xauth"]
 	path = src/xorg/app/xauth
-	url = git@gitlab.freedesktop.org:xorg/app/xauth.git
+	url = https://gitlab.freedesktop.org/xorg/app/xauth.git
 [submodule "src/xorg/app/xbacklight"]
 	path = src/xorg/app/xbacklight
-	url = git@gitlab.freedesktop.org:xorg/app/xbacklight.git
+	url = https://gitlab.freedesktop.org/xorg/app/xbacklight.git
 [submodule "src/xorg/app/xcalc"]
 	path = src/xorg/app/xcalc
-	url = git@gitlab.freedesktop.org:xorg/app/xcalc.git
+	url = https://gitlab.freedesktop.org/xorg/app/xcalc.git
 [submodule "src/xorg/app/xclipboard"]
 	path = src/xorg/app/xclipboard
-	url = git@gitlab.freedesktop.org:xorg/app/xclipboard.git
+	url = https://gitlab.freedesktop.org/xorg/app/xclipboard.git
 [submodule "src/xorg/app/xclock"]
 	path = src/xorg/app/xclock
-	url = git@gitlab.freedesktop.org:xorg/app/xclock.git
+	url = https://gitlab.freedesktop.org/xorg/app/xclock.git
 [submodule "src/xorg/app/xcmsdb"]
 	path = src/xorg/app/xcmsdb
-	url = git@gitlab.freedesktop.org:xorg/app/xcmsdb.git
+	url = https://gitlab.freedesktop.org/xorg/app/xcmsdb.git
 [submodule "src/xorg/app/xcompmgr"]
 	path = src/xorg/app/xcompmgr
-	url = git@gitlab.freedesktop.org:xorg/app/xcompmgr.git
+	url = https://gitlab.freedesktop.org/xorg/app/xcompmgr.git
 [submodule "src/xorg/app/xconsole"]
 	path = src/xorg/app/xconsole
-	url = git@gitlab.freedesktop.org:xorg/app/xconsole.git
+	url = https://gitlab.freedesktop.org/xorg/app/xconsole.git
 [submodule "src/xorg/app/xcursorgen"]
 	path = src/xorg/app/xcursorgen
-	url = git@gitlab.freedesktop.org:xorg/app/xcursorgen.git
+	url = https://gitlab.freedesktop.org/xorg/app/xcursorgen.git
 [submodule "src/xorg/app/xditview"]
 	path = src/xorg/app/xditview
-	url = git@gitlab.freedesktop.org:xorg/app/xditview.git
+	url = https://gitlab.freedesktop.org/xorg/app/xditview.git
 [submodule "src/xorg/app/xdm"]
 	path = src/xorg/app/xdm
-	url = git@gitlab.freedesktop.org:xorg/app/xdm.git
+	url = https://gitlab.freedesktop.org/xorg/app/xdm.git
 [submodule "src/xorg/app/xdpyinfo"]
 	path = src/xorg/app/xdpyinfo
-	url = git@gitlab.freedesktop.org:xorg/app/xdpyinfo.git
+	url = https://gitlab.freedesktop.org/xorg/app/xdpyinfo.git
 [submodule "src/xorg/app/xedit"]
 	path = src/xorg/app/xedit
-	url = git@gitlab.freedesktop.org:xorg/app/xedit.git
+	url = https://gitlab.freedesktop.org/xorg/app/xedit.git
 [submodule "src/xorg/app/xev"]
 	path = src/xorg/app/xev
-	url = git@gitlab.freedesktop.org:xorg/app/xev.git
+	url = https://gitlab.freedesktop.org/xorg/app/xev.git
 [submodule "src/xorg/app/xeyes"]
 	path = src/xorg/app/xeyes
-	url = git@gitlab.freedesktop.org:xorg/app/xeyes.git
+	url = https://gitlab.freedesktop.org/xorg/app/xeyes.git
 [submodule "src/xorg/app/xfd"]
 	path = src/xorg/app/xfd
-	url = git@gitlab.freedesktop.org:xorg/app/xfd.git
+	url = https://gitlab.freedesktop.org/xorg/app/xfd.git
 [submodule "src/xorg/app/xfontsel"]
 	path = src/xorg/app/xfontsel
-	url = git@gitlab.freedesktop.org:xorg/app/xfontsel.git
+	url = https://gitlab.freedesktop.org/xorg/app/xfontsel.git
 [submodule "src/xorg/app/xfs"]
 	path = src/xorg/app/xfs
-	url = git@gitlab.freedesktop.org:xorg/app/xfs.git
+	url = https://gitlab.freedesktop.org/xorg/app/xfs.git
 [submodule "src/xorg/app/xfsinfo"]
 	path = src/xorg/app/xfsinfo
-	url = git@gitlab.freedesktop.org:xorg/app/xfsinfo.git
+	url = https://gitlab.freedesktop.org/xorg/app/xfsinfo.git
 [submodule "src/xorg/app/xgamma"]
 	path = src/xorg/app/xgamma
-	url = git@gitlab.freedesktop.org:xorg/app/xgamma.git
+	url = https://gitlab.freedesktop.org/xorg/app/xgamma.git
 [submodule "src/xorg/app/xgc"]
 	path = src/xorg/app/xgc
-	url = git@gitlab.freedesktop.org:xorg/app/xgc.git
+	url = https://gitlab.freedesktop.org/xorg/app/xgc.git
 [submodule "src/xorg/app/xhost"]
 	path = src/xorg/app/xhost
-	url = git@gitlab.freedesktop.org:xorg/app/xhost.git
+	url = https://gitlab.freedesktop.org/xorg/app/xhost.git
 [submodule "src/xorg/app/xinit"]
 	path = src/xorg/app/xinit
-	url = git@gitlab.freedesktop.org:xorg/app/xinit.git
+	url = https://gitlab.freedesktop.org/xorg/app/xinit.git
 [submodule "src/xorg/app/xinput"]
 	path = src/xorg/app/xinput
-	url = git@gitlab.freedesktop.org:xorg/app/xinput.git
+	url = https://gitlab.freedesktop.org/xorg/app/xinput.git
 [submodule "src/xorg/app/xkbcomp"]
 	path = src/xorg/app/xkbcomp
-	url = git@gitlab.freedesktop.org:xorg/app/xkbcomp.git
+	url = https://gitlab.freedesktop.org/xorg/app/xkbcomp.git
 [submodule "src/xorg/app/xkbevd"]
 	path = src/xorg/app/xkbevd
-	url = git@gitlab.freedesktop.org:xorg/app/xkbevd.git
+	url = https://gitlab.freedesktop.org/xorg/app/xkbevd.git
 [submodule "src/xorg/app/xkbprint"]
 	path = src/xorg/app/xkbprint
-	url = git@gitlab.freedesktop.org:xorg/app/xkbprint.git
+	url = https://gitlab.freedesktop.org/xorg/app/xkbprint.git
 [submodule "src/xorg/app/xkbutils"]
 	path = src/xorg/app/xkbutils
-	url = git@gitlab.freedesktop.org:xorg/app/xkbutils.git
+	url = https://gitlab.freedesktop.org/xorg/app/xkbutils.git
 [submodule "src/xorg/app/xkill"]
 	path = src/xorg/app/xkill
-	url = git@gitlab.freedesktop.org:xorg/app/xkill.git
+	url = https://gitlab.freedesktop.org/xorg/app/xkill.git
 [submodule "src/xorg/app/xload"]
 	path = src/xorg/app/xload
-	url = git@gitlab.freedesktop.org:xorg/app/xload.git
+	url = https://gitlab.freedesktop.org/xorg/app/xload.git
 [submodule "src/xorg/app/xlogo"]
 	path = src/xorg/app/xlogo
-	url = git@gitlab.freedesktop.org:xorg/app/xlogo.git
+	url = https://gitlab.freedesktop.org/xorg/app/xlogo.git
 [submodule "src/xorg/app/xlsatoms"]
 	path = src/xorg/app/xlsatoms
-	url = git@gitlab.freedesktop.org:xorg/app/xlsatoms.git
+	url = https://gitlab.freedesktop.org/xorg/app/xlsatoms.git
 [submodule "src/xorg/app/xlsclients"]
 	path = src/xorg/app/xlsclients
-	url = git@gitlab.freedesktop.org:xorg/app/xlsclients.git
+	url = https://gitlab.freedesktop.org/xorg/app/xlsclients.git
 [submodule "src/xorg/app/xlsfonts"]
 	path = src/xorg/app/xlsfonts
-	url = git@gitlab.freedesktop.org:xorg/app/xlsfonts.git
+	url = https://gitlab.freedesktop.org/xorg/app/xlsfonts.git
 [submodule "src/xorg/app/xmag"]
 	path = src/xorg/app/xmag
-	url = git@gitlab.freedesktop.org:xorg/app/xmag.git
+	url = https://gitlab.freedesktop.org/xorg/app/xmag.git
 [submodule "src/xorg/app/xman"]
 	path = src/xorg/app/xman
-	url = git@gitlab.freedesktop.org:xorg/app/xman.git
+	url = https://gitlab.freedesktop.org/xorg/app/xman.git
 [submodule "src/xorg/app/xmessage"]
 	path = src/xorg/app/xmessage
-	url = git@gitlab.freedesktop.org:xorg/app/xmessage.git
+	url = https://gitlab.freedesktop.org/xorg/app/xmessage.git
 [submodule "src/xorg/app/xmh"]
 	path = src/xorg/app/xmh
-	url = git@gitlab.freedesktop.org:xorg/app/xmh.git
+	url = https://gitlab.freedesktop.org/xorg/app/xmh.git
 [submodule "src/xorg/app/xmodmap"]
 	path = src/xorg/app/xmodmap
-	url = git@gitlab.freedesktop.org:xorg/app/xmodmap.git
+	url = https://gitlab.freedesktop.org/xorg/app/xmodmap.git
 [submodule "src/xorg/app/xmore"]
 	path = src/xorg/app/xmore
-	url = git@gitlab.freedesktop.org:xorg/app/xmore.git
+	url = https://gitlab.freedesktop.org/xorg/app/xmore.git
 [submodule "src/xorg/app/xpr"]
 	path = src/xorg/app/xpr
-	url = git@gitlab.freedesktop.org:xorg/app/xpr.git
+	url = https://gitlab.freedesktop.org/xorg/app/xpr.git
 [submodule "src/xorg/app/xprop"]
 	path = src/xorg/app/xprop
-	url = git@gitlab.freedesktop.org:xorg/app/xprop.git
+	url = https://gitlab.freedesktop.org/xorg/app/xprop.git
 [submodule "src/xorg/app/xrandr"]
 	path = src/xorg/app/xrandr
-	url = git@gitlab.freedesktop.org:xorg/app/xrandr.git
+	url = https://gitlab.freedesktop.org/xorg/app/xrandr.git
 [submodule "src/xorg/app/xrdb"]
 	path = src/xorg/app/xrdb
-	url = git@gitlab.freedesktop.org:xorg/app/xrdb.git
+	url = https://gitlab.freedesktop.org/xorg/app/xrdb.git
 [submodule "src/xorg/app/xrefresh"]
 	path = src/xorg/app/xrefresh
-	url = git@gitlab.freedesktop.org:xorg/app/xrefresh.git
+	url = https://gitlab.freedesktop.org/xorg/app/xrefresh.git
 [submodule "src/xorg/app/xscope"]
 	path = src/xorg/app/xscope
-	url = git@gitlab.freedesktop.org:xorg/app/xscope.git
+	url = https://gitlab.freedesktop.org/xorg/app/xscope.git
 [submodule "src/xorg/app/xset"]
 	path = src/xorg/app/xset
-	url = git@gitlab.freedesktop.org:xorg/app/xset.git
+	url = https://gitlab.freedesktop.org/xorg/app/xset.git
 [submodule "src/xorg/app/xsetmode"]
 	path = src/xorg/app/xsetmode
-	url = git@gitlab.freedesktop.org:xorg/app/xsetmode.git
+	url = https://gitlab.freedesktop.org/xorg/app/xsetmode.git
 [submodule "src/xorg/app/xsetpointer"]
 	path = src/xorg/app/xsetpointer
-	url = git@gitlab.freedesktop.org:xorg/app/xsetpointer.git
+	url = https://gitlab.freedesktop.org/xorg/app/xsetpointer.git
 [submodule "src/xorg/app/xsetroot"]
 	path = src/xorg/app/xsetroot
-	url = git@gitlab.freedesktop.org:xorg/app/xsetroot.git
+	url = https://gitlab.freedesktop.org/xorg/app/xsetroot.git
 [submodule "src/xorg/app/xsm"]
 	path = src/xorg/app/xsm
-	url = git@gitlab.freedesktop.org:xorg/app/xsm.git
+	url = https://gitlab.freedesktop.org/xorg/app/xsm.git
 [submodule "src/xorg/app/xstdcmap"]
 	path = src/xorg/app/xstdcmap
-	url = git@gitlab.freedesktop.org:xorg/app/xstdcmap.git
+	url = https://gitlab.freedesktop.org/xorg/app/xstdcmap.git
 [submodule "src/xorg/app/xvinfo"]
 	path = src/xorg/app/xvinfo
-	url = git@gitlab.freedesktop.org:xorg/app/xvinfo.git
+	url = https://gitlab.freedesktop.org/xorg/app/xvinfo.git
 [submodule "src/xorg/app/xwd"]
 	path = src/xorg/app/xwd
-	url = git@gitlab.freedesktop.org:xorg/app/xwd.git
+	url = https://gitlab.freedesktop.org/xorg/app/xwd.git
 [submodule "src/xorg/app/xwininfo"]
 	path = src/xorg/app/xwininfo
-	url = git@gitlab.freedesktop.org:xorg/app/xwininfo.git
+	url = https://gitlab.freedesktop.org/xorg/app/xwininfo.git
 [submodule "src/xorg/app/xwud"]
 	path = src/xorg/app/xwud
-	url = git@gitlab.freedesktop.org:xorg/app/xwud.git
+	url = https://gitlab.freedesktop.org/xorg/app/xwud.git
 [submodule "src/xorg/data/bitmaps"]
 	path = src/xorg/data/bitmaps
-	url = git@gitlab.freedesktop.org:xorg/data/bitmaps.git
+	url = https://gitlab.freedesktop.org/xorg/data/bitmaps.git
 [submodule "src/xorg/data/cursors"]
 	path = src/xorg/data/cursors
-	url = git@gitlab.freedesktop.org:xorg/data/cursors.git
+	url = https://gitlab.freedesktop.org/xorg/data/cursors.git
 [submodule "src/xorg/doc/xorg-docs"]
 	path = src/xorg/doc/xorg-docs
-	url = git@gitlab.freedesktop.org:xorg/doc/xorg-docs.git
+	url = https://gitlab.freedesktop.org/xorg/doc/xorg-docs.git
 [submodule "src/xorg/doc/xorg-sgml-doctools"]
 	path = src/xorg/doc/xorg-sgml-doctools
-	url = git@gitlab.freedesktop.org:xorg/doc/xorg-sgml-doctools.git
+	url = https://gitlab.freedesktop.org/xorg/doc/xorg-sgml-doctools.git
 [submodule "src/xorg/driver/xf86-input-void"]
 	path = src/xorg/driver/xf86-input-void
-	url = git@gitlab.freedesktop.org:xorg/driver/xf86-input-void.git
+	url = https://gitlab.freedesktop.org/xorg/driver/xf86-input-void.git
 [submodule "src/xorg/driver/xf86-video-dummy"]
 	path = src/xorg/driver/xf86-video-dummy
-	url = git@gitlab.freedesktop.org:xorg/driver/xf86-video-dummy.git
+	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-dummy.git
 [submodule "src/xorg/font/encodings"]
 	path = src/xorg/font/encodings
-	url = git@gitlab.freedesktop.org:xorg/font/encodings.git
+	url = https://gitlab.freedesktop.org/xorg/font/encodings.git
 [submodule "src/xorg/font/adobe-100dpi"]
 	path = src/xorg/font/adobe-100dpi
-	url = git@gitlab.freedesktop.org:xorg/font/adobe-100dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/adobe-100dpi.git
 [submodule "src/xorg/font/adobe-75dpi"]
 	path = src/xorg/font/adobe-75dpi
-	url = git@gitlab.freedesktop.org:xorg/font/adobe-75dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/adobe-75dpi.git
 [submodule "src/xorg/font/adobe-utopia-100dpi"]
 	path = src/xorg/font/adobe-utopia-100dpi
-	url = git@gitlab.freedesktop.org:xorg/font/adobe-utopia-100dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/adobe-utopia-100dpi.git
 [submodule "src/xorg/font/adobe-utopia-75dpi"]
 	path = src/xorg/font/adobe-utopia-75dpi
-	url = git@gitlab.freedesktop.org:xorg/font/adobe-utopia-75dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/adobe-utopia-75dpi.git
 [submodule "src/xorg/font/adobe-utopia-type1"]
 	path = src/xorg/font/adobe-utopia-type1
-	url = git@gitlab.freedesktop.org:xorg/font/adobe-utopia-type1.git
+	url = https://gitlab.freedesktop.org/xorg/font/adobe-utopia-type1.git
 [submodule "src/xorg/font/alias"]
 	path = src/xorg/font/alias
-	url = git@gitlab.freedesktop.org:xorg/font/alias.git
+	url = https://gitlab.freedesktop.org/xorg/font/alias.git
 [submodule "src/xorg/font/arabic-misc"]
 	path = src/xorg/font/arabic-misc
-	url = git@gitlab.freedesktop.org:xorg/font/arabic-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/arabic-misc.git
 [submodule "src/xorg/font/bh-100dpi"]
 	path = src/xorg/font/bh-100dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bh-100dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-100dpi.git
 [submodule "src/xorg/font/bh-75dpi"]
 	path = src/xorg/font/bh-75dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bh-75dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-75dpi.git
 [submodule "src/xorg/font/bh-lucidatypewriter-100dpi"]
 	path = src/xorg/font/bh-lucidatypewriter-100dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bh-lucidatypewriter-100dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-lucidatypewriter-100dpi.git
 [submodule "src/xorg/font/bh-lucidatypewriter-75dpi"]
 	path = src/xorg/font/bh-lucidatypewriter-75dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bh-lucidatypewriter-75dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-lucidatypewriter-75dpi.git
 [submodule "src/xorg/font/bh-ttf"]
 	path = src/xorg/font/bh-ttf
-	url = git@gitlab.freedesktop.org:xorg/font/bh-ttf.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-ttf.git
 [submodule "src/xorg/font/bh-type1"]
 	path = src/xorg/font/bh-type1
-	url = git@gitlab.freedesktop.org:xorg/font/bh-type1.git
+	url = https://gitlab.freedesktop.org/xorg/font/bh-type1.git
 [submodule "src/xorg/font/bitstream-100dpi"]
 	path = src/xorg/font/bitstream-100dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bitstream-100dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bitstream-100dpi.git
 [submodule "src/xorg/font/bitstream-75dpi"]
 	path = src/xorg/font/bitstream-75dpi
-	url = git@gitlab.freedesktop.org:xorg/font/bitstream-75dpi.git
+	url = https://gitlab.freedesktop.org/xorg/font/bitstream-75dpi.git
 [submodule "src/xorg/font/bitstream-speedo"]
 	path = src/xorg/font/bitstream-speedo
-	url = git@gitlab.freedesktop.org:xorg/font/bitstream-speedo.git
+	url = https://gitlab.freedesktop.org/xorg/font/bitstream-speedo.git
 [submodule "src/xorg/font/bitstream-type1"]
 	path = src/xorg/font/bitstream-type1
-	url = git@gitlab.freedesktop.org:xorg/font/bitstream-type1.git
+	url = https://gitlab.freedesktop.org/xorg/font/bitstream-type1.git
 [submodule "src/xorg/font/cronyx-cyrillic"]
 	path = src/xorg/font/cronyx-cyrillic
-	url = git@gitlab.freedesktop.org:xorg/font/cronyx-cyrillic.git
+	url = https://gitlab.freedesktop.org/xorg/font/cronyx-cyrillic.git
 [submodule "src/xorg/font/cursor-misc"]
 	path = src/xorg/font/cursor-misc
-	url = git@gitlab.freedesktop.org:xorg/font/cursor-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/cursor-misc.git
 [submodule "src/xorg/font/daewoo-misc"]
 	path = src/xorg/font/daewoo-misc
-	url = git@gitlab.freedesktop.org:xorg/font/daewoo-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/daewoo-misc.git
 [submodule "src/xorg/font/dec-misc"]
 	path = src/xorg/font/dec-misc
-	url = git@gitlab.freedesktop.org:xorg/font/dec-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/dec-misc.git
 [submodule "src/xorg/font/ibm-type1"]
 	path = src/xorg/font/ibm-type1
-	url = git@gitlab.freedesktop.org:xorg/font/ibm-type1.git
+	url = https://gitlab.freedesktop.org/xorg/font/ibm-type1.git
 [submodule "src/xorg/font/isas-misc"]
 	path = src/xorg/font/isas-misc
-	url = git@gitlab.freedesktop.org:xorg/font/isas-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/isas-misc.git
 [submodule "src/xorg/font/jis-misc"]
 	path = src/xorg/font/jis-misc
-	url = git@gitlab.freedesktop.org:xorg/font/jis-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/jis-misc.git
 [submodule "src/xorg/font/micro-misc"]
 	path = src/xorg/font/micro-misc
-	url = git@gitlab.freedesktop.org:xorg/font/micro-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/micro-misc.git
 [submodule "src/xorg/font/misc-cyrillic"]
 	path = src/xorg/font/misc-cyrillic
-	url = git@gitlab.freedesktop.org:xorg/font/misc-cyrillic.git
+	url = https://gitlab.freedesktop.org/xorg/font/misc-cyrillic.git
 [submodule "src/xorg/font/misc-ethiopic"]
 	path = src/xorg/font/misc-ethiopic
-	url = git@gitlab.freedesktop.org:xorg/font/misc-ethiopic.git
+	url = https://gitlab.freedesktop.org/xorg/font/misc-ethiopic.git
 [submodule "src/xorg/font/misc-meltho"]
 	path = src/xorg/font/misc-meltho
-	url = git@gitlab.freedesktop.org:xorg/font/misc-meltho.git
+	url = https://gitlab.freedesktop.org/xorg/font/misc-meltho.git
 [submodule "src/xorg/font/misc-misc"]
 	path = src/xorg/font/misc-misc
-	url = git@gitlab.freedesktop.org:xorg/font/misc-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/misc-misc.git
 [submodule "src/xorg/font/mutt-misc"]
 	path = src/xorg/font/mutt-misc
-	url = git@gitlab.freedesktop.org:xorg/font/mutt-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/mutt-misc.git
 [submodule "src/xorg/font/sun-misc"]
 	path = src/xorg/font/sun-misc
-	url = git@gitlab.freedesktop.org:xorg/font/sun-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/sun-misc.git
 [submodule "src/xorg/font/util"]
 	path = src/xorg/font/util
-	url = git@gitlab.freedesktop.org:xorg/font/util.git
+	url = https://gitlab.freedesktop.org/xorg/font/util.git
 [submodule "src/xorg/font/winitzki-cyrillic"]
 	path = src/xorg/font/winitzki-cyrillic
-	url = git@gitlab.freedesktop.org:xorg/font/winitzki-cyrillic.git
+	url = https://gitlab.freedesktop.org/xorg/font/winitzki-cyrillic.git
 [submodule "src/xorg/font/xfree86-type1"]
 	path = src/xorg/font/xfree86-type1
-	url = git@gitlab.freedesktop.org:xorg/font/xfree86-type1.git
+	url = https://gitlab.freedesktop.org/xorg/font/xfree86-type1.git
 [submodule "src/xorg/lib/libAppleWM"]
 	path = src/xorg/lib/libAppleWM
-	url = git@gitlab.freedesktop.org:xorg/lib/libAppleWM.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libAppleWM.git
 [submodule "src/xorg/lib/libFS"]
 	path = src/xorg/lib/libFS
-	url = git@gitlab.freedesktop.org:xorg/lib/libFS.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libFS.git
 [submodule "src/xorg/lib/libICE"]
 	path = src/xorg/lib/libICE
-	url = git@gitlab.freedesktop.org:xorg/lib/libICE.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libICE.git
 [submodule "src/xorg/lib/libSM"]
 	path = src/xorg/lib/libSM
-	url = git@gitlab.freedesktop.org:xorg/lib/libSM.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libSM.git
 [submodule "src/xorg/lib/libX11"]
 	path = src/xorg/lib/libX11
-	url = git@gitlab.freedesktop.org:xorg/lib/libX11.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libX11.git
 [submodule "src/xorg/lib/libXScrnSaver"]
 	path = src/xorg/lib/libXScrnSaver
-	url = git@gitlab.freedesktop.org:xorg/lib/libXScrnSaver.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXScrnSaver.git
 [submodule "src/xorg/lib/libXTrap"]
 	path = src/xorg/lib/libXTrap
-	url = git@gitlab.freedesktop.org:xorg/lib/libXTrap.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXTrap.git
 [submodule "src/xorg/lib/libXau"]
 	path = src/xorg/lib/libXau
-	url = git@gitlab.freedesktop.org:xorg/lib/libXau.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXau.git
 [submodule "src/xorg/lib/libXaw"]
 	path = src/xorg/lib/libXaw
-	url = git@gitlab.freedesktop.org:xorg/lib/libXaw.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXaw.git
 [submodule "src/xorg/lib/libXaw8"]
 	path = src/xorg/lib/libXaw8
-	url = git@gitlab.freedesktop.org:xorg/lib/libXaw
+	url = https://gitlab.freedesktop.org/xorg/lib/libXaw
 [submodule "src/xorg/lib/libXaw3d"]
 	path = src/xorg/lib/libXaw3d
-	url = git@gitlab.freedesktop.org:xorg/lib/libXaw3d.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXaw3d.git
 [submodule "src/xorg/lib/libXcomposite"]
 	path = src/xorg/lib/libXcomposite
-	url = git@gitlab.freedesktop.org:xorg/lib/libXcomposite.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXcomposite.git
 [submodule "src/xorg/lib/libXcursor"]
 	path = src/xorg/lib/libXcursor
-	url = git@gitlab.freedesktop.org:xorg/lib/libXcursor.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXcursor.git
 [submodule "src/xorg/lib/libXdamage"]
 	path = src/xorg/lib/libXdamage
-	url = git@gitlab.freedesktop.org:xorg/lib/libXdamage.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXdamage.git
 [submodule "src/xorg/lib/libXdmcp"]
 	path = src/xorg/lib/libXdmcp
-	url = git@gitlab.freedesktop.org:xorg/lib/libXdmcp.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXdmcp.git
 [submodule "src/xorg/lib/libXevie"]
 	path = src/xorg/lib/libXevie
-	url = git@gitlab.freedesktop.org:xorg/lib/libXevie.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXevie.git
 [submodule "src/xorg/lib/libXext"]
 	path = src/xorg/lib/libXext
-	url = git@gitlab.freedesktop.org:xorg/lib/libXext.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXext.git
 [submodule "src/xorg/lib/libXfixes"]
 	path = src/xorg/lib/libXfixes
-	url = git@gitlab.freedesktop.org:xorg/lib/libXfixes.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXfixes.git
 [submodule "src/xorg/lib/libXfont"]
 	path = src/xorg/lib/libXfont
-	url = git@gitlab.freedesktop.org:xorg/lib/libXfont.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXfont.git
 [submodule "src/xorg/lib/libXfont2"]
 	path = src/xorg/lib/libXfont2
-	url = git@gitlab.freedesktop.org:xorg/lib/libXfont
+	url = https://gitlab.freedesktop.org/xorg/lib/libXfont
 [submodule "src/xorg/lib/libXfontcache"]
 	path = src/xorg/lib/libXfontcache
-	url = git@gitlab.freedesktop.org:xorg/lib/libXfontcache.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXfontcache.git
 [submodule "src/xorg/font/schumacher-misc"]
 	path = src/xorg/font/schumacher-misc
-	url = git@gitlab.freedesktop.org:xorg/font/schumacher-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/schumacher-misc.git
 [submodule "src/xorg/font/screen-cyrillic"]
 	path = src/xorg/font/screen-cyrillic
-	url = git@gitlab.freedesktop.org:xorg/font/screen-cyrillic.git
+	url = https://gitlab.freedesktop.org/xorg/font/screen-cyrillic.git
 [submodule "src/xorg/font/sony-misc"]
 	path = src/xorg/font/sony-misc
-	url = git@gitlab.freedesktop.org:xorg/font/sony-misc.git
+	url = https://gitlab.freedesktop.org/xorg/font/sony-misc.git
 [submodule "src/xorg/lib/libXft"]
 	path = src/xorg/lib/libXft
-	url = git@gitlab.freedesktop.org:xorg/lib/libXft.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXft.git
 [submodule "src/xorg/lib/libXi"]
 	path = src/xorg/lib/libXi
-	url = git@gitlab.freedesktop.org:xorg/lib/libXi.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXi.git
 [submodule "src/xorg/lib/libXinerama"]
 	path = src/xorg/lib/libXinerama
-	url = git@gitlab.freedesktop.org:xorg/lib/libXinerama.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXinerama.git
 [submodule "src/xorg/lib/libXmu"]
 	path = src/xorg/lib/libXmu
-	url = git@gitlab.freedesktop.org:xorg/lib/libXmu.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXmu.git
 [submodule "src/xorg/lib/libXp"]
 	path = src/xorg/lib/libXp
-	url = git@gitlab.freedesktop.org:xorg/lib/libXp.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXp.git
 [submodule "src/xorg/lib/libXpm"]
 	path = src/xorg/lib/libXpm
-	url = git@gitlab.freedesktop.org:xorg/lib/libXpm.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXpm.git
 [submodule "src/xorg/lib/libXpresent"]
 	path = src/xorg/lib/libXpresent
-	url = git@gitlab.freedesktop.org:xorg/lib/libXpresent.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXpresent.git
 [submodule "src/xorg/lib/libXrandr"]
 	path = src/xorg/lib/libXrandr
-	url = git@gitlab.freedesktop.org:xorg/lib/libXrandr.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXrandr.git
 [submodule "src/xorg/lib/libXrender"]
 	path = src/xorg/lib/libXrender
-	url = git@gitlab.freedesktop.org:xorg/lib/libXrender.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXrender.git
 [submodule "src/xorg/lib/libXres"]
 	path = src/xorg/lib/libXres
-	url = git@gitlab.freedesktop.org:xorg/lib/libXres.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXres.git
 [submodule "src/xorg/lib/libXt"]
 	path = src/xorg/lib/libXt
-	url = git@gitlab.freedesktop.org:xorg/lib/libXt.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXt.git
 [submodule "src/xorg/lib/libXt-flatnamespace"]
 	path = src/xorg/lib/libXt-flatnamespace
-	url = git@gitlab.freedesktop.org:xorg/lib/libXt
+	url = https://gitlab.freedesktop.org/xorg/lib/libXt
 [submodule "src/xorg/lib/libXtst"]
 	path = src/xorg/lib/libXtst
-	url = git@gitlab.freedesktop.org:xorg/lib/libXtst.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXtst.git
 [submodule "src/xorg/lib/libXv"]
 	path = src/xorg/lib/libXv
-	url = git@gitlab.freedesktop.org:xorg/lib/libXv.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXv.git
 [submodule "src/xorg/lib/libXvMC"]
 	path = src/xorg/lib/libXvMC
-	url = git@gitlab.freedesktop.org:xorg/lib/libXvMC.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXvMC.git
 [submodule "src/xorg/lib/libXxf86dga"]
 	path = src/xorg/lib/libXxf86dga
-	url = git@gitlab.freedesktop.org:xorg/lib/libXxf86dga.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXxf86dga.git
 [submodule "src/xorg/lib/libXxf86misc"]
 	path = src/xorg/lib/libXxf86misc
-	url = git@gitlab.freedesktop.org:xorg/lib/libXxf86misc.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXxf86misc.git
 [submodule "src/xorg/lib/libXxf86vm"]
 	path = src/xorg/lib/libXxf86vm
-	url = git@gitlab.freedesktop.org:xorg/lib/libXxf86vm.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libXxf86vm.git
 [submodule "src/xorg/lib/libdmx"]
 	path = src/xorg/lib/libdmx
-	url = git@gitlab.freedesktop.org:xorg/lib/libdmx.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libdmx.git
 [submodule "src/xorg/lib/libfontenc"]
 	path = src/xorg/lib/libfontenc
-	url = git@gitlab.freedesktop.org:xorg/lib/libfontenc.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libfontenc.git
 [submodule "src/xorg/lib/libxcb"]
 	path = src/xorg/lib/libxcb
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb.git
 [submodule "src/xorg/lib/libxcb-cursor"]
 	path = src/xorg/lib/libxcb-cursor
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-cursor.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-cursor.git
 [submodule "src/xorg/lib/libxcb-errors"]
 	path = src/xorg/lib/libxcb-errors
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-errors.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git
 [submodule "src/xorg/lib/libxcb-image"]
 	path = src/xorg/lib/libxcb-image
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-image.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-image.git
 [submodule "src/xorg/lib/libxcb-keysyms"]
 	path = src/xorg/lib/libxcb-keysyms
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-keysyms.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-keysyms.git
 [submodule "src/xorg/lib/libxcb-render-util"]
 	path = src/xorg/lib/libxcb-render-util
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-render-util.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-render-util.git
 [submodule "src/xorg/lib/libxcb-util"]
 	path = src/xorg/lib/libxcb-util
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-util.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-util.git
 [submodule "src/xorg/lib/libxcb-wm"]
 	path = src/xorg/lib/libxcb-wm
-	url = git@gitlab.freedesktop.org:xorg/lib/libxcb-wm.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcb-wm.git
 [submodule "src/xorg/lib/libxkbfile"]
 	path = src/xorg/lib/libxkbfile
-	url = git@gitlab.freedesktop.org:xorg/lib/libxkbfile.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxkbfile.git
 [submodule "src/xorg/lib/libxkbui"]
 	path = src/xorg/lib/libxkbui
-	url = git@gitlab.freedesktop.org:xorg/lib/libxkbui.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxkbui.git
 [submodule "src/xorg/lib/libxshmfence"]
 	path = src/xorg/lib/libxshmfence
-	url = git@gitlab.freedesktop.org:xorg/lib/libxshmfence.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxshmfence.git
 [submodule "src/xorg/lib/libxtrans"]
 	path = src/xorg/lib/libxtrans
-	url = git@gitlab.freedesktop.org:xorg/lib/libxtrans.git
+	url = https://gitlab.freedesktop.org/xorg/lib/libxtrans.git
 [submodule "src/xorg/lib/pthread-stubs"]
 	path = src/xorg/lib/pthread-stubs
-	url = git@gitlab.freedesktop.org:xorg/lib/pthread-stubs.git
+	url = https://gitlab.freedesktop.org/xorg/lib/pthread-stubs.git
 [submodule "src/xorg/lib/xpyb"]
 	path = src/xorg/lib/xpyb
-	url = git@gitlab.freedesktop.org:xorg/lib/xpyb.git
+	url = https://gitlab.freedesktop.org/xorg/lib/xpyb.git
 [submodule "src/xorg/proto/xcbproto"]
 	path = src/xorg/proto/xcbproto
-	url = git@gitlab.freedesktop.org:xorg/proto/xcbproto.git
+	url = https://gitlab.freedesktop.org/xorg/proto/xcbproto.git
 [submodule "src/xorg/proto/xorgproto"]
 	path = src/xorg/proto/xorgproto
-	url = git@gitlab.freedesktop.org:xorg/proto/xorgproto.git
+	url = https://gitlab.freedesktop.org/xorg/proto/xorgproto.git
 [submodule "src/xorg/test/rendercheck"]
 	path = src/xorg/test/rendercheck
-	url = git@gitlab.freedesktop.org:xorg/test/rendercheck.git
+	url = https://gitlab.freedesktop.org/xorg/test/rendercheck.git
 [submodule "src/xorg/test/x11perf"]
 	path = src/xorg/test/x11perf
-	url = git@gitlab.freedesktop.org:xorg/test/x11perf.git
+	url = https://gitlab.freedesktop.org/xorg/test/x11perf.git
 [submodule "src/xorg/test/xhiv"]
 	path = src/xorg/test/xhiv
-	url = git@gitlab.freedesktop.org:xorg/test/xhiv.git
+	url = https://gitlab.freedesktop.org/xorg/test/xhiv.git
 [submodule "src/xorg/test/xorg-gtest"]
 	path = src/xorg/test/xorg-gtest
-	url = git@gitlab.freedesktop.org:xorg/test/xorg-gtest.git
+	url = https://gitlab.freedesktop.org/xorg/test/xorg-gtest.git
 [submodule "src/xorg/test/xorg-integration-tests"]
 	path = src/xorg/test/xorg-integration-tests
-	url = git@gitlab.freedesktop.org:xorg/test/xorg-integration-tests.git
+	url = https://gitlab.freedesktop.org/xorg/test/xorg-integration-tests.git
 [submodule "src/xorg/test/xts"]
 	path = src/xorg/test/xts
-	url = git@gitlab.freedesktop.org:xorg/test/xts.git
+	url = https://gitlab.freedesktop.org/xorg/test/xts.git
 [submodule "src/xorg/test/xtsttopng"]
 	path = src/xorg/test/xtsttopng
-	url = git@gitlab.freedesktop.org:xorg/test/xtsttopng.git
+	url = https://gitlab.freedesktop.org/xorg/test/xtsttopng.git
 [submodule "src/xorg/util/bdftopcf"]
 	path = src/xorg/util/bdftopcf
-	url = git@gitlab.freedesktop.org:xorg/util/bdftopcf.git
+	url = https://gitlab.freedesktop.org/xorg/util/bdftopcf.git
 [submodule "src/xorg/util/lndir"]
 	path = src/xorg/util/lndir
-	url = git@gitlab.freedesktop.org:xorg/util/lndir.git
+	url = https://gitlab.freedesktop.org/xorg/util/lndir.git
 [submodule "src/xorg/util/macros"]
 	path = src/xorg/util/macros
-	url = git@gitlab.freedesktop.org:xorg/util/macros.git
+	url = https://gitlab.freedesktop.org/xorg/util/macros.git
 [submodule "src/xorg/xserver"]
 	path = src/xorg/xserver
-	url = git@gitlab.freedesktop.org:xorg/xserver.git
+	url = https://gitlab.freedesktop.org/xorg/xserver.git
 [submodule "src/mesa/mesa"]
 	path = src/mesa/mesa
-	url = git@gitlab.freedesktop.org:mesa/mesa.git
+	url = https://gitlab.freedesktop.org/mesa/mesa.git
 [submodule "src/mesa/glu"]
 	path = src/mesa/glu
-	url = git@gitlab.freedesktop.org:mesa/glu.git
+	url = https://gitlab.freedesktop.org/mesa/glu.git
 [submodule "src/mesa/demos"]
 	path = src/mesa/demos
-	url = git@gitlab.freedesktop.org:mesa/demos.git
+	url = https://gitlab.freedesktop.org/mesa/demos.git
 [submodule "src/pixman"]
 	path = src/pixman
-	url = git@gitlab.freedesktop.org:pixman/pixman
+	url = https://gitlab.freedesktop.org/pixman/pixman
 [submodule "src/cairo"]
 	path = src/cairo
 	url = git://anongit.freedesktop.org/git/cairo
@@ -597,25 +597,25 @@
 	url = git://git.code.sf.net/p/libpng/code
 [submodule "src/freeglut"]
 	path = src/freeglut
-	url = git@github.com:dcnieho/FreeGLUT.git
+	url = git://github.com/dcnieho/FreeGLUT.git
 [submodule "src/xterm"]
 	path = src/xterm
-	url = git@github.com:ThomasDickey/xterm-snapshots.git
+	url = git://github.com/ThomasDickey/xterm-snapshots.git
 [submodule "src/freetype2"]
 	path = src/freetype2
 	url = git://git.savannah.gnu.org/freetype/freetype2.git
 [submodule "src/fontconfig"]
 	path = src/fontconfig
-	url = git@gitlab.freedesktop.org:fontconfig/fontconfig.git
+	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
 [submodule "src/Sparkle"]
 	path = src/Sparkle
-	url = git@github.com:sparkle-project/Sparkle.git
+	url = git://github.com/sparkle-project/Sparkle.git
 [submodule "src/xquartz/xserver"]
 	path = src/xquartz/xserver
-	url = git@github.com:XQuartz/xorg-server.git
+	url = git://github.com/XQuartz/xorg-server.git
 [submodule "src/xkeyboard-config"]
 	path = src/xkeyboard-config
-	url = git@github.com:freedesktop/xkeyboard-config.git
+	url = git://github.com/freedesktop/xkeyboard-config.git
 [submodule "src/xorg/driver/xf86-video-nested"]
 	path = src/xorg/driver/xf86-video-nested
-	url = git@gitlab.freedesktop.org:xorg/driver/xf86-video-nested.git
+	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested.git
