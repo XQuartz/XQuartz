@@ -278,7 +278,7 @@ do_strip_sign_dsyms() {
             sudo cp "${file}" "${SYM_ROOT}"
             sudo strip -S "${file}"
 
-            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
+            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
         fi
     done
 
@@ -290,8 +290,8 @@ do_strip_sign_dsyms() {
         fi
     done
 
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
 }
 
 do_sym_tarball() {
@@ -331,7 +331,7 @@ do_dmg() {
     cp "${PKG_INPUT}" "${DMG_DIR}"/Xquartz.pkg
 
     hdiutil create -srcfolder "${DMG_DIR}" -fs JHFS+ -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
-    xcrun codesign --force --sign "${CODESIGN_IDENTITY_APP}" "${DMG_OUTPUT}"
+    xcrun codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force "${DMG_OUTPUT}"
 }
 
 do_notarize() {
