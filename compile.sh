@@ -330,7 +330,7 @@ do_dmg() {
     mkdir -p "${DMG_DIR}"
     cp "${PKG_INPUT}" "${DMG_DIR}"/Xquartz.pkg
 
-    hdiutil create -srcfolder "${DMG_DIR}" -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
+    hdiutil create -srcfolder "${DMG_DIR}" -fs JHFS+ -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
     xcrun codesign --force --sign "${CODESIGN_IDENTITY_APP}" "${DMG_OUTPUT}"
 }
 
