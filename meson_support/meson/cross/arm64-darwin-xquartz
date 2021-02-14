@@ -1,0 +1,10 @@
+[host_machine]
+system = 'darwin'
+cpu_family = 'aarch64'
+cpu = 'arm64'
+endian = 'little'
+
+[binaries]
+pkgconfig = '/opt/buildX11/bin/pkg-config'
+cmake = '/opt/buildX11/bin/cmake'
+strip = '/usr/bin/strip'
