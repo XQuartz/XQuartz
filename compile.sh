@@ -735,7 +735,7 @@ fi
 
 do_notarize
 
-/bin/echo -n "Proceed with distribution? (enter \"YES\" to notarize) "
+/bin/echo -n "Proceed with distribution? (enter \"YES\" to distribute) "
 read MAYBE
 if [ "${MAYBE}" != "YES" ] ; then
     exit 0
