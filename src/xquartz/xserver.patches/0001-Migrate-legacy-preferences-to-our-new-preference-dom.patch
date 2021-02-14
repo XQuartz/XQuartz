@@ -1,0 +1,36 @@
+From 4d79fdf05e453c81d646afc5076198f566001aeb Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sat, 13 Feb 2021 23:37:23 -0800
+Subject: [PATCH] Migrate legacy preferences to our new preference domain on
+ first launch
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ hw/xquartz/bundle/X11.sh | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/hw/xquartz/bundle/X11.sh b/hw/xquartz/bundle/X11.sh
+index 3b8b6799c..dbb7539b5 100755
+--- a/hw/xquartz/bundle/X11.sh
++++ b/hw/xquartz/bundle/X11.sh
+@@ -2,6 +2,17 @@
+ 
+ set "$(dirname "$0")"/X11.bin "${@}"
+ 
++if [ ! -f "${HOME}/Library/Preferences/org.xquartz.X11.plist" ] ; then
++    # Try migrating preferences
++    if [ -f "${HOME}/Library/Preferences/org.macosforge.xquartz.X11.plist" ] ; then
++        cp "${HOME}/Library/Preferences/org.macosforge.xquartz.X11.plist" "${HOME}/Library/Preferences/org.xquartz.X11.plist"
++    elif [ -f "${HOME}/Library/Preferences/org.x.X11.plist" ] ; then
++        cp "${HOME}/Library/Preferences/org.x.X11.plist" "${HOME}/Library/Preferences/org.xquartz.X11.plist"
++    elif [ -f "${HOME}/Library/Preferences/com.apple.X11.plist" ] ; then
++        cp "${HOME}/Library/Preferences/com.apple.X11.plist" "${HOME}/Library/Preferences/org.xquartz.X11.plist"
++    fi
++fi
++
+ if [ -x ~/.x11run ]; then
+ 	exec ~/.x11run "${@}"
+ fi
+-- 
+2.29.2 (Apple Git-129)
+
