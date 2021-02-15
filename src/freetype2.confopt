@@ -1,1 +1,1 @@
---without-png
+--without-png --enable-freetype-config
