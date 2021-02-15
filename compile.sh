@@ -326,12 +326,17 @@ do_pkg() {
     # Initial configuration created like this and then manually edited:
     # pkgbuild --analyze --root "${DESTDIR}" "${PKG_COMPONENT_PLIST}"
 
-    pkgbuild --sign "${CODESIGN_IDENTITY_PKG}" --scripts "${PKG_CONFIG_ROOT}"/scripts --root ${PKG_ROOT} --install-location / --component-plist "${PKG_COMPONENT_PLIST}" "${PKG_CONFIG_ROOT}"/XQuartzComponent.pkg
+    PKG_PLUGINS_PATH="${PKG_CONFIG_ROOT}"/plugins
+
+    cd ${PKG_CONFIG_ROOT}/plugin-src
+    xcodebuild install -configuration Release DSTROOT="${PKG_PLUGINS_PATH}" CODE_SIGN_IDENTITY="${CODESIGN_IDENTITY_APP}"
+
+    pkgbuild --sign "${CODESIGN_IDENTITY_PKG}" --scripts "${PKG_CONFIG_ROOT}"/scripts --root "${PKG_ROOT}" --install-location / --component-plist "${PKG_COMPONENT_PLIST}" "${PKG_CONFIG_ROOT}"/XQuartzComponent.pkg
 
     # Initial configuration created like this and then manually edited:
     # productbuild --synthesize --product "${PKG_REQUIREMENTS_PLIST}" --package "${PKG_CONFIG_ROOT}"/XQuartzComponent.pkg "${PKG_DISTRIBUTION_PLIST}"
 
-    productbuild --sign "${CODESIGN_IDENTITY_PKG}" --distribution "${PKG_DISTRIBUTION_PLIST}" --resources "${PKG_CONFIG_ROOT}"/resources --package-path "${PKG_CONFIG_ROOT}" "${PKG_OUTPUT}"
+    productbuild --sign "${CODESIGN_IDENTITY_PKG}" --distribution "${PKG_DISTRIBUTION_PLIST}" --resources "${PKG_CONFIG_ROOT}"/resources --plugins "${PKG_PLUGINS_PATH}" --package-path "${PKG_CONFIG_ROOT}" "${PKG_OUTPUT}"
     rm "${PKG_CONFIG_ROOT}"/XQuartzComponent.pkg
 }
 

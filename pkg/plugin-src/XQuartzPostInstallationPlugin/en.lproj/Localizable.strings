@@ -1,0 +1,7 @@
+/* Localized versions of Info.plist keys */
+
+"PaneTitle" = "Post-installation";
+
+"AlertMessage" = "Logout Required";
+
+"AlertInformative" = "Please logout or reboot your system to complete installation.";
