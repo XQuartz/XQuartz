@@ -83,7 +83,9 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -
      done
 
      OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
-     HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
+
+     # ASan requires use to not use -D_FORTIFY_SOURCE=2, or it can lead to false-positives
+     HARDENING_CFLAGS="-fstack-protector-all"
      export MACOSX_DEPLOYMENT_TARGET=10.10
 else
      # Release-candidate and Release builds
