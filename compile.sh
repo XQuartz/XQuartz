@@ -69,9 +69,8 @@ else
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
 fi
 
-if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o \
-     "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
-     # Alpha and Beta builds
+if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
+     # Alpha builds use ASan
      SANITIZER_LIB_DIR=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
 
      SANITIZER_CFLAGS="-fsanitize=address"
@@ -87,6 +86,11 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -
      # ASan requires use to not use -D_FORTIFY_SOURCE=2, or it can lead to false-positives
      HARDENING_CFLAGS="-fstack-protector-all"
      export MACOSX_DEPLOYMENT_TARGET=10.10
+elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
+     # Beta builds use full stack protection and disable optimizations
+     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
+     HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
+     export MACOSX_DEPLOYMENT_TARGET=10.9
 else
      # Release-candidate and Release builds
      OPT_CFLAGS="-Os"
