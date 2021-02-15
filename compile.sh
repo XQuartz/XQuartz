@@ -76,7 +76,7 @@ DEBUG_CFLAGS="-g3 -gdwarf-2"
 MAKE="gnumake"
 MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
 
-if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o
+if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o \
      "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
      # Alpha and Beta builds
      SANITIZER_LIB_DIR=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
