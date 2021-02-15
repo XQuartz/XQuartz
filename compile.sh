@@ -69,13 +69,6 @@ else
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
 fi
 
-export MACOSX_DEPLOYMENT_TARGET=10.9
-
-ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET} -arch x86_64 -arch arm64"
-DEBUG_CFLAGS="-g3 -gdwarf-2"
-MAKE="gnumake"
-MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
-
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -o \
      "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
      # Alpha and Beta builds
@@ -91,11 +84,18 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" -
 
      OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
      HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
+     export MACOSX_DEPLOYMENT_TARGET=10.10
 else
      # Release-candidate and Release builds
      OPT_CFLAGS="-Os"
      HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
+     export MACOSX_DEPLOYMENT_TARGET=10.9
 fi
+
+ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET} -arch x86_64 -arch arm64"
+DEBUG_CFLAGS="-g3 -gdwarf-2"
+MAKE="gnumake"
+MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
 
 BASE_DIR=$(pwd)
 
