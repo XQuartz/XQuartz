@@ -58,9 +58,16 @@ CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_
 
 APPLICATION_VERSION=2.8.7
 APPLICATION_VERSION_STRING=2.8.0_beta3
-#SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/alpha.xml"
-SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
-#SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
+
+if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/alpha.xml"
+elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
+elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/rc/}" ] ; then
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
+else
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
+fi
 
 export MACOSX_DEPLOYMENT_TARGET=10.9
 
