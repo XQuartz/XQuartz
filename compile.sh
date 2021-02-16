@@ -133,6 +133,13 @@ export CC="/usr/bin/clang"
 export CXX="/usr/bin/clang++"
 export OBJC="/usr/bin/clang"
 
+# meson is strict about it's toolchain names, especially relevant when cross-compiling.
+# The machine doing the building is the build machine, and the tools
+# it uses for the build are CC_FOR_BUILD/CXX_FOR_BUILD
+# https://mesonbuild.com/Reference-tables.html#Environment-variables-per-machine
+export CC_FOR_BUILD="${CC}"
+export CXX_FOR_BUILD="${CXX}"
+
 # For static analysis if we want to do it
 #SCAN_BUILD="scan-build-mp-10 -v -V -o clang.d --use-cc=${CC} --use-c++=${CXX}"
 
@@ -212,6 +219,7 @@ do_meson_build() {
     local PROJECT_DIR="${BASE_DIR}/${1}"
     local PROJECT_PATCHES_DIR="${PROJECT_DIR}.patches"
     local CONFOPT_FILE="${PROJECT_DIR}.confopt"
+    local MESON_CROSS_DIR="${BASE_DIR}/meson_support/meson/cross"
     [ -f "${CONFOPT_FILE}" ] || CONFOPT_FILE=/dev/null
 
     cd "${PROJECT_DIR}" || die "Could not change directory to ${PROJECT_DIR}"
@@ -221,15 +229,15 @@ do_meson_build() {
     do_patches "${PROJECT_PATCHES_DIR}"
 
     # We need to do this hacky dance because of a bug in meson.
-    # We need to configure meson as a cross compiler to build arm64 from x86_64, or do
-    # builds on Apple Silicon until this is resolved.  See https://mesonbuild.com/Cross-compilation.html
+    # We need to configure meson as a cross compiler to build arm64 from x86_64
+    # See https://mesonbuild.com/Cross-compilation.html
     # https://github.com/mesonbuild/meson/issues/8206
     for arch in arm64 x86_64 ; do
         CFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
             OBJCFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
             CXXFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
             LDFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
-            meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
+            meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) --cross-file ${MESON_CROSS_DIR}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
         ninja -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.meson.${arch}" ninja -C build.${arch} install || die "Failed to install in $(pwd)"
 

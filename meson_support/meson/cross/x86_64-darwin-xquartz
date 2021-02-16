@@ -1,0 +1,10 @@
+[host_machine]
+system = 'darwin'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[binaries]
+pkgconfig = '/opt/buildX11/bin/pkg-config'
+cmake = '/opt/buildX11/bin/cmake'
+strip = '/usr/bin/strip'
