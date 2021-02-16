@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
+    <script>
+        function onConclusion() {
+            if (system.files.fileExistsAtPath("/Library/LaunchAgents/org.macosforge.xquartz.startx.plist") ||
+                !system.files.fileExistsAtPath("/Library/LaunchAgents/org.xquartz.startx.plist")) {
+                return "RequireLogout";
+            } else {
+                return None;
+            }
+        }
+    </script>
     <!-- <welcome file="INTRODUCTION.txt"/> -->
     <license file="LICENSE.txt"/>
     <readme file="README.txt"/>
@@ -19,5 +29,5 @@
     <choice id="org.xquartz.X11" visible="false">
         <pkg-ref id="org.xquartz.X11"/>
     </choice>
-    <pkg-ref id="org.xquartz.X11" version="2.8.0" onConclusion="none">XQuartzComponent.pkg</pkg-ref>
+    <pkg-ref id="org.xquartz.X11" version="2.8.0" onConclusionScript="onConclusion()">XQuartzComponent.pkg</pkg-ref>
 </installer-gui-script>
