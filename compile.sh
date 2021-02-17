@@ -120,6 +120,12 @@ export ac_cv_path_OPENSSL=/usr/bin/openssl
 # timespec_get() was added in macOS 10.15
 export ac_cv_func_timespec_get=no
 
+# clock_gettime was added in macOS 10.12
+export ac_cv_func_clock_gettime=no
+
+# mkostemp was added in macOS 10.12
+export ac_cv_func_mkostemp=no
+
 export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
@@ -274,6 +280,18 @@ do_checks() {
 
             if otool -L "${file}" | grep -q "${BUILD_TOOLS_PREFIX}" ; then
                 die "=== ${file} links against an invalid library ==="
+            fi
+
+            # Ignore Sparkle since it handles back deployment properly
+            [ "${file/Sparkle/}" != "${file}" ] && continue
+
+            # Ignore mesa for now
+            [ "${file/swrast_dri.so/}" != "${file}" ] && continue
+            [ "${file/libOSMesa/}" != "${file}" ] && continue
+
+            # Ignore _voucher* symbols (mig) and symbols from libc++ and libobjc that the compiler might have added
+            if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "weak external" ; then
+                die "=== ${file} has a weak link ==="
             fi
         fi
     done
