@@ -351,6 +351,7 @@ do_dmg() {
     mkdir -p "${DMG_DIR}"
     cp "${PKG_INPUT}" "${DMG_DIR}"/Xquartz.pkg
 
+    [[ -e "${DMG_OUTPUT}" ]] && rm -f "${DMG_OUTPUT}"
     hdiutil create -srcfolder "${DMG_DIR}" -fs JHFS+ -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
     xcrun codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force "${DMG_OUTPUT}"
 }
