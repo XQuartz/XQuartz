@@ -1,20 +1,19 @@
 #!/bin/sh -x -e
 
-# Note that the build system needs to be Apple Silicon with Rosetta 2 enabled.
+# Note that the build system needs to be macOS 11.3 or newer, Intel or Apple Silicon
 #
-# Before building, be sure the checkout sources and configure the system:
+# Before building, be sure to checkout sources and configure the system:
 #
 # 1) Install the latest version of Xcode.
 #
-# 2) Install autoconf, automake, pkgconfig, and glibtool to ${BUILD_TOOLS_PREFIX} (eg: through MacPorts)
-#    Eg with MacPorts:
-#        base $ ./configure --prefix=/opt/buildX11 && make -j$(sysctl -n hw.activecpu) && sudo make install
-#        $ sudo nano -w /opt/buildX11/etc/macports/macports.conf # Edit applications_dir        /Applications/MacPorts/BuildX11
-#        $ sudo /opt/buildX11/bin/port -v selfupdate
-#        $ sudo /opt/buildX11/bin/port -N -v install autoconf automake pkgconfig libtool py38-mako meson
-#        $ sudo /opt/buildX11/bin/port select python3 python38
+# 2) Use the the "install-or-update-macports.sh" script to install autoconf, automake, 
+#    pkgconfig, glibtool, and meson to ${BUILD_TOOLS_PREFIX}
 #
-# 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved aside or they will interfere
+# 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved aside or they will interfere.
+#    The "install-or-update-macports.sh" script will do that for you as well.
+#
+#    Please also use that script to update the toolchain when needed, as it moves the 
+#    pkgconfig directories to the proper location during the update, otherwise you must do that manually.
 #
 # 4) Setup authentication for altool with one of the following options:
 #    4a) Create an app-specific password for altool at appleid.apple.com.  Save this as pkg/altool.user and pkg/altool.password
@@ -35,8 +34,6 @@
 # branch in the submodule and then commit the changed hash at the top level.
 #
 # TODO:
-#   * Automate installation of build tools
-#   * Support building arm64 from Intel macs via meson
 #   * build tools for documentation
 #   * Do we want to add Bincompat packages:
 #     src/xorg/lib/libXp
