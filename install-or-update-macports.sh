@@ -4,22 +4,22 @@ BUILD_TOOLS_PREFIX="/opt/buildX11"
 # MACPORTS_VERSION="2.6"
 
 die() {
-        echo "${@}" >&2
-        exit 1
+    echo "${@}" >&2
+    exit 1
 }
 
 if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
-	cd /tmp || die "Could not change to tmp directory"
+    cd /tmp || die "Could not change to tmp directory"
 
-	if [ -d "/tmp/macports-base" ] ; then
-		sudo rm -rf /tmp/macports-base || die "Could not remove /tmp/macports-base"
-	fi
+    if [ -d "/tmp/macports-base" ] ; then
+        sudo rm -rf /tmp/macports-base || die "Could not remove /tmp/macports-base"
+    fi
 
-	git clone -b release-2.6 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
-	cd macports-base || die "Could not enter macports-base"
-	./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
-	make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
-	sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
+    git clone -b release-2.6 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
+    cd macports-base || die "Could not enter macports-base"
+    ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
+    make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
+    sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
 fi
 
 if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
