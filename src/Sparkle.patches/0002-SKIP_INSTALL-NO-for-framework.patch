@@ -1,6 +1,6 @@
-From ecca2a3e7abdf1ffc9fb3168c59e47ed7f0157ce Mon Sep 17 00:00:00 2001
+From 16e553d51ccb484c20f37814bb44696a8f14d29a Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
-Date: Sun, 10 Jan 2021 13:18:50 -0800
+Date: Fri, 19 Feb 2021 01:03:23 -0800
 Subject: [PATCH 2/2] SKIP_INSTALL=NO for framework
 
 Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
@@ -9,17 +9,18 @@ Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Configurations/ConfigFramework.xcconfig b/Configurations/ConfigFramework.xcconfig
-index fb394e01..a458d3ed 100644
+index e3db1abd..03516805 100644
 --- a/Configurations/ConfigFramework.xcconfig
 +++ b/Configurations/ConfigFramework.xcconfig
-@@ -8,6 +8,6 @@ FRAMEWORK_VERSION = A
+@@ -7,7 +7,7 @@ WRAPPER_EXTENSION = framework
+ FRAMEWORK_VERSION = A
  INFOPLIST_FILE = Sparkle/Sparkle-Info.plist
  GCC_PREPROCESSOR_DEFINITIONS = $(inherited) BUILDING_SPARKLE=1
- OTHER_LDFLAGS = -Wl,-U,_NSURLQuarantinePropertiesKey
 -SKIP_INSTALL = YES
 +SKIP_INSTALL = NO
  DEFINES_MODULE = YES
  PRODUCT_BUNDLE_IDENTIFIER = ${SPARKLE_BUNDLE_IDENTIFIER}
+ 
 -- 
 2.24.3 (Apple Git-128)
 

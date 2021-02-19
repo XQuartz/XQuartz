@@ -1,9 +1,9 @@
-From f17d9a8d921063f16ea76981817caf1ae458dbd2 Mon Sep 17 00:00:00 2001
+From 8e8b4864e33d19931bd99fbe2600665c71a0a61d Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
-Date: Wed, 6 Jan 2021 16:12:35 -0800
+Date: Fri, 19 Feb 2021 01:02:36 -0800
 Subject: [PATCH 1/2] Add bsdiff and ed25519 as dependencies of Sparkle
 
-https://github.com/sparkle-project/Sparkle/issues/1716
+Fixes #1716
 
 Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 ---
@@ -11,56 +11,56 @@ Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
  1 file changed, 26 insertions(+)
 
 diff --git a/Sparkle.xcodeproj/project.pbxproj b/Sparkle.xcodeproj/project.pbxproj
-index 6b57ae9c..edaf600b 100644
+index 2f898d3b..1e417fef 100644
 --- a/Sparkle.xcodeproj/project.pbxproj
 +++ b/Sparkle.xcodeproj/project.pbxproj
-@@ -397,6 +397,20 @@
- 			remoteGlobalIDString = 55C14BB6136EEF1500649790;
- 			remoteInfo = Autoupdate;
+@@ -570,6 +570,20 @@
+ 			remoteGlobalIDString = EA1E280E22B64522004AA304;
+ 			remoteInfo = bsdiff;
  		};
-+		3F64D40F25A6895D00BF9F2D /* PBXContainerItemProxy */ = {
++		3FFBA9E425DFB60C00397D43 /* PBXContainerItemProxy */ = {
 +			isa = PBXContainerItemProxy;
 +			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 +			proxyType = 1;
-+			remoteGlobalIDString = EA4311E9229D651300A5503D;
++			remoteGlobalIDString = EA1E280E22B64522004AA304;
 +			remoteInfo = bsdiff;
 +		};
-+		3F64D41D25A689C800BF9F2D /* PBXContainerItemProxy */ = {
++		3FFBA9E625DFB60E00397D43 /* PBXContainerItemProxy */ = {
 +			isa = PBXContainerItemProxy;
 +			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
 +			proxyType = 1;
-+			remoteGlobalIDString = EA43119F229D5FBC00A5503D;
++			remoteGlobalIDString = EA1E282C22B660BE004AA304;
 +			remoteInfo = ed25519;
 +		};
- 		55C14F96136F044100649790 /* PBXContainerItemProxy */ = {
+ 		5A06357123FE332300478A72 /* PBXContainerItemProxy */ = {
  			isa = PBXContainerItemProxy;
  			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-@@ -1958,6 +1972,8 @@
+@@ -2814,6 +2828,8 @@
+ 			buildRules = (
  			);
  			dependencies = (
- 				55C14F97136F044100649790 /* PBXTargetDependency */,
-+				3F64D41025A6895D00BF9F2D /* PBXTargetDependency */,
-+				3F64D41E25A689C800BF9F2D /* PBXTargetDependency */,
++				3FFBA9E525DFB60C00397D43 /* PBXTargetDependency */,
++				3FFBA9E725DFB60E00397D43 /* PBXTargetDependency */,
+ 				72A5D5AC1D6929260009E5AC /* PBXTargetDependency */,
+ 				72D954BA1CBB6E27006F28BD /* PBXTargetDependency */,
  			);
- 			name = Sparkle;
- 			productInstallPath = "$(HOME)/Library/Frameworks";
-@@ -2548,6 +2564,16 @@
- 			target = 55C14BB6136EEF1500649790 /* Autoupdate */;
- 			targetProxy = 1495006B195FB8A600BC5B5B /* PBXContainerItemProxy */;
+@@ -3756,6 +3772,16 @@
+ 			target = EA1E280E22B64522004AA304 /* bsdiff */;
+ 			targetProxy = 37DC0CE52340667000501A67 /* PBXContainerItemProxy */;
  		};
-+		3F64D41025A6895D00BF9F2D /* PBXTargetDependency */ = {
++		3FFBA9E525DFB60C00397D43 /* PBXTargetDependency */ = {
 +			isa = PBXTargetDependency;
-+			target = EA4311E9229D651300A5503D /* bsdiff */;
-+			targetProxy = 3F64D40F25A6895D00BF9F2D /* PBXContainerItemProxy */;
++			target = EA1E280E22B64522004AA304 /* bsdiff */;
++			targetProxy = 3FFBA9E425DFB60C00397D43 /* PBXContainerItemProxy */;
 +		};
-+		3F64D41E25A689C800BF9F2D /* PBXTargetDependency */ = {
++		3FFBA9E725DFB60E00397D43 /* PBXTargetDependency */ = {
 +			isa = PBXTargetDependency;
-+			target = EA43119F229D5FBC00A5503D /* ed25519 */;
-+			targetProxy = 3F64D41D25A689C800BF9F2D /* PBXContainerItemProxy */;
++			target = EA1E282C22B660BE004AA304 /* ed25519 */;
++			targetProxy = 3FFBA9E625DFB60E00397D43 /* PBXContainerItemProxy */;
 +		};
- 		55C14F97136F044100649790 /* PBXTargetDependency */ = {
+ 		5A06357223FE332300478A72 /* PBXTargetDependency */ = {
  			isa = PBXTargetDependency;
- 			target = 55C14BB6136EEF1500649790 /* Autoupdate */;
+ 			target = EA1E282C22B660BE004AA304 /* ed25519 */;
 -- 
 2.24.3 (Apple Git-128)
 
