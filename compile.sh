@@ -442,7 +442,7 @@ do_dist() {
         echo "         <title>XQuartz-${APPLICATION_VERSION_STRING}</title>"
         echo "         <sparkle:releaseNotesLink>https://www.xquartz.org/releases/bare/XQuartz-${APPLICATION_VERSION_STRING}.html</sparkle:releaseNotesLink>"
         echo "         <pubDate>$(date -u +"%a, %d %b %Y %T %Z")</pubDate>"
-        echo "         <enclosure url=\"https://dl.bintray.com/xquartz/downloads/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" length=\"${SIZE}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA}\" />"
+        echo "         <enclosure url=\"https://dl.bintray.com/xquartz/downloads/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" length=\"${SIZE}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA}\" sparkle:installationType=\"package\" />"
         echo "      </item>"
     fi
 
