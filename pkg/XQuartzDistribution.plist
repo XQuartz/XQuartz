@@ -25,7 +25,7 @@
             <line choice="org.xquartz.X11"/>
         </line>
     </choices-outline>
-    <choice id="default"/>
+    <choice id="default" customLocationAllowAlternateVolumes="false"/>
     <choice id="org.xquartz.X11" visible="false">
         <pkg-ref id="org.xquartz.X11"/>
     </choice>
