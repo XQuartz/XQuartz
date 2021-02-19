@@ -109,7 +109,7 @@ DESTDIR=${PRODUCTS_DIR}/XQuartz.dest
 PKG_ROOT=${PRODUCTS_DIR}/XQuartz.signed
 SYM_ROOT=${PRODUCTS_DIR}/XQuartz.symbols
 
-WARNING_CFLAGS="-Werror=unguarded-availability-new"
+WARNING_CFLAGS="-Werror=unguarded-availability-new -Werror=objc-method-access"
 
 # Don't let startx use openssl from /opt/buildX11 (https://github.com/XQuartz/XQuartz/issues/29)
 export ac_cv_path_OPENSSL=/usr/bin/openssl
