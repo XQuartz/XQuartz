@@ -6,14 +6,13 @@
 #
 # 1) Install the latest version of Xcode.
 #
-# 2) Use the the "install-or-update-macports.sh" script to install autoconf, automake, 
-#    pkgconfig, glibtool, and meson to ${BUILD_TOOLS_PREFIX}
+# 2) Use the the "install-or-update-macports.sh" script to install autoconf, automake,
+#    pkgconfig, glibtool, and meson to ${BUILD_TOOLS_PREFIX}.
 #
-# 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved aside or they will interfere.
-#    The "install-or-update-macports.sh" script will do that for you as well.
-#
-#    Please also use that script to update the toolchain when needed, as it moves the 
-#    pkgconfig directories to the proper location during the update, otherwise you must do that manually.
+# 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved
+#    aside or they will interfere.  The "install-or-update-macports.sh" script will
+#    manage these directories for you, moving them aside on completion and back on
+#    future updates.
 #
 # 4) Setup authentication for altool with one of the following options:
 #    4a) Create an app-specific password for altool at appleid.apple.com.  Save this as pkg/altool.user and pkg/altool.password
