@@ -3,6 +3,8 @@ BUILD_TOOLS_PREFIX="/opt/buildX11"
 # presently hard-coded to base branch "release-2.6"
 # MACPORTS_VERSION="2.6"
 
+export PATH="${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
 die() {
     echo "${@}" >&2
     exit 1
@@ -47,4 +49,3 @@ if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig" ] ; then
 fi
 
 echo "MacPorts toolchain successfully installed in ${BUILD_TOOLS_PREFIX}"
-
