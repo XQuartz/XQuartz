@@ -33,8 +33,10 @@
 # branch in the submodule and then commit the changed hash at the top level.
 #
 # TODO:
-#   * build tools for documentation
 #   * Do we want to add Bincompat packages:
+#     src/libpng/libpng12
+#     src/libpng/libpng14
+#     src/libpng/libpng15
 #     src/xorg/lib/libXp
 #     src/xorg/lib/libXevie
 #     src/xorg/lib/libXfontcache
@@ -122,6 +124,14 @@ export ac_cv_func_clock_gettime=no
 # mkostemp was added in macOS 10.12
 export ac_cv_func_mkostemp=no
 
+export XMLTO=${BUILD_TOOLS_PREFIX}/bin/xmlto
+export ASCIIDOC=${BUILD_TOOLS_PREFIX}/bin/asciidoc
+export DOXYGEN=${BUILD_TOOLS_PREFIX}/bin/doxygen
+export FOP=${BUILD_TOOLS_PREFIX}/bin/fop
+export FOP_OPTS="-Xmx2048m -Djava.awt.headless=true"
+export GROFF=${BUILD_TOOLS_PREFIX}/bin/groff
+export PS2PDF=${BUILD_TOOLS_PREFIX}/bin/ps2pdf
+
 export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
@@ -203,7 +213,7 @@ do_autotools_build() {
         ;;
     esac
 
-    ${SCAN_BUILD} ./configure --prefix=${PREFIX} --disable-static $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
+    ${SCAN_BUILD} ./configure --prefix=${PREFIX} --disable-static --enable-docs --enable-devel-docs --enable-builddocs --with-doxygen --with-xmlto --with-fop $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
 
     [[ "${SKIP_CLEAN}" == "YES" ]] || ${MAKE} clean || die "Unable to make clean in $(pwd)"
 
