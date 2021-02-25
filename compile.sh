@@ -96,7 +96,7 @@ else
      export MACOSX_DEPLOYMENT_TARGET=10.9
 fi
 
-ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET} -arch x86_64 -arch arm64"
+ARCHS="arm64 x86_64"
 DEBUG_CFLAGS="-g3 -gdwarf-2"
 MAKE="gnumake"
 MAKE_OPTS="V=1 -j$(sysctl -n hw.activecpu)"
@@ -136,28 +136,49 @@ export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sb
 export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,/System/Library/Fonts"
 export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX}/share/aclocal"
-export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
-export CXXFLAGS="${CFLAGS}"
-export OBJCFLAGS="${CFLAGS}"
-export LDFLAGS="${ARCH_FLAGS} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
-export CC="/usr/bin/clang"
-export CXX="/usr/bin/clang++"
-export OBJC="/usr/bin/clang"
-
-# meson is strict about it's toolchain names, especially relevant when cross-compiling.
-# The machine doing the building is the build machine, and the tools
-# it uses for the build are CC_FOR_BUILD/CXX_FOR_BUILD
-# https://mesonbuild.com/Reference-tables.html#Environment-variables-per-machine
-export CC_FOR_BUILD="${CC}"
-export CXX_FOR_BUILD="${CXX}"
-
-# For static analysis if we want to do it
-#SCAN_BUILD="scan-build-mp-10 -v -V -o clang.d --use-cc=${CC} --use-c++=${CXX}"
 
 die() {
-        echo "${@}" >&2
-        exit 1
+    echo "${@}" >&2
+    exit 1
+}
+
+first() {
+    local all="${@}"
+    echo "${all%% *}"
+}
+
+last() {
+    local all="${@}"
+    echo "${all##* }"
+}
+
+setup_environment() {
+    local ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET}"
+
+    for arch in "${@}" ; do
+        ARCH_FLAGS="${ARCH_FLAGS} -arch ${arch}"
+    done
+
+    export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
+    export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
+    export CXXFLAGS="${CFLAGS}"
+    export OBJCFLAGS="${CFLAGS}"
+    export LDFLAGS="${ARCH_FLAGS} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+
+    # These are all the same now, but could be conditionalized in the future
+    export CC="/usr/bin/clang"
+    export CXX="/usr/bin/clang++"
+    export OBJC="/usr/bin/clang"
+
+    # meson is strict about it's toolchain names, especially relevant when cross-compiling.
+    # The machine doing the building is the build machine, and the tools
+    # it uses for the build are CC_FOR_BUILD/CXX_FOR_BUILD
+    # https://mesonbuild.com/Reference-tables.html#Environment-variables-per-machine
+    export CC_FOR_BUILD="${CC}"
+    export CXX_FOR_BUILD="${CXX}"
+
+    # For static analysis if we want to do it
+    #SCAN_BUILD="scan-build-mp-10 -v -V -o clang.d --use-cc=${CC} --use-c++=${CXX}"
 }
 
 do_patches() {
@@ -199,6 +220,8 @@ do_autotools_build() {
     esac
 
     do_patches "${PROJECT_PATCHES_DIR}"
+
+    setup_environment ${ARCHS} || die "Failed to setup environment"
 
     case ${PROJECT} in
     freetype2)
@@ -244,12 +267,9 @@ do_meson_build() {
     # We need to configure meson as a cross compiler to build arm64 from x86_64
     # See https://mesonbuild.com/Cross-compilation.html
     # https://github.com/mesonbuild/meson/issues/8206
-    for arch in arm64 x86_64 ; do
-        CFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
-            OBJCFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
-            CXXFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${WARNING_CFLAGS}" \
-            LDFLAGS="-target ${arch}-apple-macos${MACOSX_DEPLOYMENT_TARGET} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
-            meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) --cross-file ${MESON_CROSS_DIR}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
+    for arch in ${ARCHS} ; do
+        setup_environment ${arch} || die "Failed to setup environment"
+        meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) --cross-file ${MESON_CROSS_DIR}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
         ninja -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.meson.${arch}" ninja -C build.${arch} install || die "Failed to install in $(pwd)"
 
@@ -257,14 +277,21 @@ do_meson_build() {
         sudo rm -f "${DESTDIR}.meson.${arch}${PREFIX}/lib"/*.la
     done
 
-    sudo cp -a "${DESTDIR}.meson.arm64" "${DESTDIR}.meson.fat"
+    sudo cp -a "${DESTDIR}.meson.$(first ${ARCHS})" "${DESTDIR}.meson.fat"
 
-    cd "${DESTDIR}.meson.fat"
-    find . -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
-            sudo lipo -create -output "${file}" "${DESTDIR}.meson.arm64/${file}" "${DESTDIR}.meson.x86_64/${file}"
-        fi
-    done
+    if [ "$(last ${ARCHS})" != "$(first ${ARCHS})" ] ; then
+        pushd "${DESTDIR}.meson.fat"
+        find . -type f | while read file ; do
+            if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+                unset INPUT_FILES
+                for arch in ${ARCHS} ; do
+                    INPUT_FILES="${INPUT_FILES} ${DESTDIR}.meson.${arch}/${file}"
+                done
+                sudo lipo -create -output "${file}" ${INPUT_FILES}
+            fi
+        done
+        popd
+    fi
 
     sudo ditto "${DESTDIR}.meson.fat" "${DESTDIR}"
     sudo ditto "${DESTDIR}.meson.fat" /
@@ -494,7 +521,7 @@ fi
 cd ${BASE_DIR}/src/Sparkle
 do_patches ${BASE_DIR}/src/Sparkle.patches
 xcodebuild install -configuration Release \
-    ARCHS="arm64 x86_64" \
+    ARCHS="${ARCHS}" \
     DSTROOT="${DESTDIR}.Sparkle" \
     INSTALL_PATH="${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
     DYLIB_INSTALL_NAME_BASE="@executable_path/../Frameworks" \
