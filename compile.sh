@@ -98,10 +98,12 @@ fi
 
 ARCHS_BIN="arm64 x86_64"
 ARCHS_LIB="${ARCHS_BIN}"
+ARCHS_LIB_BINCOMPAT_2_7="x86_64"
 
 if [ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk" ] ; then
     SDKROOT_i386="/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk"
     ARCHS_LIB="${ARCHS_LIB} i386"
+    ARCHS_LIB_BINCOMPAT_2_7="${ARCHS_LIB_BINCOMPAT_2_7} i386"
     echo "This build will not be distributable due to lack of i386 support."
 fi
 
@@ -699,13 +701,14 @@ do_autotools_build src/xorg/lib/libICE ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libSM ${ARCHS_LIB}
 
 # Bincompat
-#do_autotools_build src/xorg/lib/libXt-flatnamespace ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXt-flatnamespace ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXt7-stub ${ARCHS_LIB_BINCOMPAT_2_7}
+sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${PREFIX}/lib/flat_namespace
+sudo mv ${DESTDIR}${PREFIX}/lib/libXt.6.dylib ${DESTDIR}${PREFIX}/lib/flat_namespace
+sudo install -o root -g wheel -m 0755 -d ${PREFIX}/lib/flat_namespace
+sudo mv ${PREFIX}/lib/libXt.6.dylib ${PREFIX}/lib/flat_namespace
 
 do_autotools_build src/xorg/lib/libXt ${ARCHS_LIB}
-
-# Bincompat
-#do_autotools_build src/xorg/lib/libXt7-stub ${ARCHS_LIB}
-
 do_autotools_build src/xorg/lib/libXmu ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXpm ${ARCHS_LIB}
 
