@@ -153,17 +153,17 @@ last() {
 }
 
 setup_environment() {
-    local ARCH_FLAGS="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET}"
+    local arch_flags="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET}"
 
     for arch in "${@}" ; do
-        ARCH_FLAGS="${ARCH_FLAGS} -arch ${arch}"
+        arch_flags="${arch_flags} -arch ${arch}"
     done
 
     export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-    export CFLAGS="${ARCH_FLAGS} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
+    export CFLAGS="${arch_flags} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
     export CXXFLAGS="${CFLAGS}"
     export OBJCFLAGS="${CFLAGS}"
-    export LDFLAGS="${ARCH_FLAGS} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+    export LDFLAGS="${arch_flags} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
 
     # These are all the same now, but could be conditionalized in the future
     export CC="/usr/bin/clang"
@@ -182,12 +182,12 @@ setup_environment() {
 }
 
 do_patches() {
-    local PROJECT_PATCHES_DIR="${1}"
-    if [ -d "${PROJECT_PATCHES_DIR}" -a ! -f "${PROJECT_PATCHES_DIR}/applied" ] ; then
-        for patch in "${PROJECT_PATCHES_DIR}"/* ; do
+    local patchdir="${1}"
+    if [ -d "${patchdir}" -a ! -f "${patchdir}/applied" ] ; then
+        for patch in "${patchdir}"/* ; do
             patch -p1 < "${patch}" || die "Unable to apply patch ${patch}"
         done
-        touch "${PROJECT_PATCHES_DIR}/applied"
+        touch "${patchdir}/applied"
     fi
 }
 
@@ -203,12 +203,12 @@ do_patches() {
 #   SKIP_CLEAN can be set to YES
 #   SKIP_AUTORECONF can be set to YES
 do_autotools_build() {
-    local PROJECT_DIR="${BASE_DIR}/${1}"
-    local PROJECT_PATCHES_DIR="${PROJECT_DIR}.patches"
-    local CONFOPT_FILE="${PROJECT_DIR}.confopt"
-    [ -f "${CONFOPT_FILE}" ] || CONFOPT_FILE=/dev/null
+    local project_dir="${BASE_DIR}/${1}"
+    local patches_dir="${project_dir}.patches"
+    local confopt_file="${project_dir}.confopt"
+    [ -f "${confopt_file}" ] || confopt_file=/dev/null
 
-    cd "${PROJECT_DIR}" || die "Could not change directory to ${PROJECT_DIR}"
+    cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
     PROJECT=$(basename $(pwd))
 
@@ -219,7 +219,7 @@ do_autotools_build() {
         ;;
     esac
 
-    do_patches "${PROJECT_PATCHES_DIR}"
+    do_patches "${patches_dir}"
 
     setup_environment ${ARCHS} || die "Failed to setup environment"
 
@@ -236,7 +236,7 @@ do_autotools_build() {
         ;;
     esac
 
-    ${SCAN_BUILD} ./configure --prefix=${PREFIX} --disable-static --enable-docs --enable-devel-docs --enable-builddocs --with-doxygen --with-xmlto --with-fop $(eval echo $(cat "${CONFOPT_FILE}")) || die "Could not configure in $(pwd)"
+    ${SCAN_BUILD} ./configure --prefix=${PREFIX} --disable-static --enable-docs --enable-devel-docs --enable-builddocs --with-doxygen --with-xmlto --with-fop $(eval echo $(cat "${confopt_file}")) || die "Could not configure in $(pwd)"
 
     [[ "${SKIP_CLEAN}" == "YES" ]] || ${MAKE} clean || die "Unable to make clean in $(pwd)"
 
@@ -251,17 +251,17 @@ do_autotools_build() {
 }
 
 do_meson_build() {
-    local PROJECT_DIR="${BASE_DIR}/${1}"
-    local PROJECT_PATCHES_DIR="${PROJECT_DIR}.patches"
-    local CONFOPT_FILE="${PROJECT_DIR}.confopt"
-    local MESON_CROSS_DIR="${BASE_DIR}/meson_support/meson/cross"
-    [ -f "${CONFOPT_FILE}" ] || CONFOPT_FILE=/dev/null
+    local project_dir="${BASE_DIR}/${1}"
+    local patches_dir="${project_dir}.patches"
+    local confopt_file="${project_dir}.confopt"
+    local meson_cross_dir="${BASE_DIR}/meson_support/meson/cross"
+    [ -f "${confopt_file}" ] || confopt_file=/dev/null
 
-    cd "${PROJECT_DIR}" || die "Could not change directory to ${PROJECT_DIR}"
+    cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
     PROJECT=$(basename $(pwd))
 
-    do_patches "${PROJECT_PATCHES_DIR}"
+    do_patches "${patches_dir}"
 
     # We need to do this hacky dance because of a bug in meson.
     # We need to configure meson as a cross compiler to build arm64 from x86_64
@@ -269,7 +269,7 @@ do_meson_build() {
     # https://github.com/mesonbuild/meson/issues/8206
     for arch in ${ARCHS} ; do
         setup_environment ${arch} || die "Failed to setup environment"
-        meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${CONFOPT_FILE}")) --cross-file ${MESON_CROSS_DIR}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
+        meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${confopt_file}")) --cross-file ${meson_cross_dir}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
         ninja -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.meson.${arch}" ninja -C build.${arch} install || die "Failed to install in $(pwd)"
 
