@@ -99,7 +99,7 @@ get_fontdirs() {
     local d
     if [[ $system == 1 ]] ; then
         if [[ $osxfonts == 1 ]] ; then
-            find {/System/,/}Library/Fonts -type d
+            find /Library/Fonts ${X11DIR}/share/system_fonts -type d
         fi
 
         for d in "${X11FONTDIR}"/* ; do
@@ -108,7 +108,7 @@ get_fontdirs() {
                 *) find "$d" -type d ;;
             esac
         done
-    else 
+    else
 	if [[ $osxfonts == 1 && -d "${HOME}/Library/Fonts" ]] ; then
             find "${HOME}/Library/Fonts" -type d
 	fi
@@ -138,6 +138,13 @@ setup_fontdirs() {
             -e ${X11FONTDIR}/encodings \
             -e ${X11FONTDIR}/encodings/large \
             -- ${X11FONTDIR}/encodings
+    fi
+
+    # Create a shadow of /System/Library/Fonts since /System is read-only in macOS 10.15+
+    # https://github.com/XQuartz/XQuartz/issues/99
+    if [[ $osxfonts == 1 ]] ; then
+        mkdir -p ${X11DIR}/opt/X11/share/system_fonts
+        ${X11DIR}/bin/lndir /System/Library/Fonts ${X11DIR}/share/system_fonts
     fi
 
     OIFS=$IFS
