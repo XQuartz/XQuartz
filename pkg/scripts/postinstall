@@ -27,27 +27,6 @@ if [[ -n "${SSH_CONFIG}" ]] ; then
     fi
 fi
 
-[[ -f /etc/paths.d/XQuartz ]] && rm /etc/paths.d/XQuartz
-[[ -f /etc/manpaths.d/XQuartz ]] && rm /etc/manpaths.d/XQuartz
-
-[[ -d /opt/X11/include/libpng12 ]] && rm -rf /opt/X11/include/libpng12
-[[ -f /opt/X11/bin/libpng12-config ]] && rm /opt/X11/bin/libpng12-config
-
-[[ -d /opt/X11/include/libpng14 ]] && rm -rf /opt/X11/include/libpng14
-[[ -f /opt/X11/bin/libpng14-config ]] && rm /opt/X11/bin/libpng14-config
-
-[[ -d /opt/X11/include/libpng15 ]] && rm -rf /opt/X11/include/libpng15
-[[ -f /opt/X11/bin/libpng15-config ]] && rm /opt/X11/bin/libpng15-config
-
-if [[ -f /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist ]] ; then
-    /bin/launchctl unload -w /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist
-    rm  /Library/LaunchDaemons/org.macosforge.xquartz.privileged_startx.plist
-fi
-
-if [[ -f /Library/LaunchAgents/org.macosforge.xquartz.startx.plist ]] ; then
-    rm /Library/LaunchAgents/org.macosforge.xquartz.startx.plist
-fi
-
 # Load the privileged_startx daemon
 /bin/launchctl unload -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
 /bin/launchctl load -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
