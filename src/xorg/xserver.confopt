@@ -5,7 +5,6 @@
 --disable-xquartz \
 --enable-xorg \
 --enable-kdrive \
---enable-xfake \
 --enable-xephyr \
 --disable-sdl \
 --enable-xnest \
