@@ -247,7 +247,11 @@ if [[ -x /usr/bin/lockfile ]] ; then
 else
     if [[ -r "${FC_LOCKFILE}" ]] ; then
         read OLD_PID < "${FC_LOCKFILE}"
-        if kill -0 ${OLD_PID} >& /dev/null ; then
+
+        # Some folks are seeing lockfiles that contain 0 for some reason
+        # https://github.com/XQuartz/XQuartz/issues/97
+        # https://github.com/XQuartz/XQuartz/issues/115
+        if [[ "${OLD_PID}" != "0" ]] && kill -0 ${OLD_PID} >& /dev/null ; then
             echo "font_cache is already running with PID ${OLD_PID}." >&2
             echo "If you believe this to be erroneous, please remove ${FC_LOCKFILE}." >&2
             exit 1
