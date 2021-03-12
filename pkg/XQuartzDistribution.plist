@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
+    <!-- https://developer.apple.com/library/archive/documentation/DeveloperTools/Reference/DistributionDefinitionRef/Chapters/Introduction.html#//apple_ref/doc/uid/TP40005370 -->
+    <!-- https://developer.apple.com/documentation/installer_js -->
     <script>
         function onConclusion() {
             if (system.files.fileExistsAtPath("/Library/LaunchAgents/org.macosforge.xquartz.startx.plist") ||
@@ -14,7 +16,9 @@
     <license file="LICENSE.txt"/>
     <readme file="README.txt"/>
     <pkg-ref id="org.xquartz.X11"/>
-    <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64"/>
+    <!-- allow-external-scripts="true" should not be needed, but on macOS 10.14, system.files.fileExistsAtPath
+         fails without it.  It works on macOS 11.3. See rdar://75342864 for more details. -->
+    <options customize="never" allow-external-scripts="true" hostArchitectures="x86_64,arm64"/>
     <volume-check>
         <allowed-os-versions>
             <os-version min="10.9"/>
