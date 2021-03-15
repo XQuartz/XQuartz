@@ -24,8 +24,9 @@
 #
 # 5) Add credential files to the pkg sundirectory:
 #        pkg/altool.* (see #4 above)
-#        pkg/bintray.cred
 #        pkg/sparkle_priv.pem
+#        pkg/github.token (see https://docs.github.com/en/articles/creating-an-access-token-for-command-line-use)
+#        pkg/github.user
 #
 # 6) Ensure the macOS keychain contains the private key for our Developer ID certificates
 #
@@ -571,17 +572,61 @@ do_dist() {
     openssl sha256 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha256sum
     openssl sha512 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha512sum
 
-    if [ -f "${BASE_DIR}"/pkg/bintray.cred ] ; then
-        BINTRAY_CRED="$(cat "${BASE_DIR}"/pkg/bintray.cred)"
+    if [ -f "${BASE_DIR}"/pkg/github.user -a "${BASE_DIR}"/pkg/github.token ] ; then
+        local gh_user="$(cat "${BASE_DIR}"/pkg/github.user)"
+        local gh_token="$(cat "${BASE_DIR}"/pkg/github.token)"
+        local gh_project=XQuartz
+        local gh_repo=XQuartz
+
+        local tag=XQuartz-${APPLICATION_VERSION_STRING}
+        local prerelease="false"
+        if [ "${tag}" != "${tag/alpha/}" ] || [ "${tag}" != "${tag/beta/}" ] || [ "${tag}" != "${tag/rc/}" ] ; then
+            prerelease="true"
+        fi
+
+        # https://docs.github.com/en/rest/reference/repos#create-a-release
+        git tag -a ${tag} -m ${tag}
+        git push -f origin ${tag}
+        response=$(curl -i -u ${gh_user}:${gh_token} \
+            -d "{ \
+                \"tag_name\": \"${tag}\", \
+                \"name\": \"${tag}\", \
+                \"body\": \"See https://www.xquartz.org/releases/${tag}.html\", \
+                \"prerelease\": ${prerelease}, \
+                \"draft\": true \
+            }" \
+            https://api.github.com/repos/${gh_project}/${gh_repo}/releases)
+
+        # Get ID
+        eval $(echo "$response" | grep -m 1 "id.:" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
+        if [ -z "$id" ] ; then
+            echo "${response}" >&2
+            die "Error: Failed to get release id for tag: $tag"
+        fi
+
+        local tmpfile=$(mktemp)
+
         for f in "${DMG}"* "${SYM_TARBALL}"* ; do
             echo "Uploading ${f}"
-            curl -T "${f}" -u${BINTRAY_CRED} https://api.bintray.com/content/xquartz/downloads/XQuartz/"${APPLICATION_VERSION_STRING}"/$(basename "${f}")
+
+            GH_ASSET_URL="https://uploads.github.com/repos/${GH_PROJECT}/${GH_REPO}/releases/${id}/assets?name=$(basename ${f})"
+            if ! curl -i -u ${gh_user}:${gh_token} \
+                    -o ${tmpfile} \
+                    --progress-bar \
+                    --data-binary @${f} \
+                    -H "Content-Type: application/octet-stream" \
+                    https://uploads.github.com/repos/${gh_project}/${gh_repo}/releases/${id}/assets?name=$(basename ${f}) ; then
+                cat ${tmpfile} >&2
+                die "Failed to upload $(basename ${f})."
+            fi
 
             # The response printed by curl has no newline, so add it here
             echo ""
         done
 
-        echo "Visit https://bintray.com/xquartz/downloads/XQuartz/${APPLICATION_VERSION_STRING}/view/general to accept the uploads to bintray"
+        rm ${tmpfile}
+
+        echo "Visit https://github.com/${gh_project}/${gh_repo}/releases/tag/${tag} to review / publish the release"
     fi
 
     if [ -f "${BASE_DIR}"/pkg/sparkle_priv.pem ] ; then
