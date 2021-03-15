@@ -1,7 +1,7 @@
 diff -Naurp libXaw-1.0.4.orig/Makefile.am libXaw-1.0.4/Makefile.am
 --- libXaw-1.0.4.orig/Makefile.am	2007-01-03 21:13:17 -0800
 +++ libXaw-1.0.4/Makefile.am	2008-11-23 12:51:11 -0800
-@@ -9,21 +9,33 @@ pkgconfig_DATA = 
+@@ -9,21 +9,33 @@ pkgconfig_DATA =
  if BUILD_XAW6
  
  pkgconfig_DATA += xaw6.pc
@@ -38,15 +38,18 @@ diff -Naurp libXaw-1.0.4.orig/Makefile.am libXaw-1.0.4/Makefile.am
  
  endif
  
-@@ -38,7 +50,7 @@ EXTRA_DIST = xaw6.pc.in \
+@@ -36,11 +48,6 @@ EXTRA_DIST = xaw6.pc.in \
+ 	old-doc/CHANGES \
+ 	ChangeLog
  
- if !PLATFORM_WIN32
- install-exec-hook:
+-if !PLATFORM_WIN32
+-install-exec-hook:
 -	cd $(DESTDIR)$(libdir) && rm -f libXaw.so && ln -s $(DEFAULT_LIB) libXaw.so
-+	cd $(DESTDIR)$(libdir) && rm -f libXaw.@LIBEXT@ && ln -s $(DEFAULT_LIB) libXaw.@LIBEXT@
- endif
- 
+-endif
+-
  MAINTAINERCLEANFILES=ChangeLog
+ 
+ .PHONY: ChangeLog
 diff -Naurp libXaw-1.0.4.orig/configure.ac libXaw-1.0.4/configure.ac
 --- libXaw-1.0.4.orig/configure.ac	2007-08-21 13:18:48 -0700
 +++ libXaw-1.0.4/configure.ac	2008-11-23 12:49:32 -0800

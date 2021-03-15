@@ -38,13 +38,8 @@
 #     src/libpng/libpng12
 #     src/libpng/libpng14
 #     src/libpng/libpng15
-#     src/xorg/lib/libXp
-#     src/xorg/lib/libXevie
-#     src/xorg/lib/libXfontcache
-#     src/xorg/lib/libxkbui
-#     src/xorg/lib/libXTrap
-#     src/xorg/lib/libXxf86misc
-#   * If so, we don't need headers and arm64 slices for bincompat libs
+#     src/cairo
+#     src/xpyb
 
 PREFIX=/opt/X11
 BUILD_TOOLS_PREFIX=/opt/buildX11
@@ -290,6 +285,16 @@ do_autotools_build() {
         do_autotools_build_sub fat ${confopt_file} ${archs}
     fi
 
+    case ${PROJECT} in
+    libXaw8|libXp|libXevie|libXfontcache|libxkbui|libXTrap|libXxf86misc)
+        # These projects exist for bincompat reasons only.  Only ship libraries
+        sudo rm -rf "${DESTDIR}.lipo.fat${PREFIX}/"{bin,include,share,lib/pkgconfig}
+        for f in ${DESTDIR}.lipo.fat${PREFIX}/lib/* ; do
+            [ -h "${f}" ] && sudo rm "${f}"
+        done
+        ;;
+    esac
+
     sudo ditto "${DESTDIR}.lipo.fat" "${DESTDIR}"
     sudo ditto "${DESTDIR}.lipo.fat" /
 
@@ -363,7 +368,6 @@ do_lipo() {
         fi
     done
 }
-
 
 do_meson_build() {
     local project_dir="${BASE_DIR}/${1}"
@@ -443,6 +447,44 @@ do_checks() {
             fi
         fi
     done
+}
+
+do_remove_legacy_protos() {
+    sudo rm -rf ${DESTDIR}${PREFIX}/include/X11/PM
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/evieproto.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapbits.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xf86rushstr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xcalibrateproto.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xf86mscstr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapddmi.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/lgewire.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/Xeviestr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtraplib.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/windowswm.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/fontcachstr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xf86misc.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/fontcache.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapemacros.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/Printstr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/Print.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/windowswmstr.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapproto.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xf86rush.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtraplibp.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xcalibratewire.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapdi.h
+    sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/fontcacheP.h
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/trapproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xcalibrateproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xproxymngproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/fontcacheproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/evieproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/printproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xf86rushproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/lg3dproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/windowswmproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xf86miscproto.pc
+    sudo rm -f ${DESTDIR}${PREFIX}/share/man/man7/Xprint.7
 }
 
 do_strip_sign_dsyms() {
@@ -644,7 +686,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(cairo|libpng1[245]|libXaw8|libXevie|libXfontcache|libxkbui|libXp |libXt-flatnamespace|libXTrap|libXTrap|libXxf86misc|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(cairo|libpng1[245]|libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
@@ -758,7 +800,7 @@ do_autotools_build src/xorg/lib/libXmu ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXpm ${ARCHS_LIB}
 
 # Bincompat
-#do_autotools_build src/xorg/lib/libXaw8 ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXaw8 ${ARCHS_LIB_BINCOMPAT_2_7}
 
 do_autotools_build src/xorg/lib/libXaw ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXaw3d ${ARCHS_LIB}
@@ -781,6 +823,14 @@ do_autotools_build src/xorg/lib/libXScrnSaver ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXtst ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXv ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXvMC ${ARCHS_LIB}
+
+# Bincompat
+do_autotools_build src/xorg/lib/libxkbui ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXp ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXevie ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXfontcache ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXTrap ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXxf86misc ${ARCHS_LIB_BINCOMPAT_2_7}
 
 do_autotools_build src/xorg/data/bitmaps ${ARCHS_BIN}
 
@@ -952,6 +1002,8 @@ sudo ln -s Xquartz ${PREFIX}/bin/X
 #do_autotools_build src/xorg/test/xorg-integration-tests
 #do_autotools_build src/xorg/test/xts
 #do_autotools_build src/xorg/test/xtsttopng
+
+do_remove_legacy_protos
 
 do_checks
 
