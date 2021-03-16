@@ -31,4 +31,12 @@ pkgutil --files ${OLDER_PACKAGE_ID} 2> /dev/null | grep opt/X11 | tail -r | whil
 done
 pkgutil --forget ${OLDER_PACKAGE_ID}
 
+# Cleanup after buggy font caching script (cf: https://github.com/XQuartz/XQuartz/issues/127)
+if [ -d /opt/X11/opt/X11/share/system_fonts ] ; then
+    rm -rf /opt/X11/opt/X11/share/system_fonts
+    rmdir /opt/X11/opt/X11/share
+    rmdir /opt/X11/opt/X11
+    rmdir /opt/X11/opt
+fi
+
 exit 0
