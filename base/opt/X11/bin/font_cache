@@ -143,7 +143,7 @@ setup_fontdirs() {
     # Create a shadow of /System/Library/Fonts since /System is read-only in macOS 10.15+
     # https://github.com/XQuartz/XQuartz/issues/99
     if [[ $osxfonts == 1 ]] ; then
-        mkdir -p ${X11DIR}/opt/X11/share/system_fonts
+        mkdir -p ${X11DIR}/share/system_fonts
         ${X11DIR}/bin/lndir /System/Library/Fonts ${X11DIR}/share/system_fonts
     fi
 
