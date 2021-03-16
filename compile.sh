@@ -667,7 +667,7 @@ do_dist() {
 
         rm ${tmpfile}
 
-        echo "Visit https://github.com/${gh_project}/${gh_repo}/releases/tag/${tag} to review / publish the release"
+        echo "Visit https://github.com/${gh_project}/${gh_repo}/releases to review / publish the release."
     fi
 
     if [ -f "${BASE_DIR}"/pkg/sparkle_priv.pem ] ; then
