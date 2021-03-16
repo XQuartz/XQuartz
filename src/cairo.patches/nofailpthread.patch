@@ -1,0 +1,19 @@
+The compiler warns when using i386, so just disable the check for empty output
+
+diff --git a/build/aclocal.cairo.m4 b/build/aclocal.cairo.m4
+index 64c1a2e2f..12f56a7e4 100644
+--- a/build/aclocal.cairo.m4
++++ b/build/aclocal.cairo.m4
+@@ -106,9 +106,9 @@ AC_DEFUN([CAIRO_CC_TRY_LINK_WITH_ENV_SILENT],[dnl
+ 		[cairo_cc_stderr=`test -f conftest.err && cat conftest.err`
+ 		 cairo_cc_flag=no])
+ 
+-	if test "x$cairo_cc_stderr" != "x"; then
+-		cairo_cc_flag=no
+-	fi
++	#if test "x$cairo_cc_stderr" != "x"; then
++	#	cairo_cc_flag=no
++	#fi
+ 
+ 	if test "x$cairo_cc_flag" = "xyes"; then
+ 		ifelse([$3], , :, [$3])

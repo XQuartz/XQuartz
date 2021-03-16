@@ -39,7 +39,7 @@ fi
 sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
 
 # Note that docbook-utils is needed for fontconfig docs, but we're skipping it here because of https://trac.macports.org/ticket/62354
-sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v install autoconf automake pkgconfig libtool py39-mako meson xmlto asciidoc doxygen fop groff || die "Could not install basic toolchain"
+sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v install autoconf automake pkgconfig libtool py39-mako meson xmlto asciidoc doxygen fop groff gtk-doc || die "Could not install basic toolchain"
 sudo ${BUILD_TOOLS_PREFIX}/bin/port select python3 python39 || die "Could not select python3"
 
 if [ -d "${BUILD_TOOLS_PREFIX}/lib/pkgconfig" ] ; then

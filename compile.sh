@@ -38,7 +38,6 @@
 #     src/libpng/libpng12
 #     src/libpng/libpng14
 #     src/libpng/libpng15
-#     src/cairo
 #     src/xpyb
 
 PREFIX=/opt/X11
@@ -262,7 +261,7 @@ do_autotools_build() {
     do_patches "${patches_dir}"
 
     case ${PROJECT} in
-    freetype2)
+    freetype2|cairo)
         ./autogen.sh
         ;;
     xterm)
@@ -686,7 +685,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(cairo|libpng1[245]|libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(libpng1[245]|libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
@@ -976,7 +975,8 @@ sudo install -o root -g wheel -m 0755 -d ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxinfo ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxgears ${PREFIX}/bin
 
-# TODO do_autotools_build src/cairo ${ARCHS_LIB}
+do_autotools_build src/cairo ${ARCHS_LIB}
+
 # TODO do_autotools_build src/xorg/lib/xpyb ${ARCHS_LIB}
 
 do_autotools_build src/xkeyboard-config ${ARCHS_LIB}
