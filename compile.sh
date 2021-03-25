@@ -557,7 +557,7 @@ do_dmg() {
     DMG_DIR="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.d
 
     mkdir -p "${DMG_DIR}"
-    cp "${PKG_INPUT}" "${DMG_DIR}"/Xquartz.pkg
+    cp "${PKG_INPUT}" "${DMG_DIR}"/XQuartz.pkg
 
     [[ -e "${DMG_OUTPUT}" ]] && rm -f "${DMG_OUTPUT}"
     hdiutil create -srcfolder "${DMG_DIR}" -fs JHFS+ -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
