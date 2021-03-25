@@ -1,1 +1,1 @@
--Dc_std=c11 -Dosmesa=gallium
+-Dc_std=c11 -Dosmesa=true

@@ -1,7 +1,7 @@
-From 81d5303ada601d2dc43e90271a32ee8859ead987 Mon Sep 17 00:00:00 2001
+From 86bf3aac2cdb81a0ee8b2e3c0fededf520f12a32 Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 Date: Thu, 14 Jan 2021 10:08:34 -0800
-Subject: [PATCH 1/4] darwin: Use the system libunwind
+Subject: [PATCH 1/3] darwin: Use the system libunwind
 
 Closes: https://gitlab.freedesktop.org/mesa/mesa/-/issues/4094
 
@@ -14,10 +14,10 @@ Part-of: <https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/8507>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 9fc09a42d25..76f51f26bb0 100644
+index 932eb136681..238e2fb34e1 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -1661,7 +1661,11 @@ elif _libunwind == 'false'
+@@ -1733,7 +1733,11 @@ elif _libunwind == 'false'
    warning('libunwind option "false" deprecated, please use "disabled" instead.')
  endif
  if _libunwind != 'disabled' and not with_platform_android
@@ -31,5 +31,5 @@ index 9fc09a42d25..76f51f26bb0 100644
      pre_args += '-DHAVE_LIBUNWIND'
    endif
 -- 
-2.29.2 (Apple Git-129)
+2.30.1 (Apple Git-130)
 
