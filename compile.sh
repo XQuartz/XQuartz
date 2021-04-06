@@ -32,13 +32,6 @@
 #
 # To update a submodule to a newer version, just checkout the appropriate
 # branch in the submodule and then commit the changed hash at the top level.
-#
-# TODO:
-#   * Do we want to add Bincompat packages:
-#     src/libpng/libpng12
-#     src/libpng/libpng14
-#     src/libpng/libpng15
-#     src/xpyb
 
 PREFIX=/opt/X11
 BUILD_TOOLS_PREFIX=/opt/buildX11
@@ -685,7 +678,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libpng1[245]|libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
@@ -733,13 +726,13 @@ sudo ditto ${DESTDIR}.Sparkle ${DESTDIR}
 sudo ditto ${DESTDIR}.Sparkle /
 
 # Bincompat versions of libpng
-#do_autotools_build src/libpng/libpng12 ${ARCHS_LIB}
-#do_autotools_build src/libpng/libpng14 ${ARCHS_LIB}
-#do_autotools_build src/libpng/libpng15 ${ARCHS_LIB}
-#sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/bin/libpng*-config
-#sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng1?.dylib
-#sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng12.0.*.dylib
-#sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
+do_autotools_build src/libpng/libpng12 ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/libpng/libpng14 ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/libpng/libpng15 ${ARCHS_LIB_BINCOMPAT_2_7}
+sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/bin/libpng*-config
+sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng1?.dylib
+sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng12.0.*.dylib
+sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
 
 do_autotools_build src/libpng/libpng16 ${ARCHS_LIB}
 
