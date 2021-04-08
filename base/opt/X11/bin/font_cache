@@ -50,7 +50,7 @@ check_dirty() {
     # Create a list of all files in the dir
     # Filter out config / cache files.  Ugly... counting down the day until
     # xfs finally goes away
-    fontfiles="$(find ${dir}/ -maxdepth 1 -type f | awk '$0 !~ /fonts\..*$|^.*\.dir$/ {print}')"
+    fontfiles="$(find -L ${dir}/ -maxdepth 1 -type f | awk '$0 !~ /fonts\..*$|^.*\.dir$/ {print}')"
 
     # Fonts were deleted (or never there).  Kill off the caches
     if [[ -z "${fontfiles}" ]] ; then
