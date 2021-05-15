@@ -8,11 +8,7 @@ License: see [COPYING](COPYING)
 
 Support
 --
-FAQs. Your question may already be answered, but if not, there are three ways to get support for XQuartz:
-Join us in [#xquartz] irc://irc.freenode.net/xquartz on the Freenode IRC Network
-Try our Mailing Lists
-File a Bug Report
-Related Sites
-Additional information can be found at these related websites.
-X
-freedesktop.org
+Join us in #xquartz  on the [Freenode](https://Freenode.net) IRC Network (irc.freenode.net/xquartz) <br>
+[Mailing Lists](https://www.xquartz.org/Mailing-Lists.html) <br>
+[Bugs](https://www.xquartz.org/Bug-Reporting.html) <br>
+Related Sites: [X.Org](https://X.Org) and [freedesktop.org](https://Freedesktop.org)
