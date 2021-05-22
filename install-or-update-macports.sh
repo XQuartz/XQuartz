@@ -1,7 +1,7 @@
 BUILD_TOOLS_PREFIX="/opt/buildX11"
 
-# presently hard-coded to base branch "release-2.6"
-# MACPORTS_VERSION="2.6"
+# presently hard-coded to base branch "release-2.7"
+# MACPORTS_VERSION="2.7"
 
 export PATH="${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
@@ -17,7 +17,7 @@ if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
         sudo rm -rf /tmp/macports-base || die "Could not remove /tmp/macports-base"
     fi
 
-    git clone -b release-2.6 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
+    git clone -b release-2.7 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
     cd macports-base || die "Could not enter macports-base"
     ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
     make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
