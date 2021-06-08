@@ -17,7 +17,7 @@ if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
         sudo rm -rf /tmp/macports-base || die "Could not remove /tmp/macports-base"
     fi
 
-    git clone -b release-2.7 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
+    git clone -b release-2.7 --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
     cd macports-base || die "Could not enter macports-base"
     ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
     make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
