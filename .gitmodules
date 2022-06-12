@@ -597,10 +597,10 @@
 	url = git://git.code.sf.net/p/libpng/code
 [submodule "src/freeglut"]
 	path = src/freeglut
-	url = git://github.com/dcnieho/FreeGLUT.git
+	url = https://github.com/dcnieho/FreeGLUT.git
 [submodule "src/xterm"]
 	path = src/xterm
-	url = git://github.com/ThomasDickey/xterm-snapshots.git
+	url = https://github.com/ThomasDickey/xterm-snapshots.git
 [submodule "src/freetype2"]
 	path = src/freetype2
 	url = git://git.savannah.gnu.org/freetype/freetype2.git
@@ -609,13 +609,13 @@
 	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
 [submodule "src/Sparkle"]
 	path = src/Sparkle
-	url = git://github.com/sparkle-project/Sparkle.git
+	url = https://github.com/sparkle-project/Sparkle.git
 [submodule "src/xquartz/xserver"]
 	path = src/xquartz/xserver
-	url = git://github.com/XQuartz/xorg-server.git
+	url = https://github.com/XQuartz/xorg-server.git
 [submodule "src/xkeyboard-config"]
 	path = src/xkeyboard-config
-	url = git://github.com/freedesktop/xkeyboard-config.git
+	url = https://github.com/freedesktop/xkeyboard-config.git
 [submodule "src/xorg/driver/xf86-video-nested"]
 	path = src/xorg/driver/xf86-video-nested
 	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested.git
