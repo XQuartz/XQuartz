@@ -1,38 +1,14 @@
 #!/bin/sh
 
-[[ -e /etc/sshd_config ]] && SSHD_CONFIG=/etc/sshd_config
-[[ -e /etc/ssh/sshd_config ]] && SSHD_CONFIG=/etc/ssh/sshd_config
-
-[[ -e /etc/ssh_config ]] && SSH_CONFIG=/etc/ssh_config
-[[ -e /etc/ssh/ssh_config ]] && SSH_CONFIG=/etc/ssh/ssh_config
-
-if [[ -n "${SSHD_CONFIG}" ]] ; then
-    if ! cat ${SSHD_CONFIG} | grep -v '^#' | egrep -q '^(Match|XAuthLocation)' ; then
-    {
-        echo ""
-        echo "# XAuthLocation added by XQuartz (https://www.xquartz.org)"
-        echo "XAuthLocation /opt/X11/bin/xauth"
-    } >> ${SSHD_CONFIG}
-    fi
-fi
-
-if [[ -n "${SSH_CONFIG}" ]] ; then
-    if ! cat ${SSH_CONFIG} | grep -v '^#' | grep -q 'XAuthLocation' ; then
-    {
-        echo ""
-        echo "# XAuthLocation added by XQuartz (https://www.xquartz.org)"
-        echo "Host *"
-        echo "    XAuthLocation /opt/X11/bin/xauth"
-    } >> ${SSH_CONFIG}
-    fi
-fi
-
 # Load the privileged_startx daemon
 /bin/launchctl unload -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
 /bin/launchctl load -w /Library/LaunchDaemons/org.xquartz.privileged_startx.plist
 
 # Cache system fonts
 /opt/X11/bin/font_cache --force --system
+
+# Ensure ssh configs are setup
+/opt/X11/libexec/privileged_startx
 
 # Hook for the system X11 if it wants to do something after XQuartz installs
 [[ -x /usr/X11/libexec/xquartz_postinst.sh ]] && /usr/X11/libexec/xquartz_postinst.sh
