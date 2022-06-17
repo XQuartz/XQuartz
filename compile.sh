@@ -973,7 +973,7 @@ do_autotools_build src/cairo ${ARCHS_LIB}
 
 # TODO do_autotools_build src/xorg/lib/xpyb ${ARCHS_LIB}
 
-do_autotools_build src/xkeyboard-config ${ARCHS_LIB}
+do_meson_build src/xkeyboard-config ${ARCHS_LIB}
 
 do_autotools_build src/xorg/xserver ${ARCHS_BIN}
 do_autotools_build src/xorg/driver/xf86-input-void ${ARCHS_BIN}
