@@ -1,7 +1,7 @@
-From e74850c8ac0ec844dd94e00e00e2d91b1a597878 Mon Sep 17 00:00:00 2001
+From 198540dcdb239c12f5c88fe43a87c4180dd8892e Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 Date: Tue, 5 Jan 2021 14:46:55 -0800
-Subject: [PATCH 4/5] Let's not have freetype-config giving different answers
+Subject: [PATCH 3/3] Let's not have freetype-config giving different answers
  depending on whether or not pkg-config is installed.
 
 Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
@@ -10,10 +10,10 @@ Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/builds/unix/unix-def.in b/builds/unix/unix-def.in
-index e74844d29..425b1d258 100644
+index 8e298ac59..da91ac7c8 100644
 --- a/builds/unix/unix-def.in
 +++ b/builds/unix/unix-def.in
-@@ -110,7 +110,7 @@ NO_OUTPUT := 2> /dev/null
+@@ -111,7 +111,7 @@ NO_OUTPUT := 2> /dev/null
  $(OBJ_BUILD)/freetype-config: $(TOP_DIR)/builds/unix/freetype-config.in
  	rm -f $@ $@.tmp
  	sed -e 's|%LIBSSTATIC_CONFIG%|$(LIBSSTATIC_CONFIG)|'   \
@@ -23,5 +23,5 @@ index e74844d29..425b1d258 100644
  	    -e 's|%exec_prefix%|$(exec_prefix)|'               \
  	    -e 's|%ft_version%|$(ft_version)|'                 \
 -- 
-2.24.3 (Apple Git-128)
+2.32.0 (Apple Git-132)
 
