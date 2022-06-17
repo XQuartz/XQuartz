@@ -1,7 +1,7 @@
-From fd578453ecb422a29be14e0ed90120dfab3dab8d Mon Sep 17 00:00:00 2001
+From 92981ee03b629ae1985ceb78b976f88d50a1334e Mon Sep 17 00:00:00 2001
 From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
 Date: Sun, 24 Jan 2021 21:10:29 -0800
-Subject: [PATCH 3/3] Hack to address build failure when using newer macOS SDKs
+Subject: [PATCH] Hack to address build failure when using newer macOS SDKs
  with older deployment targets
 
 Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
@@ -29,5 +29,5 @@ index 45cb6075e6e..355d725f7da 100644
  timespec_get(struct timespec *ts, int base)
  {
 -- 
-2.30.1 (Apple Git-130)
+2.32.1 (Apple Git-133)
 
