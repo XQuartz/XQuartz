@@ -949,7 +949,7 @@ do_autotools_build src/xorg/font/winitzki-cyrillic ${ARCHS_LIB}
 do_autotools_build src/xorg/font/xfree86-type1 ${ARCHS_LIB}
 
 do_meson_build src/mesa/mesa ${ARCHS_LIB}
-do_autotools_build src/mesa/glu ${ARCHS_LIB}
+do_meson_build src/mesa/glu ${ARCHS_LIB}
 do_autotools_build src/freeglut ${ARCHS_LIB}
 
 # Manually build glxinfo and glxgears
