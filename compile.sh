@@ -665,7 +665,7 @@ do_dist() {
         echo "Visit https://github.com/${gh_project}/${gh_repo}/releases to review / publish the release."
     fi
 
-    if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_ed_priv.pem ] ; then
+    if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key ] ; then
         DSA_SIG=$(openssl dgst -sha1 -binary < "${DMG}" | openssl dgst -sha1 -sign "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem | base64)
         #ED_SIG=$(openssl pkeyutl -sign -inkey "${BASE_DIR}"/pkg/sparkle_ed25519_priv.pem -rawin -in ${DMG}" | base64)
         #SIZE=$(wc -c "${DMG}" | awk '{print $1}')
