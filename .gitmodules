@@ -619,3 +619,6 @@
 [submodule "src/xorg/driver/xf86-video-nested"]
 	path = src/xorg/driver/xf86-video-nested
 	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested.git
+[submodule "src/Sparkle2x"]
+	path = src/Sparkle2x
+	url = https://github.com/sparkle-project/Sparkle.git

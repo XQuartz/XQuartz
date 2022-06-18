@@ -24,7 +24,8 @@
 #
 # 5) Add credential files to the pkg sundirectory:
 #        pkg/altool.* (see #4 above)
-#        pkg/sparkle_priv.pem
+#        pkg/sparkle_dsa_priv.pem
+#        pkg/sparkle_eddsa_priv.key
 #        pkg/github.token (see https://docs.github.com/en/articles/creating-an-access-token-for-command-line-use)
 #        pkg/github.user
 #
@@ -664,16 +665,18 @@ do_dist() {
         echo "Visit https://github.com/${gh_project}/${gh_repo}/releases to review / publish the release."
     fi
 
-    if [ -f "${BASE_DIR}"/pkg/sparkle_priv.pem ] ; then
-        DSA=$(openssl dgst -sha1 -binary < "${DMG}" | openssl dgst -sha1 -sign "${BASE_DIR}"/pkg/sparkle_priv.pem | openssl enc -base64)
-        SIZE=$(wc -c "${DMG}" | awk '{print $1}')
+    if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_ed_priv.pem ] ; then
+        DSA_SIG=$(openssl dgst -sha1 -binary < "${DMG}" | openssl dgst -sha1 -sign "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem | base64)
+        #ED_SIG=$(openssl pkeyutl -sign -inkey "${BASE_DIR}"/pkg/sparkle_ed25519_priv.pem -rawin -in ${DMG}" | base64)
+        #SIZE=$(wc -c "${DMG}" | awk '{print $1}')
+        ED_SIG_AND_SIZE=$(sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${DMG}")
 
         echo "      <item>"
         echo "         <sparkle:minimumSystemVersion>${MACOSX_DEPLOYMENT_TARGET}</sparkle:minimumSystemVersion>"
         echo "         <title>XQuartz-${APPLICATION_VERSION_STRING}</title>"
         echo "         <sparkle:releaseNotesLink>https://www.xquartz.org/releases/bare/XQuartz-${APPLICATION_VERSION_STRING}.html</sparkle:releaseNotesLink>"
         echo "         <pubDate>$(date -u +"%a, %d %b %Y %T %Z")</pubDate>"
-        echo "         <enclosure url=\"https://github.com/XQuartz/XQuartz/releases/download/XQuartz-${APPLICATION_VERSION_STRING}/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" length=\"${SIZE}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA}\" sparkle:installationType=\"package\" />"
+        echo "         <enclosure url=\"https://github.com/XQuartz/XQuartz/releases/download/XQuartz-${APPLICATION_VERSION_STRING}/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA_SIG}\" ${ED_SIG_AND_SIZE} sparkle:installationType=\"package\" />"
         echo "      </item>"
     fi
 

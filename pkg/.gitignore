@@ -1,5 +1,5 @@
 altool.*
 github.*
 bintray.cred
-sparkle_priv.pem
+sparkle_*_priv.*
 plugins

@@ -1,0 +1,14 @@
+diff --git a/hw/xquartz/bundle/Info.plist.cpp b/hw/xquartz/bundle/Info.plist.cpp
+index 6314c7181..0e078ee1f 100644
+--- a/hw/xquartz/bundle/Info.plist.cpp
++++ b/hw/xquartz/bundle/Info.plist.cpp
+@@ -31,7 +31,7 @@
+ #ifdef XQUARTZ_SPARKLE
+ 	<key>SUEnableAutomaticChecks</key>
+ 		<true/>
+-	<key>SUPublicDSAKeyFile</key>
+-		<string>sparkle.pem</string>
++	<key>SUPublicEDKey</key>
++		<string>pgjiBdCBJJg1rSqFR3GtMPXaRKcU9Jjeh6OqfkH4j+8=</string>
+         <key>SUFeedURL</key>
+                 <string>XQUARTZ_SPARKLE_FEED_URL</string>

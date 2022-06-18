@@ -3,6 +3,7 @@ BUILD_TOOLS_PREFIX="/opt/buildX11"
 # presently hard-coded to base branch "release-2.7"
 # MACPORTS_VERSION="2.7"
 
+BASE_DIR=$(pwd)
 export PATH="${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 die() {
@@ -53,4 +54,10 @@ if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig" ] ; then
     sudo mv -f ${BUILD_TOOLS_PREFIX}/share/pkgconfig ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored || die "Could not move ${BUILD_TOOLS_PREFIX}/share/pkgconfig to stored"
 fi
 
-echo "MacPorts toolchain successfully installed in ${BUILD_TOOLS_PREFIX}"
+SPARKLE_DSTROOT=$(mktemp -d /tmp/Sparkle.XXXXXX)
+cd ${BASE_DIR}/src/Sparkle2x
+xcodebuild install -scheme sign_update INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
+xcodebuild install -scheme generate_keys INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
+sudo ditto ${SPARKLE_DSTROOT} /
+
+echo "MacPorts toolchain and Sparkle signing tools successfully installed in ${BUILD_TOOLS_PREFIX}"
