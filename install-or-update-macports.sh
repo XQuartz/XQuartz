@@ -57,7 +57,7 @@ fi
 SPARKLE_DSTROOT=$(mktemp -d /tmp/Sparkle.XXXXXX)
 cd ${BASE_DIR}/src/Sparkle2x
 xcodebuild install -scheme sign_update INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
-xcodebuild install -scheme generate_keys INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
+#xcodebuild install -scheme generate_keys INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
 sudo ditto ${SPARKLE_DSTROOT} /
 
 echo "MacPorts toolchain and Sparkle signing tools successfully installed in ${BUILD_TOOLS_PREFIX}"
