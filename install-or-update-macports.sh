@@ -1,3 +1,5 @@
+#!/bin/sh -e
+
 BUILD_TOOLS_PREFIX="/opt/buildX11"
 
 # presently hard-coded to base branch "release-2.7"
