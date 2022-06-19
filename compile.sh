@@ -682,7 +682,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libXt-flatnamespace|xpyb|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(libXt-flatnamespace|xpyb|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
