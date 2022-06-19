@@ -1,1 +1,1 @@
---with-bzip2
+--with-bzip2 ZLIB_CFLAGS="-I/opt/X11/include" ZLIB_LIBS=-lz

@@ -1,10 +1,26 @@
---- bitmap-1.0.4/Makefile.am.orig	2009-10-13 11:27:37.000000000 -0700
-+++ bitmap-1.0.4/Makefile.am	2009-10-13 11:27:45.000000000 -0700
-@@ -96,7 +96,6 @@ dist_bitmap_DATA =	\
- 	Right		\
- 	RotateLeft	\
- 	RotateRight	\
--	Stipple		\
- 	Term		\
- 	Up
+Remote Stipple.  It conflicts with stipple from xorg/data/bitmaps:
+
+xorg/data/bitmaps (master) $ cat stipple
+#define stipple_width 16
+#define stipple_height 4
+static char stipple_bits[] = {
+   0x55, 0x55, 0xee, 0xee, 0x55, 0x55, 0xba, 0xbb};
+
+xorg/app/bitmap/bitmaps (master) $ cat Stipple
+#define Stipple_width 2
+#define Stipple_height 2
+static char Stipple_bits[] = {
+   0x01, 0x00};
+
+diff --git a/Makefile.am b/Makefile.am
+index f6f411f..f595d89 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -61,7 +61,6 @@ dist_bitmap_DATA =	\
+ 	bitmaps/Right		\
+ 	bitmaps/RotateLeft	\
+ 	bitmaps/RotateRight	\
+-	bitmaps/Stipple		\
+ 	bitmaps/Term		\
+ 	bitmaps/Up
  
