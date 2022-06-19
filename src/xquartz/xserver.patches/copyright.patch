@@ -1,0 +1,16 @@
+diff --git a/hw/xquartz/bundle/Info.plist.cpp b/hw/xquartz/bundle/Info.plist.cpp
+index 6314c7181..f209eb609 100644
+--- a/hw/xquartz/bundle/Info.plist.cpp
++++ b/hw/xquartz/bundle/Info.plist.cpp
+@@ -39,9 +39,9 @@
+ 	<key>LSApplicationCategoryType</key>
+ 		<string>public.app-category.utilities</string>
+ 	<key>NSHumanReadableCopyright</key>
+-		<string>© 2003-2021 Apple Inc.
++		<string>© 2003-2022 Apple Inc.
+ © 2003 XFree86 Project, Inc.
+-© 2003-2021 X.org Foundation, Inc.
++© 2003-2022 X.org Foundation, Inc.
+ </string>
+ 	<key>NSMainNibFile</key>
+ 		<string>main</string>
