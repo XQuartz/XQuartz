@@ -1,4 +1,8 @@
---x-include=${PREFIX}/include --x-lib=${PREFIX}/lib \
---enable-pthread --disable-quartz \
---enable-xlib --enable-xlib-xrender --enable-xcb --enable-xcb-shm --enable-xlib-xcb \
---enable-tee --enable-xml --disable-trace --disable-gobject --disable-gtk-doc
+-Dgl-backend=gl \
+-Dpng=enabled \
+-Dquartz=disabled \
+-Dxlib=enabled \
+-Dxcb=enabled \
+-Dxlib-xcb=enabled \
+-Dxml=enabled \
+-Dglib=disabled

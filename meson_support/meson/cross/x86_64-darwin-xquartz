@@ -4,6 +4,9 @@ cpu_family = 'x86_64'
 cpu = 'x86_64'
 endian = 'little'
 
+[properties]
+ipc_rmid_deferred_release = 'false'
+
 [binaries]
 pkgconfig = '/opt/buildX11/bin/pkg-config'
 cmake = '/opt/buildX11/bin/cmake'

@@ -1,0 +1,33 @@
+From 35b78ffa2435adc173462cc3a85651c77bd98218 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Mon, 20 Jun 2022 21:07:25 -0700
+Subject: [PATCH] meson: Fix detection of expat on darwin
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ util/meson.build | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/util/meson.build b/util/meson.build
+index 5cc209cc9..d6f68730b 100644
+--- a/util/meson.build
++++ b/util/meson.build
+@@ -43,7 +43,14 @@ if gtk_dep.found()
+ endif
+ 
+ if feature_conf.get('CAIRO_HAS_XML_SURFACE', 0) == 1
+-  expat_dep = dependency('expat', fallback: ['expat', 'expat_dep'])
++  # Linking expat should not be so difficult... see: https://github.com/mesonbuild/meson/issues/10516
++  expat_dep = dependency('expat', required: false)
++  if not expat_dep.found()
++    expat_dep = cc.find_library('expat', required : false)
++    if not expat_dep.found()
++      expat_dep = dependency('expat', method: 'system', fallback: ['expat', 'expat_dep'])
++    endif
++  endif
+   cairo_utils += [
+     ['trace-to-xml.c', {'deps': [expat_dep]}],
+     ['xml-to-trace.c', {'deps': [expat_dep]}],
+-- 
+2.32.1 (Apple Git-133)
+

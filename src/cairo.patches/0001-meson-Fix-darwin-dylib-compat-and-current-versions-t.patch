@@ -1,0 +1,69 @@
+From e446005b7954728a2efd05d2accee0c1e60a99ba Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 19 Jun 2022 13:45:09 -0700
+Subject: [PATCH] meson: Fix darwin dylib compat and current versions to better
+ match autotools builds
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ meson.build                    | 5 +++++
+ src/meson.build                | 1 +
+ util/cairo-gobject/meson.build | 1 +
+ util/cairo-script/meson.build  | 1 +
+ 4 files changed, 8 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index d7dd9b428..ad288f014 100644
+--- a/meson.build
++++ b/meson.build
+@@ -32,6 +32,11 @@ else
+   cairo_libversion = '@0@.@1@.@2@'.format(cairo_version_sonum, cairo_version, cairo_version_micro)
+ endif
+ 
++# autotools-builds of cairo had broken compat/current version management. They had current == compat
++# and bumped every release, making them not suitable for distribution as system libraries.  In
++# transitioning to meson, we're resetting this to a sane versioning scheme.
++cairo_darwin_versions = ['1.0', '@0@.@1@.@2@'.format(cairo_version_major, cairo_version_minor, cairo_version_micro)]
++
+ conf = configuration_data()
+ 
+ cc = meson.get_compiler('c')
+diff --git a/src/meson.build b/src/meson.build
+index 612a3fc47..c1f9df158 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -267,6 +267,7 @@ libcairo = library('cairo', cairo_sources,
+   link_args: extra_link_args,
+   soversion: cairo_version_sonum,
+   version: cairo_libversion,
++  darwin_versions: cairo_darwin_versions,
+   install: true,
+   include_directories: incbase,
+ )
+diff --git a/util/cairo-gobject/meson.build b/util/cairo-gobject/meson.build
+index 0a525b6fa..73a19823b 100644
+--- a/util/cairo-gobject/meson.build
++++ b/util/cairo-gobject/meson.build
+@@ -12,6 +12,7 @@ libcairogobject = library('cairo-gobject', cairo_gobject_sources,
+   dependencies: [glib_dep, gobject_dep, libcairo_dep],
+   soversion: cairo_version_sonum,
+   version: cairo_libversion,
++  darwin_versions: cairo_darwin_versions,
+   install: true,
+ )
+ 
+diff --git a/util/cairo-script/meson.build b/util/cairo-script/meson.build
+index 653c19d33..4b93d2f25 100644
+--- a/util/cairo-script/meson.build
++++ b/util/cairo-script/meson.build
+@@ -30,6 +30,7 @@ libcairoscript = library('cairo-script-interpreter',
+   dependencies: deps + [libcairo_dep],
+   soversion: cairo_version_sonum,
+   version: cairo_libversion,
++  darwin_versions: cairo_darwin_versions,
+   install: true,
+ )
+ 
+-- 
+2.32.1 (Apple Git-133)
+

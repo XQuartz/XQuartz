@@ -255,7 +255,7 @@ do_autotools_build() {
     do_patches "${patches_dir}"
 
     case ${PROJECT} in
-    freetype2|cairo)
+    freetype2)
         ./autogen.sh
         ;;
     xterm)
@@ -972,7 +972,7 @@ sudo install -o root -g wheel -m 0755 -d ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxinfo ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxgears ${PREFIX}/bin
 
-do_autotools_build src/cairo ${ARCHS_LIB}
+do_meson_build src/cairo ${ARCHS_LIB}
 
 # TODO do_autotools_build src/xorg/lib/xpyb ${ARCHS_LIB}
 
