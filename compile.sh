@@ -818,7 +818,7 @@ do_autotools_build src/xorg/lib/libXres ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXScrnSaver ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXtst ${ARCHS_LIB}
 do_autotools_build src/xorg/lib/libXv ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXvMC ${ARCHS_LIB}
+do_meson_build src/xorg/lib/libXvMC ${ARCHS_LIB}
 
 # Bincompat
 do_autotools_build src/xorg/lib/libxkbui ${ARCHS_LIB_BINCOMPAT_2_7}
