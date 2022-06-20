@@ -1,1 +1,1 @@
---without-libuuid
+LIBUUID_LIBS="-lSystem" LIBUUID_CFLAGS="-I/opt/X11/include" --with-libuuid
