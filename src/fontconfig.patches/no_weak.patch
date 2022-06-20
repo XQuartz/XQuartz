@@ -1,0 +1,15 @@
+mkostemp wase added in macOS 10.12, so disable them until we bump our deployment target
+
+diff --git a/src/fccompat.c b/src/fccompat.c
+index 65ac84c..2784767 100644
+--- a/src/fccompat.c
++++ b/src/fccompat.c
+@@ -152,7 +152,7 @@ FcMakeTempfile (char *template)
+ {
+     int fd = -1;
+ 
+-#if HAVE_MKOSTEMP
++#if HAVE_MKOSTEMP && !(defined(__x86_64__) || defined(__i386__))
+     fd = mkostemp (template, FC_O_CLOEXEC);
+ #elif HAVE_MKSTEMP
+     fd = mkstemp (template);

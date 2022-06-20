@@ -744,7 +744,7 @@ do_autotools_build src/libpng/libpng16 ${ARCHS_LIB}
 do_autotools_build src/freetype2 ${ARCHS_LIB}
 do_autotools_build src/pixman ${ARCHS_LIB}
 
-do_autotools_build src/fontconfig ${ARCHS_LIB}
+do_meson_build src/fontconfig ${ARCHS_LIB}
 
 do_autotools_build src/xorg/util/macros ${ARCHS_BIN}
 
