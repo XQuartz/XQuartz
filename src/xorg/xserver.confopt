@@ -1,13 +1,13 @@
---disable-dri --disable-glx --disable-shave --disable-nls \
---with-fontdir=${PREFIX}/share/fonts \
---with-default-font-path=${FONTPATH} \
---disable-glamor \
---disable-xquartz \
---enable-xorg \
---enable-kdrive \
---enable-xephyr \
---disable-sdl \
---enable-xnest \
---enable-xvfb \
---disable-specs \
---disable-devel-docs --disable-docs  
+-Dxorg=true \
+-Dxephyr=true \
+-Dxnest=true \
+-Dxvfb=true \
+-Dxquartz=false \
+-Dglamor=false \
+-Dsecure-rpc=false \
+-Dpciaccess=false \
+-Dint10=false \
+-Ddocs=false \
+-Ddevel-docs=false \
+-Ddocs-pdf=false \
+-Ddefault_font_path=${FONTPATH}
