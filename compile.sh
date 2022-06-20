@@ -46,6 +46,7 @@ CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_
 APPLICATION_VERSION=2.8.24
 APPLICATION_VERSION_STRING=2.8.2
 
+SPARKLE_PUBLIC_EDKEY="pgjiBdCBJJg1rSqFR3GtMPXaRKcU9Jjeh6OqfkH4j+8="
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/alpha.xml"
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
@@ -984,7 +985,7 @@ do_autotools_build src/xorg/driver/xf86-input-void ${ARCHS_BIN}
 do_autotools_build src/xorg/driver/xf86-video-dummy ${ARCHS_BIN}
 do_autotools_build src/xorg/driver/xf86-video-nested ${ARCHS_BIN}
 
-do_autotools_build src/xquartz/xserver ${ARCHS_BIN}
+do_meson_build src/xquartz/xserver ${ARCHS_BIN}
 
 # We want X to be Xquartz by default
 sudo rm -f ${DESTDIR}${PREFIX}/bin/X

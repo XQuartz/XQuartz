@@ -1,0 +1,32 @@
+clock_gettime and mkostemp were added in macOS 10.12, so disable them until we bump our deployment target
+
+diff --git a/include/meson.build b/include/meson.build
+index 3521fa3ef..5fe0eee23 100644
+--- a/include/meson.build
++++ b/include/meson.build
+@@ -33,6 +33,9 @@ cc.compiles('''
+     #ifndef CLOCK_MONOTONIC
+     #error CLOCK_MONOTONIC not defined
+     #endif
++    #ifdef __x86_64__
++    #error "x86_64 needs to support 10.9+, so disabling"
++    #endif
+ ''',
+     name: 'CLOCK_MONOTONIC') ? '1' : false)
+ 
+@@ -153,7 +156,14 @@ conf_data.set('HAVE_GETPEERUCRED', cc.has_function('getpeerucred') ? '1' : false
+ conf_data.set('HAVE_GETPROGNAME', cc.has_function('getprogname') ? '1' : false)
+ conf_data.set('HAVE_GETZONEID', cc.has_function('getzoneid') ? '1' : false)
+ conf_data.set('HAVE_MEMFD_CREATE', cc.has_function('memfd_create') ? '1' : false)
+-conf_data.set('HAVE_MKOSTEMP', cc.has_function('mkostemp') ? '1' : false)
++#conf_data.set('HAVE_MKOSTEMP', cc.has_function('mkostemp') ? '1' : false)
++conf_data.set('HAVE_MKOSTEMP', cc.has_function('mkostemp') and
++cc.compiles('''
++    #ifdef __x86_64__
++    #error "x86_64 needs to support 10.9+, so disabling"
++    #endif
++''',
++    name: 'HAVE_MKOSTEMP') ? '1' : false)
+ conf_data.set('HAVE_MMAP', cc.has_function('mmap') ? '1' : false)
+ conf_data.set('HAVE_POLL', cc.has_function('poll') ? '1' : false)
+ conf_data.set('HAVE_POLLSET_CREATE', cc.has_function('pollset_create') ? '1' : false)

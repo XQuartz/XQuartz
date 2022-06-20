@@ -1,10 +1,13 @@
---disable-shave --disable-nls \
---enable-xcsecurity --enable-record \
---with-fontdir=${PREFIX}/share/fonts \
---with-default-font-path=${FONTPATH} \
---with-bundle-id-prefix=${IDENTIFIER_PREFIX} \
---with-apple-application-name=XQuartz \
---with-apple-applications-dir=${APPLICATION_PATH} \
---with-bundle-version=${APPLICATION_VERSION} \
---with-bundle-version-string=${APPLICATION_VERSION_STRING} \
---enable-sparkle --with-sparkle-feed-url=${SPARKLE_FEED_URL}
+-Dxcsecurity=true \
+-Dsecure-rpc=false \
+-Dxephyr=false \
+-Dxnest=false \
+-Dxorg=false \
+-Dxvfb=false \
+-Dapple-application-name=XQuartz \
+-Dbundle-id-prefix=${IDENTIFIER_PREFIX} \
+-Dbundle-version=${APPLICATION_VERSION} \
+-Dbundle-version-string=${APPLICATION_VERSION_STRING} \
+-Dsparkle-feed-url=${SPARKLE_FEED_URL} \
+-Dsparkle-public-edkey=${SPARKLE_PUBLIC_EDKEY} \
+-Ddefault_font_path=${FONTPATH}
