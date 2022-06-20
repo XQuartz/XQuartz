@@ -751,7 +751,7 @@ do_autotools_build src/xorg/util/macros ${ARCHS_BIN}
 do_autotools_build src/xorg/doc/xorg-docs ${ARCHS_BIN}
 do_autotools_build src/xorg/doc/xorg-sgml-doctools ${ARCHS_BIN}
 
-do_autotools_build src/xorg/proto/xorgproto ${ARCHS_BIN}
+do_meson_build src/xorg/proto/xorgproto ${ARCHS_BIN}
 do_autotools_build src/xorg/proto/xcbproto ${ARCHS_BIN}
 
 do_autotools_build src/xorg/util/bdftopcf ${ARCHS_BIN}

@@ -1,1 +1,1 @@
---enable-legacy
+-Dlegacy=true
