@@ -622,3 +622,6 @@
 [submodule "src/Sparkle2x"]
 	path = src/Sparkle2x
 	url = https://github.com/sparkle-project/Sparkle.git
+[submodule "src/xorg/lib/libxcvt"]
+	path = src/xorg/lib/libxcvt
+	url = https://gitlab.freedesktop.org/xorg/lib/libxcvt.git
