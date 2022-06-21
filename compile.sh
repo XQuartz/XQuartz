@@ -388,8 +388,8 @@ do_meson_build() {
     for arch in ${archs} ; do
         setup_environment ${arch} || die "Failed to setup environment"
         meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${confopt_file}")) --cross-file ${meson_cross_dir}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
-        ninja -C build.${arch} || die "Failed to compile in $(pwd)"
-        sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja -C build.${arch} install || die "Failed to install in $(pwd)"
+        ninja --verbose -C build.${arch} || die "Failed to compile in $(pwd)"
+        sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
 
         # Prune the .la files that we don't want
         sudo rm -f "${DESTDIR}.lipo.${arch}${PREFIX}/lib"/*.la
