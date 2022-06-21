@@ -1,0 +1,49 @@
+diff --git a/meson.build b/meson.build
+index a066325b4..c0c5a67d3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -48,6 +48,15 @@ ft2_pkgconfig_version = run_command(python_exe,
+   files('builds/unix/configure.raw'),
+   check: true).stdout().strip()
+ 
++# Correct currnet and compatibility versions on darwin to match autotools-based builds
++ft2_pkgconfig_version_arr = ft2_pkgconfig_version.split('.')
++ft2_pkgconfig_version_major = ft2_pkgconfig_version_arr[0].to_int()
++ft2_pkgconfig_version_minor = ft2_pkgconfig_version_arr[1].to_int()
++ft2_pkgconfig_version_tiny = ft2_pkgconfig_version_arr[2].to_int()
++ft2_darwin_version_compat = '@0@.0.0'.format(ft2_pkgconfig_version_major + 1)
++ft2_darwin_version_current = '@0@.@1@.@2@'.format(ft2_pkgconfig_version_major + 1, ft2_pkgconfig_version_minor, ft2_pkgconfig_version_tiny)
++ft2_darwin_versions = [ft2_darwin_version_compat, ft2_darwin_version_current]
++
+ ft2_includes = include_directories('include')
+ 
+ freetype_includedir = join_paths(get_option('includedir'), 'freetype2')
+@@ -244,20 +253,6 @@ ft2_deps = []
+ common_ldflags = []
+ 
+ 
+-# Correct compatibility version for OS x.
+-#
+-# OSX sets the compatibility_version (aka libtools version) differently from
+-# the library name.
+-#
+-if host_machine.system() == 'darwin'
+-  # maintain compatibility with autotools on macOS
+-  common_ldflags = [
+-    '-compatibility_version', ft2_pkgconfig_version.split('.')[0],
+-    '-current_version', ft2_pkgconfig_version
+-  ]
+-endif
+-
+-
+ # Generate `ftoption.h` based on available dependencies.
+ 
+ process_header_command = [python_exe,
+@@ -399,6 +394,7 @@ ft2_lib = library('freetype',
+   dependencies: ft2_deps,
+   install: true,
+   version: ft2_so_version,
++  darwin_versions: ft2_darwin_versions,
+   link_args: common_ldflags,
+ )
+ 

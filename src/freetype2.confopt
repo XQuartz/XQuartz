@@ -1,1 +1,2 @@
---without-png --enable-freetype-config
+-Dpng=disabled \
+-Dzlib=system

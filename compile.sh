@@ -256,9 +256,6 @@ do_autotools_build() {
     do_patches "${patches_dir}"
 
     case ${PROJECT} in
-    freetype2)
-        ./autogen.sh
-        ;;
     xterm)
         ;;
     *)
@@ -741,7 +738,7 @@ sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
 
 do_autotools_build src/libpng/libpng16 ${ARCHS_LIB}
 
-do_autotools_build src/freetype2 ${ARCHS_LIB}
+do_meson_build src/freetype2 ${ARCHS_LIB}
 do_meson_build src/pixman ${ARCHS_LIB}
 
 do_meson_build src/fontconfig ${ARCHS_LIB}
