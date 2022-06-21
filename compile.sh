@@ -47,13 +47,13 @@ APPLICATION_VERSION=2.8.22
 APPLICATION_VERSION_STRING=2.8.2_beta3
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
-    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/alpha.xml"
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/alpha.xml"
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
-    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/beta.xml"
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/rc/}" ] ; then
-    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/beta.xml"
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/rc.xml"
 else
-    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle/release.xml"
+    SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/release.xml"
 fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
