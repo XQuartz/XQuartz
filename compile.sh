@@ -543,22 +543,8 @@ do_pkg() {
     rm "${PKG_CONFIG_ROOT}"/XQuartzComponent.pkg
 }
 
-do_dmg() {
-    PKG_INPUT="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.pkg
-    DMG_OUTPUT="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.dmg
-    DMG_DIR="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.d
-
-    mkdir -p "${DMG_DIR}"
-    cp "${PKG_INPUT}" "${DMG_DIR}"/XQuartz.pkg
-
-    [[ -e "${DMG_OUTPUT}" ]] && rm -f "${DMG_OUTPUT}"
-    #diskimagetool create -srcfolder "${DMG_DIR}" -format UDZO -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
-    hdiutil create -srcfolder "${DMG_DIR}" -fs JHFS+ -format UDBZ -volname "XQuartz-${APPLICATION_VERSION_STRING}" "${DMG_OUTPUT}"
-    xcrun codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force "${DMG_OUTPUT}"
-}
-
 do_notarize() {
-    DMG="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.dmg
+    PKG="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.pkg
 
     ALTOOL_USER_FILE="${BASE_DIR}"/pkg/altool.user
     ALTOOL_PASS_FILE="${BASE_DIR}"/pkg/altool.password
@@ -579,29 +565,29 @@ do_notarize() {
     fi
 
     if [ -n "${ALTOOL_AUTH}" ] ; then
-        xcrun altool --notarize-app --primary-bundle-id org.xquartz.X11 ${ALTOOL_AUTH} --file "${DMG}" --asc-provider "${CODESIGN_ASC_PROVIDER}"
+        xcrun altool --notarize-app --primary-bundle-id org.xquartz.X11 ${ALTOOL_AUTH} --file "${PKG}" --asc-provider "${CODESIGN_ASC_PROVIDER}"
 
         # Check the notarization with:
         echo "Check on the status of notarization with:"
         echo "   xcrun altool --notarization-info <request-uuid> <auth information>"
 
         sleep 10
-        while ! xcrun stapler staple "${DMG}" ; do
+        while ! xcrun stapler staple "${PKG}" ; do
             echo "Waiting for notarization to complete"
             sleep 10
         done
 
         # Check the disk image with:
-        # spctl --assess --type open --context context:primary-signature --verbose "${DMG}"
+        # spctl --assess --type open --context context:primary-signature --verbose "${PKG}"
     fi
 }
 
 do_dist() {
-    DMG="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.dmg
+    PKG="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.pkg
     SYM_TARBALL="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.dSYMS.tar.bz2
 
-    openssl sha256 "${DMG}" > "${DMG}".sha256sum
-    openssl sha512 "${DMG}" > "${DMG}".sha512sum
+    openssl sha256 "${PKG}" > "${PKG}".sha256sum
+    openssl sha512 "${PKG}" > "${PKG}".sha512sum
 
     openssl sha256 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha256sum
     openssl sha512 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha512sum
@@ -640,7 +626,7 @@ do_dist() {
 
         local tmpfile=$(mktemp)
 
-        for f in "${DMG}"* "${SYM_TARBALL}"* ; do
+        for f in "${PKG}"* "${SYM_TARBALL}"* ; do
             echo "Uploading ${f}"
 
             GH_ASSET_URL="https://uploads.github.com/repos/${GH_PROJECT}/${GH_REPO}/releases/${id}/assets?name=$(basename ${f})"
@@ -664,17 +650,14 @@ do_dist() {
     fi
 
     if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key ] ; then
-        DSA_SIG=$(openssl dgst -sha1 -binary < "${DMG}" | openssl dgst -sha1 -sign "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem | base64)
-        #ED_SIG=$(openssl pkeyutl -sign -inkey "${BASE_DIR}"/pkg/sparkle_ed25519_priv.pem -rawin -in ${DMG}" | base64)
-        #SIZE=$(wc -c "${DMG}" | awk '{print $1}')
-        ED_SIG_AND_SIZE=$(sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${DMG}")
+        ED_SIG_AND_SIZE=$(sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${PKG}")
 
         echo "      <item>"
         echo "         <sparkle:minimumSystemVersion>${MACOSX_DEPLOYMENT_TARGET}</sparkle:minimumSystemVersion>"
         echo "         <title>XQuartz-${APPLICATION_VERSION_STRING}</title>"
         echo "         <sparkle:releaseNotesLink>https://www.xquartz.org/releases/bare/XQuartz-${APPLICATION_VERSION_STRING}.html</sparkle:releaseNotesLink>"
         echo "         <pubDate>$(date -u +"%a, %d %b %Y %T %Z")</pubDate>"
-        echo "         <enclosure url=\"https://github.com/XQuartz/XQuartz/releases/download/XQuartz-${APPLICATION_VERSION_STRING}/XQuartz-${APPLICATION_VERSION_STRING}.dmg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" type=\"application/octet-stream\" sparkle:dsaSignature=\"${DSA_SIG}\" ${ED_SIG_AND_SIZE} sparkle:installationType=\"package\" />"
+        echo "         <enclosure url=\"https://github.com/XQuartz/XQuartz/releases/download/XQuartz-${APPLICATION_VERSION_STRING}/XQuartz-${APPLICATION_VERSION_STRING}.pkg\" sparkle:version=\"${APPLICATION_VERSION}\" sparkle:shortVersionString=\"XQuartz-${APPLICATION_VERSION_STRING}\" type=\"application/octet-stream\" ${ED_SIG_AND_SIZE} sparkle:installationType=\"package\" />"
         echo "      </item>"
     fi
 
@@ -1006,7 +989,6 @@ do_checks
 do_strip_sign_dsyms
 do_sym_tarball
 do_pkg
-do_dmg
 
 set +x
 
