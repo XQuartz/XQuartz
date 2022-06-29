@@ -14,16 +14,13 @@
 #    manage these directories for you, moving them aside on completion and back on
 #    future updates.
 #
-# 4) Setup authentication for altool with one of the following options:
-#    4a) Create an app-specific password for altool at appleid.apple.com.  Save this as pkg/altool.user and pkg/altool.password
+# 4) Setup authentication for notarytool with one of the following options:
+#    4a) Create an app-specific password for notarytool at appleid.apple.com.  Save this as pkg/notarytool.user and pkg/notarytool.password
 #    4b) Create an API Key as documented at https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api
-#        Save this as pkg/altool.user and pkg/altool.password
-#    4c) (AppleInternal) Install cliff at pkg/altool.cliff, store the username as pkg/altool.user, and
-#        save the cliff properties file (based on pkg/altool.cliff/conf/corporate_user_cliff_properties.template)
-#        as pkg/altool.cliff.properties
+#        Save this as pkg/notarytool.user and pkg/notarytool.password
 #
 # 5) Add credential files to the pkg sundirectory:
-#        pkg/altool.* (see #4 above)
+#        pkg/notarytool.* (see #4 above)
 #        pkg/sparkle_dsa_priv.pem
 #        pkg/sparkle_eddsa_priv.key
 #        pkg/github.token (see https://docs.github.com/en/articles/creating-an-access-token-for-command-line-use)
@@ -546,36 +543,22 @@ do_pkg() {
 do_notarize() {
     PKG="${BASE_DIR}"/XQuartz-${APPLICATION_VERSION_STRING}.pkg
 
-    ALTOOL_USER_FILE="${BASE_DIR}"/pkg/altool.user
-    ALTOOL_PASS_FILE="${BASE_DIR}"/pkg/altool.password
+    NOTARYTOOL_USER_FILE="${BASE_DIR}"/pkg/notarytool.user
+    NOTARYTOOL_PASS_FILE="${BASE_DIR}"/pkg/notarytool.password
 
-    ALTOOL_APIKEY_FILE="${BASE_DIR}"/pkg/altool.apiKey
-    ALTOOL_APIISSUER_FILE="${BASE_DIR}"/pkg/altool.apiIssuer
-
-    ALTOOL_CLIFF_DIR="${BASE_DIR}"/pkg/altool.cliff
-    ALTOOL_CLIFF_PROPERTIES="${BASE_DIR}"/pkg/altool.cliff.properties
+    NOTARYTOOL_APIKEY_FILE="${BASE_DIR}"/pkg/notarytool.apiKey
+    NOTARYTOOL_APIISSUER_FILE="${BASE_DIR}"/pkg/notarytool.apiIssuer
 
     # <rdar://problem/52532145> Latest XQuartz is not notarized
-    if [ -f "${ALTOOL_APIKEY_FILE}" -a -f "${ALTOOL_APIISSUER_FILE}" ] ; then
-         ALTOOL_AUTH="--apiKey $(cat "${ALTOOL_APIKEY_FILE}") --apiIssuer $(cat "${ALTOOL_APIISSUER_FILE}")"
-    elif [ -f "${ALTOOL_USER_FILE}" -a -f "${ALTOOL_PASS_FILE}" ] ; then
-        ALTOOL_AUTH="-u $(cat "${ALTOOL_USER_FILE}") -p $(cat "${ALTOOL_PASS_FILE}")"
-    elif [ -f "${ALTOOL_USER_FILE}" -a -d "${ALTOOL_CLIFF_DIR}" -a -f "${ALTOOL_CLIFF_PROPERTIES}" ] ; then
-        ALTOOL_AUTH="-u $(cat "${ALTOOL_USER_FILE}") --cliff-path ${ALTOOL_CLIFF_DIR}/bin/cliff --cliff-properties-file ${ALTOOL_CLIFF_PROPERTIES}"
+    if [ -f "${NOTARYTOOL_APIKEY_FILE}" -a -f "${NOTARYTOOL_APIISSUER_FILE}" ] ; then
+        NOTARYTOOL_AUTH="--key $(cat "${NOTARYTOOL_APIKEY_FILE}") --issuer $(cat "${NOTARYTOOL_APIISSUER_FILE}")"
+    elif [ -f "${NOTARYTOOL_USER_FILE}" -a -f "${NOTARYTOOL_PASS_FILE}" ] ; then
+        NOTARYTOOL_AUTH="--apple-id $(cat "${NOTARYTOOL_USER_FILE}") --password $(cat "${NOTARYTOOL_PASS_FILE}")"
     fi
 
-    if [ -n "${ALTOOL_AUTH}" ] ; then
-        xcrun altool --notarize-app --primary-bundle-id org.xquartz.X11 ${ALTOOL_AUTH} --file "${PKG}" --asc-provider "${CODESIGN_ASC_PROVIDER}"
-
-        # Check the notarization with:
-        echo "Check on the status of notarization with:"
-        echo "   xcrun altool --notarization-info <request-uuid> <auth information>"
-
-        sleep 10
-        while ! xcrun stapler staple "${PKG}" ; do
-            echo "Waiting for notarization to complete"
-            sleep 10
-        done
+    if [ -n "${NOTARYTOOL_AUTH}" ] ; then
+        xcrun notarytool submit --wait ${NOTARYTOOL_AUTH} --team-id "${CODESIGN_ASC_PROVIDER}" "${PKG}"
+        xcrun stapler staple "${PKG}"
 
         # Check the disk image with:
         # spctl --assess --type open --context context:primary-signature --verbose "${PKG}"
