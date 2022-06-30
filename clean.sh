@@ -7,3 +7,5 @@ git submodule foreach --recursive "git clean -d -f"
 sudo rm -rf src/Sparkle/build
 find . -name applied -exec rm {} \;
 git clean -d -f
+git submodule update
+git submodule foreach --recursive "git submodule update"
