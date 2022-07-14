@@ -42,8 +42,8 @@ fi
 sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
 
 # Note that docbook-utils is needed for fontconfig docs, but we're skipping it here because of https://trac.macports.org/ticket/62354
-sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v install autoconf automake pkgconfig libtool py39-mako meson xmlto asciidoc doxygen fop groff gtk-doc || die "Could not install basic toolchain"
-sudo ${BUILD_TOOLS_PREFIX}/bin/port select python3 python39 || die "Could not select python3"
+sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v -f install autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc || die "Could not install basic toolchain"
+sudo ${BUILD_TOOLS_PREFIX}/bin/port select python3 python310 || die "Could not select python3"
 
 # cmake can mess up the way meson searches for dependnecies, so deactivate it and the rest of the recursive leaves
 sudo ${BUILD_TOOLS_PREFIX}/bin/port deactivate rleaves
