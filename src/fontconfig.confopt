@@ -1,3 +1,5 @@
+-Dbaseconfig-dir="${PREFIX}/etc/X11/fontconfig" \
+-Dtemplate-dir="${PREFIX}/etc/X11/fontconfig/conf.avail" \
 -Dcache-build=disabled \
 -Ddoc=disabled \
 -Dtests=disabled
