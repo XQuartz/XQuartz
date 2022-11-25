@@ -436,7 +436,7 @@ do_checks() {
             [ "${file/tsan/}" != "${file}" ] && continue
 
             # Ignore _voucher* symbols (mig) and symbols from libc++ and libobjc that the compiler might have added
-            if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "weak external" ; then
+            if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "_pthread_mutexattr" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "weak external" ; then
                 die "=== ${file} has a weak link ==="
             fi
         fi
