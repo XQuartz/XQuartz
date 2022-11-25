@@ -189,10 +189,16 @@ setup_environment() {
     fi
 
     export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
-    export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${SANITIZER_CFLAGS} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
+    export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
+    export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+
+    if ! has i386 ${archs} ; then
+        export CFLAGS="${CFLAGS} ${SANITIZER_CFLAGS}"
+        export LDFLAGS="${LDFLAGS} ${SANITIZER_LDFLAGS}"
+    fi
+
     export CXXFLAGS="${CFLAGS}"
     export OBJCFLAGS="${CFLAGS}"
-    export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${SANITIZER_LDFLAGS} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
 
     # These are all the same now, but could be conditionalized in the future
     export CC="/usr/bin/clang"
