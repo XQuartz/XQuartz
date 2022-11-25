@@ -56,12 +56,13 @@ fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
      # Alpha builds use ASan
-     SANITIZER_LIB_DIR=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+     SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
 
      SANITIZER_CFLAGS="-fsanitize=address"
      SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+     SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
 
-     SANITIZER_LDFLAGS="-Wl,-rpath,${PREFIX}/lib/asan"
+     SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
      for dylib in ${SANITIZER_LIBS} ; do
          SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
      done
@@ -681,12 +682,12 @@ sudo ditto ${BASE_DIR}/base ${DESTDIR}
 sudo ditto ${BASE_DIR}/base /
 
 if [ -n "${SANITIZER_LIBS}" ] ; then
-    sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${PREFIX}/lib/asan
-    sudo install -o root -g wheel -m 0755 -d ${PREFIX}/lib/asan
+    sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${SANITIZER_LIB_DIR}
+    sudo install -o root -g wheel -m 0755 -d ${SANITIZER_LIB_DIR}
 
     for dylib in ${SANITIZER_LIBS} ; do
-        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR}/${dylib} ${DESTDIR}${PREFIX}/lib/asan
-        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR}/${dylib} ${PREFIX}/lib/asan
+        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR_SRC}/${dylib} ${DESTDIR}${SANITIZER_LIB_DIR}
+        sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR_SRC}/${dylib} ${SANITIZER_LIB_DIR}
     done
 fi
 
