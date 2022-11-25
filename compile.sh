@@ -430,6 +430,11 @@ do_checks() {
             [ "${file/swrast_dri.so/}" != "${file}" ] && continue
             [ "${file/libOSMesa/}" != "${file}" ] && continue
 
+            # Ignore sanitizers
+            [ "${file/asan/}" != "${file}" ] && continue
+            [ "${file/ubsan/}" != "${file}" ] && continue
+            [ "${file/tsan/}" != "${file}" ] && continue
+
             # Ignore _voucher* symbols (mig) and symbols from libc++ and libobjc that the compiler might have added
             if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "weak external" ; then
                 die "=== ${file} has a weak link ==="
