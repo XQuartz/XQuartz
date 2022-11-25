@@ -91,6 +91,7 @@ if [ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk" ] ; then
     SDKROOT_i386="/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk"
     ARCHS_LIB="${ARCHS_LIB} i386"
     ARCHS_LIB_BINCOMPAT_2_7="${ARCHS_LIB_BINCOMPAT_2_7} i386"
+else
     echo "This build will not be distributable due to lack of i386 support."
 fi
 
