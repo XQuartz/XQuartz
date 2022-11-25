@@ -394,6 +394,14 @@ do_meson_build() {
         ninja --verbose -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
 
+        # Meson removes the LC_RPATH that we asked for.  This hack re-adds it
+        # cf: https://github.com/mesonbuild/meson/issues/11109
+        find "${DESTDIR}.lipo.${arch}" -type f | while read file ; do
+            if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+                sudo install_name_tool -add_rpath "${SANITIZER_LIB_DIR}" "${file}"
+            fi
+        done
+
         # Prune the .la files that we don't want
         sudo rm -f "${DESTDIR}.lipo.${arch}${PREFIX}/lib"/*.la
     done
