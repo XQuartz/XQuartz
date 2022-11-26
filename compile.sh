@@ -273,12 +273,18 @@ do_autotools_build() {
     # Cleanup the universal hack directories
     sudo rm -rf "${DESTDIR}".lipo.*
 
-    if has i386 ${archs} && has arm64 ${archs} ; then
+    if ! has i386 ${archs} ; then
+        # x86_64 and arm64 can always be built together
+        do_autotools_build_sub fat ${confopt_file} ${archs}
+    elif [ -z "${SANITIZER_LIBS}" ] && ! has arm64 ${archs} ; then
+        # i386 and x86_64 can be built together (against the older SDK) if we
+        # don't also need an arm64 slice (eg: legacy bincompat dylibs)
+        do_autotools_build_sub fat ${confopt_file} ${archs}
+    else
+        # We need to build an x86_64 slice along with i386 in order for it to execute on Apple Silico Macs
         do_autotools_build_sub noarm "${confopt_file}" $(remove arm64 ${archs})
         do_autotools_build_sub no32 "${confopt_file}" $(remove i386 ${archs})
         do_lipo noarm i386 no32 "$(remove i386 ${archs})"
-    else
-        do_autotools_build_sub fat ${confopt_file} ${archs}
     fi
 
     case ${PROJECT} in
