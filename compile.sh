@@ -297,6 +297,15 @@ do_autotools_build() {
         ;;
     esac
 
+    # Remove LC_RPATHs that the compiler adds for sanitizers (we set our own)
+    find "${DESTDIR}.lipo.fat" -type f | while read file ; do
+        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+            if [ -n "${SANITIZER_LIB_DIR_SRC}" ] ; then
+                sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
+            fi
+        fi
+    done
+
     sudo ditto "${DESTDIR}.lipo.fat" "${DESTDIR}"
     sudo ditto "${DESTDIR}.lipo.fat" /
 
