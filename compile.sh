@@ -55,10 +55,12 @@ else
 fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
-     # Alpha builds use ASan
+     # Alpha builds use ASan and UBSan
      SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
 
-     SANITIZER_CFLAGS="-fsanitize=address"
+     # TODO: Eventually add: -fno-sanitize-recover=undefined -fsanitize-recover=signed-integer-overflow,...
+     #                       unsigned-integer-overflow,implicit-conversion,local-bounds"
+     SANITIZER_CFLAGS="-fsanitize=address,undefined,float-divide-by-zero"
      SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
      SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
 
