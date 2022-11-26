@@ -520,7 +520,10 @@ do_strip_sign_dsyms() {
         if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
-            sudo strip -S "${file}"
+
+            if [ -z "${SANITIZER_LIBS}" ] ; then
+                sudo strip -S "${file}"
+            fi
 
             sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
         fi
@@ -530,7 +533,10 @@ do_strip_sign_dsyms() {
         if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
-            sudo strip -S "${file}"
+
+            if [ -z "${SANITIZER_LIBS}" ] ; then
+                sudo strip -S "${file}"
+            fi
         fi
     done
 
