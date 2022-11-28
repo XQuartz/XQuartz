@@ -526,9 +526,6 @@
 [submodule "src/xorg/lib/pthread-stubs"]
 	path = src/xorg/lib/pthread-stubs
 	url = https://gitlab.freedesktop.org/xorg/lib/pthread-stubs.git
-[submodule "src/xorg/lib/xpyb"]
-	path = src/xorg/lib/xpyb
-	url = https://gitlab.freedesktop.org/xorg/lib/xpyb.git
 [submodule "src/xorg/proto/xcbproto"]
 	path = src/xorg/proto/xcbproto
 	url = https://gitlab.freedesktop.org/xorg/proto/xcbproto.git

@@ -688,7 +688,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libXt-flatnamespace|xpyb|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(libXt-flatnamespace|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
@@ -980,8 +980,6 @@ sudo install -o root -g wheel -m 0755 glxinfo ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxgears ${PREFIX}/bin
 
 do_meson_build src/cairo ${ARCHS_LIB}
-
-# TODO do_autotools_build src/xorg/lib/xpyb ${ARCHS_LIB}
 
 do_meson_build src/xkeyboard-config ${ARCHS_LIB}
 
