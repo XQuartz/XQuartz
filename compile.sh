@@ -997,13 +997,13 @@ sudo rm -f ${PREFIX}/bin/X
 sudo ln -s Xquartz ${PREFIX}/bin/X
 
 # TODO: Do we want to do anything with the tests?
-#do_autotools_build src/xorg/test/rendercheck
-#do_autotools_build src/xorg/test/x11perf
-#do_autotools_build src/xorg/test/xhiv
-#do_autotools_build src/xorg/test/xorg-gtest
-#do_autotools_build src/xorg/test/xorg-integration-tests
-#do_autotools_build src/xorg/test/xts
-#do_autotools_build src/xorg/test/xtsttopng
+#do_meson_build src/xorg/test/rendercheck ${ARCHS_BIN}
+#do_autotools_build src/xorg/test/x11perf ${ARCHS_BIN}
+#do_autotools_build src/xorg/test/xhiv ${ARCHS_BIN}
+#do_autotools_build src/xorg/test/xorg-gtest ${ARCHS_BIN}
+#do_autotools_build src/xorg/test/xorg-integration-tests ${ARCHS_BIN}
+#do_meson_build src/xorg/test/xts ${ARCHS_BIN}
+#do_meson_build src/xorg/test/xtsttopng ${ARCHS_BIN}
 
 do_remove_legacy_protos
 
