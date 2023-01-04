@@ -1,0 +1,48 @@
+From d32fddc67143e6fe637f0aefef741e32fc666b86 Mon Sep 17 00:00:00 2001
+From: Lindley French <lindleyf@google.com>
+Date: Fri, 11 Apr 2014 13:41:49 +0000
+Subject: [PATCH] XPutBackEvent copies an XEvent internally, so the pointer
+ passed in must point to an actual XEvent object, not an XConfigureEvent,
+ which is smaller. This avoids an invalid stack read.
+
+git-svn-id: svn+ssh://svn.code.sf.net/p/freeglut/code/trunk/freeglut/freeglut@1680 7f0cb862-5218-0410-a997-914c9d46530a
+---
+ src/x11/fg_window_x11.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/src/x11/fg_window_x11.c b/src/x11/fg_window_x11.c
+index 0233f94f..cea4ba2f 100644
+--- freeglut/src/freeglut_window.c
++++ freeglut/src/freeglut_window.c
+@@ -1071,7 +1071,7 @@ void fgOpenWindow( SFG_Window* window, const char* title,
+     unsigned long mask;
+     int num_FBConfigs, i;
+     unsigned int current_DisplayMode = fgState.DisplayMode ;
+-    XConfigureEvent fakeEvent = {0};
++    XEvent fakeEvent = {0};
+ 
+     /* Save the display mode if we are creating a menu window */
+     if( window->IsMenu && ( ! fgStructure.MenuContext ) )
+@@ -1168,14 +1168,14 @@ void fgOpenWindow( SFG_Window* window, const char* title,
+     /* Fake configure event to force viewport setup
+      * even with no window manager.
+      */
+-    fakeEvent.type = ConfigureNotify;
+-    fakeEvent.display = fgDisplay.Display;
+-    fakeEvent.window = window->Window.Handle;
+-    fakeEvent.x = x;
+-    fakeEvent.y = y;
+-    fakeEvent.width = w;
+-    fakeEvent.height = h;
+-    XPutBackEvent(fgDisplay.Display, (XEvent*)&fakeEvent);
++    fakeEvent.xconfigure.type = ConfigureNotify;
++    fakeEvent.xconfigure.display = fgDisplay.Display;
++    fakeEvent.xconfigure.window = window->Window.Handle;
++    fakeEvent.xconfigure.x = x;
++    fakeEvent.xconfigure.y = y;
++    fakeEvent.xconfigure.width = w;
++    fakeEvent.xconfigure.height = h;
++    XPutBackEvent(fgDisplay.Display, &fakeEvent);
+ 
+     /*
+      * The GLX context creation, possibly trying the direct context rendering
