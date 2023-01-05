@@ -1,65 +1,113 @@
 #!/bin/sh -e
 
-BUILD_TOOLS_PREFIX="/opt/buildX11"
-
-# presently hard-coded to base branch "release-2.7"
-# MACPORTS_VERSION="2.7"
-
+# presently hard-coded to base branch "release-2.8"
+MACPORTS_VERSION="2.8"
 BASE_DIR=$(pwd)
-export PATH="${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 die() {
     echo "${@}" >&2
     exit 1
 }
 
-if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
-    cd /tmp || die "Could not change to tmp directory"
+BUILD_TOOLS_CONFIGS="STD CMAKE"
 
-    if [ -d "/tmp/macports-base" ] ; then
-        sudo rm -rf /tmp/macports-base || die "Could not remove /tmp/macports-base"
-    fi
-
-    git clone -b release-2.7 --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
-    cd macports-base || die "Could not enter macports-base"
-    ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
-    make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
-    sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
-fi
-
-if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
-    die "MacPorts should be installed now, but ${BUILD_TOOLS_PREFIX}/bin/port not found"
-fi
-
-if [ -d "${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored" ] ; then
-    sudo mv -f ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored ${BUILD_TOOLS_PREFIX}/lib/pkgconfig || die "Could not move ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored back into position"
-fi
-
-if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored" ] ; then
-    sudo mv -f ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored ${BUILD_TOOLS_PREFIX}/share/pkgconfig || die "Could not move ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored back into position"
-fi
-
-sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
+BUILD_TOOLS_PREFIX_STD="/opt/buildX11"
+BUILD_TOOLS_PREFIX_CMAKE="/opt/buildX11-cmake"
 
 # Note that docbook-utils is needed for fontconfig docs, but we're skipping it here because of https://trac.macports.org/ticket/62354
-sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v -f install autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc || die "Could not install basic toolchain"
-sudo ${BUILD_TOOLS_PREFIX}/bin/port select python3 python310 || die "Could not select python3"
+PORTS_STD="autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc"
+PORTS_CMAKE="cmake"
 
-# cmake can mess up the way meson searches for dependnecies, so deactivate it and the rest of the recursive leaves
-sudo ${BUILD_TOOLS_PREFIX}/bin/port deactivate rleaves
+BASE_PATH="/usr/bin:/bin:/usr/sbin:/sbin"
 
-if [ -d "${BUILD_TOOLS_PREFIX}/lib/pkgconfig" ] ; then
-    sudo mv -f ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored || die "Could not move ${BUILD_TOOLS_PREFIX}/lib/pkgconfig to stored"
-fi
+TMP_BASE=$(mktemp -d /tmp/macports-XXXXXXX)
+trap "rm -rf ${TMP_BASE}" EXIT INT QUIT TERM
 
-if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig" ] ; then
-    sudo mv -f ${BUILD_TOOLS_PREFIX}/share/pkgconfig ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored || die "Could not move ${BUILD_TOOLS_PREFIX}/share/pkgconfig to stored"
-fi
+bootstrap_base() {
+    local BUILD_TOOLS_PREFIX=$1
 
-SPARKLE_DSTROOT=$(mktemp -d /tmp/Sparkle.XXXXXX)
-cd ${BASE_DIR}/src/Sparkle2x
-xcodebuild install -scheme sign_update INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
-#xcodebuild install -scheme generate_keys INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin DSTROOT=${SPARKLE_DSTROOT}
-sudo ditto ${SPARKLE_DSTROOT} /
+    if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
+        cd "${TMP_BASE}" || die "Could not change to tmp directory"
 
-echo "MacPorts toolchain and Sparkle signing tools successfully installed in ${BUILD_TOOLS_PREFIX}"
+        if ! [ -d "${TMP_BASE}/macports-base" ] ; then
+            git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
+            cd macports-base || die "Could not enter macports-base"
+        fi
+
+        ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
+        make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
+        sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
+    fi
+
+    if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
+        die "MacPorts should be installed now, but ${BUILD_TOOLS_PREFIX}/bin/port not found"
+    fi
+}
+
+push_pkgconfig() {
+    local BUILD_TOOLS_PREFIX=$1
+
+    if [ -d "${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored" ] ; then
+        sudo mv -f ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored ${BUILD_TOOLS_PREFIX}/lib/pkgconfig || die "Could not move ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored back into position"
+    fi
+
+    if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored" ] ; then
+        sudo mv -f ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored ${BUILD_TOOLS_PREFIX}/share/pkgconfig || die "Could not move ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored back into position"
+    fi
+}
+
+pop_pkgconfig() {
+    local BUILD_TOOLS_PREFIX=$1
+
+    if [ -d "${BUILD_TOOLS_PREFIX}/lib/pkgconfig" ] ; then
+        sudo mv -f ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ${BUILD_TOOLS_PREFIX}/lib/pkgconfig-stored || die "Could not move ${BUILD_TOOLS_PREFIX}/lib/pkgconfig to stored"
+    fi
+
+    if [ -d "${BUILD_TOOLS_PREFIX}/share/pkgconfig" ] ; then
+        sudo mv -f ${BUILD_TOOLS_PREFIX}/share/pkgconfig ${BUILD_TOOLS_PREFIX}/share/pkgconfig-stored || die "Could not move ${BUILD_TOOLS_PREFIX}/share/pkgconfig to stored"
+    fi
+}
+
+do_sign_update() {
+    local BUILD_TOOLS_PREFIX=${BUILD_TOOLS_PREFIX_STD}
+
+    SPARKLE_DSTROOT="${TMP_BASE}/Sparkle"
+    mkdir -p "${SPARKLE_DSTROOT}"
+    cd "${BASE_DIR}/src/Sparkle2x"
+    xcodebuild install -scheme sign_update "INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin" "DSTROOT=${SPARKLE_DSTROOT}"
+    #xcodebuild install -scheme generate_keys "INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin" "DSTROOT=${SPARKLE_DSTROOT}"
+    sudo ditto "${SPARKLE_DSTROOT}" /
+}
+
+do_macports_preifx() {
+    local BUILD_TOOLS_PREFIX=$1
+    shift
+
+    bootstrap_base "${BUILD_TOOLS_PREFIX}"
+
+    export PATH="${BUILD_TOOLS_PREFIX}/bin:${BASE_PATH}"
+
+    sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
+    sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v -f install ${@} || die "Could not install basic toolchain"
+
+    # cmake can mess up the way meson searches for dependnecies, so deactivate it and the rest of the recursive leaves
+    sudo ${BUILD_TOOLS_PREFIX}/bin/port deactivate rleaves
+
+    echo "MacPorts toolchain and Sparkle signing tools successfully installed in ${BUILD_TOOLS_PREFIX}"
+
+    export PATH="${BASE_PATH}"
+}
+
+set -x
+
+for CONFIG in ${BUILD_TOOLS_CONFIGS} ; do
+   BUILD_TOOLS_PREFIX_VAR=BUILD_TOOLS_PREFIX_${CONFIG}
+   PORTS_VAR=PORTS_${CONFIG}
+   do_macports_preifx "${!BUILD_TOOLS_PREFIX_VAR}" ${!PORTS_VAR}
+done
+
+sudo ${BUILD_TOOLS_PREFIX_STD}/bin/port select python3 python310 || die "Could not select python3"
+
+exit
+
+do_sign_update
