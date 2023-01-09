@@ -7,9 +7,10 @@
 # 1) Install the latest version of Xcode.
 #
 # 2) Use the the "install-or-update-macports.sh" script to install autoconf, automake,
-#    pkgconfig, glibtool, and meson to ${BUILD_TOOLS_PREFIX}.
+#    pkgconfig, glibtool, and meson to ${BUILD_TOOLS_PREFIX_STD} and cmake to
+#    ${BUILD_TOOLS_PREFIX_CMAKE}.
 #
-# 3) Make sure the ${BUILD_TOOLS_PREFIX}/{lib,share}/pkgconfig directories are moved
+# 3) Make sure the ${BUILD_TOOLS_PREFIX_*}/{lib,share}/pkgconfig directories are moved
 #    aside or they will interfere.  The "install-or-update-macports.sh" script will
 #    manage these directories for you, moving them aside on completion and back on
 #    future updates.
@@ -32,7 +33,8 @@
 # branch in the submodule and then commit the changed hash at the top level.
 
 PREFIX=/opt/X11
-BUILD_TOOLS_PREFIX=/opt/buildX11
+BUILD_TOOLS_PREFIX_STD="/opt/buildX11"
+BUILD_TOOLS_PREFIX_CMAKE="/opt/buildX11-cmake"
 APPLICATION_PATH=/Applications/Utilities
 IDENTIFIER_PREFIX=org.xquartz
 
@@ -123,18 +125,18 @@ export ac_cv_func_clock_gettime=no
 # mkostemp was added in macOS 10.12
 export ac_cv_func_mkostemp=no
 
-export XMLTO=${BUILD_TOOLS_PREFIX}/bin/xmlto
-export ASCIIDOC=${BUILD_TOOLS_PREFIX}/bin/asciidoc
-export DOXYGEN=${BUILD_TOOLS_PREFIX}/bin/doxygen
-export FOP=${BUILD_TOOLS_PREFIX}/bin/fop
+export XMLTO=${BUILD_TOOLS_PREFIX_STD}/bin/xmlto
+export ASCIIDOC=${BUILD_TOOLS_PREFIX_STD}/bin/asciidoc
+export DOXYGEN=${BUILD_TOOLS_PREFIX_STD}/bin/doxygen
+export FOP=${BUILD_TOOLS_PREFIX_STD}/bin/fop
 export FOP_OPTS="-Xmx2048m -Djava.awt.headless=true"
-export GROFF=${BUILD_TOOLS_PREFIX}/bin/groff
-export PS2PDF=${BUILD_TOOLS_PREFIX}/bin/ps2pdf
+export GROFF=${BUILD_TOOLS_PREFIX_STD}/bin/groff
+export PS2PDF=${BUILD_TOOLS_PREFIX_STD}/bin/ps2pdf
 
-export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH="${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 export PKG_CONFIG_PATH="${PREFIX}/share/pkgconfig:${PREFIX}/lib/pkgconfig"
 export FONTPATH="${PREFIX}/share/fonts/misc/,${PREFIX}/share/fonts/TTF/,${PREFIX}/share/fonts/OTF,${PREFIX}/share/fonts/Type1/,${PREFIX}/share/fonts/75dpi/:unscaled,${PREFIX}/share/fonts/100dpi/:unscaled,${PREFIX}/share/fonts/75dpi/,${PREFIX}/share/fonts/100dpi/,/Library/Fonts,${PREFIX}/share/system_fonts"
-export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX}/share/aclocal"
+export ACLOCAL="aclocal -I ${PREFIX}/share/aclocal -I ${BUILD_TOOLS_PREFIX_STD}/share/aclocal"
 
 die() {
     echo "${@}" >&2
@@ -249,6 +251,8 @@ do_autotools_build() {
 
     cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
+    export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX_STD}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
     PROJECT=$(basename $(pwd))
 
     # Oddball paths
@@ -311,6 +315,8 @@ do_autotools_build() {
 
     # Cleanup the universal hack directories
     sudo rm -rf "${DESTDIR}".lipo.*
+
+    export PATH="${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 }
 
 do_autotools_build_sub() {
@@ -392,6 +398,8 @@ do_meson_build() {
 
     cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
+    export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX_STD}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
     PROJECT=$(basename $(pwd))
 
     do_patches "${patches_dir}"
@@ -436,6 +444,72 @@ do_meson_build() {
 
     # Cleanup the universal hack directories
     sudo rm -rf "${DESTDIR}".lipo.*
+
+    export PATH="${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+}
+
+do_cmake_build() {
+    local project_dir="${BASE_DIR}/${1}"
+    shift
+    local archs=${@}
+
+    local patches_dir="${project_dir}.patches"
+    local confopt_file="${project_dir}.confopt"
+    [ -f "${confopt_file}" ] || confopt_file=/dev/null
+
+    cd "${project_dir}" || die "Could not change directory to ${project_dir}"
+
+    export PATH="${PREFIX}/bin:${BUILD_TOOLS_PREFIX_CMAKE}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+    PROJECT=$(basename $(pwd))
+
+    do_patches "${patches_dir}"
+
+    # Cleanup the universal hack directories
+    sudo rm -rf "${DESTDIR}".lipo.*
+
+    for arch in ${archs} ; do
+        setup_environment ${arch} || die "Failed to setup environment"
+        mkdir -p "${project_dir}/build.${arch}" || die "Failed to create build directory: ${project_dir}/build.${arch}"
+        cd "${project_dir}/build.${arch}" || die "Could not change directory to ${project_dir}/build.${arch}"
+
+        if [ "${arch}" == "i386" ] ; then
+            sdkdir=${SDKROOT_i386}
+        else
+            sdkdir=$(xcrun --show-sdk-path)
+        fi
+
+        cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+              -DCMAKE_INSTALL_NAME_DIR="${PREFIX}/lib" \
+              -DCMAKE_OSX_ARCHITECTURES="${arch}" \
+              -DCMAKE_OSX_SYSROOT="${sdkdir}" \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
+              $(eval echo $(cat "${confopt_file}")) .. || die "Could not configure in $(pwd)"
+
+        ${SCAN_BUILD} ${MAKE} ${MAKE_OPTS} VERBOSE=1 || die "Could not make in $(pwd)"
+        sudo ${MAKE} install DESTDIR=${DESTDIR}.lipo.${arch} VERBOSE=1 || die "Could not make install in $(pwd)"
+
+        # Prune the .la files that we don't want
+        sudo rm -f "${DESTDIR}.lipo.${arch}${PREFIX}/lib"/*.la
+    done
+
+    if [ "$(last ${archs})" == "$(first ${archs})" ] ; then
+        sudo cp -a "${DESTDIR}.lipo.$(first ${archs})" "${DESTDIR}.lipo.fat"
+    else
+        local lipo_args=""
+        for arch in ${archs} ; do
+            lipo_args="${lipo_args} ${arch} ${arch}"
+        done
+        do_lipo ${lipo_args}
+    fi
+
+    sudo ditto "${DESTDIR}.lipo.fat" "${DESTDIR}"
+    sudo ditto "${DESTDIR}.lipo.fat" /
+
+    # Cleanup the universal hack directories
+    sudo rm -rf "${DESTDIR}".lipo.*
+
+    export PATH="${PREFIX}/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 }
 
 do_checks() {
@@ -449,7 +523,11 @@ do_checks() {
                 die "=== ${file} links against an invalid library ==="
             fi
 
-            if otool -L "${file}" | grep -q "${BUILD_TOOLS_PREFIX}" ; then
+            if otool -L "${file}" | grep -q "${BUILD_TOOLS_PREFIX_STD}" ; then
+                die "=== ${file} links against an invalid library ==="
+            fi
+
+            if otool -L "${file}" | grep -q "${BUILD_TOOLS_PREFIX_CMAKE}" ; then
                 die "=== ${file} links against an invalid library ==="
             fi
 
@@ -675,7 +753,7 @@ do_dist() {
     fi
 
     if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key ] ; then
-        ED_SIG_AND_SIZE=$(sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${PKG}")
+        ED_SIG_AND_SIZE=$(${BUILD_TOOLS_PREFIX_STD}/bin/sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${PKG}")
 
         echo "      <item>"
         echo "         <sparkle:minimumSystemVersion>${MACOSX_DEPLOYMENT_TARGET}</sparkle:minimumSystemVersion>"
@@ -691,10 +769,13 @@ do_dist() {
     git submodule | egrep -v '(libXt-flatnamespace|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
-if [ -d ${BUILD_TOOLS_PREFIX}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX}/lib/pkgconfig ] ; then
+if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o
+     -d ${BUILD_TOOLS_PREFIX_CMAKE}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_CMAKE}/lib/pkgconfig ] ; then
     die "Ensure that these directories don't exist as they can interfere with the build:
-${BUILD_TOOLS_PREFIX}/share/pkgconfig
-${BUILD_TOOLS_PREFIX}/lib/pkgconfig"
+${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig
+${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig
+${BUILD_TOOLS_PREFIX_CMAKE}/share/pkgconfig
+${BUILD_TOOLS_PREFIX_CMAKE}/lib/pkgconfig"
 fi
 
 # TODO: Is there a better way to do this?
