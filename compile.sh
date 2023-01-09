@@ -255,13 +255,6 @@ do_autotools_build() {
 
     PROJECT=$(basename $(pwd))
 
-    # Oddball paths
-    case ${PROJECT} in
-    freeglut)
-        cd freeglut
-        ;;
-    esac
-
     do_patches "${patches_dir}"
 
     case ${PROJECT} in
@@ -1041,7 +1034,7 @@ do_autotools_build src/xorg/font/xfree86-type1 ${ARCHS_LIB}
 
 do_meson_build src/mesa/mesa ${ARCHS_LIB}
 do_meson_build src/mesa/glu ${ARCHS_LIB}
-do_autotools_build src/freeglut ${ARCHS_LIB}
+do_cmake_build src/freeglut ${ARCHS_LIB}
 
 # Manually build glxinfo and glxgears
 setup_environment ${ARCHS_BIN}
