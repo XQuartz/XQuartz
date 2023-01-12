@@ -922,7 +922,6 @@ do_autotools_build src/xorg/app/iceauth ${ARCHS_BIN}
 do_autotools_build src/xorg/app/ico ${ARCHS_BIN}
 do_autotools_build src/xorg/app/listres ${ARCHS_BIN}
 do_autotools_build src/xorg/app/luit ${ARCHS_BIN}
-do_autotools_build src/xorg/app/mkfontdir ${ARCHS_BIN}
 do_autotools_build src/xorg/app/mkfontscale ${ARCHS_BIN}
 do_autotools_build src/xorg/app/oclock ${ARCHS_BIN}
 do_autotools_build src/xorg/app/quartz-wm ${ARCHS_BIN}
