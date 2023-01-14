@@ -77,10 +77,13 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ]
     HARDENING_CFLAGS="-fstack-protector-all"
     export MACOSX_DEPLOYMENT_TARGET=10.10
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
+    # Beta builds use ASan for the main executables
+    SANITIZER_CONFIGS="EXEC"
+
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
-    HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
-    export MACOSX_DEPLOYMENT_TARGET=10.9
+    HARDENING_CFLAGS="-fstack-protector-all"
+    export MACOSX_DEPLOYMENT_TARGET=10.10
 else
     # Release-candidate and Release builds
     OPT_CFLAGS="-Os"
