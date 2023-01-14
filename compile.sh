@@ -86,8 +86,8 @@ else
     export MACOSX_DEPLOYMENT_TARGET=10.9
 fi
 
-ARCHS_BIN="arm64 x86_64"
-ARCHS_LIB="${ARCHS_BIN}"
+ARCHS_EXEC="arm64 x86_64"
+ARCHS_LIB="${ARCHS_EXEC}"
 ARCHS_LIB_BINCOMPAT_2_7="x86_64"
 
 if [ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk" ] ; then
@@ -805,7 +805,7 @@ fi
 cd ${BASE_DIR}/src/Sparkle
 do_patches ${BASE_DIR}/src/Sparkle.patches
 xcodebuild install -configuration Release \
-    ARCHS="${ARCHS_BIN}" \
+    ARCHS="${ARCHS_EXEC}" \
     DSTROOT="${DESTDIR}.Sparkle" \
     INSTALL_PATH="${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks" \
     DYLIB_INSTALL_NAME_BASE="@executable_path/../Frameworks" \
@@ -832,16 +832,16 @@ do_meson_build src/pixman LIB
 
 do_meson_build src/fontconfig LIB
 
-do_autotools_build src/xorg/util/macros BIN
+do_autotools_build src/xorg/util/macros EXEC
 
-do_autotools_build src/xorg/doc/xorg-docs BIN
-do_autotools_build src/xorg/doc/xorg-sgml-doctools BIN
+do_autotools_build src/xorg/doc/xorg-docs EXEC
+do_autotools_build src/xorg/doc/xorg-sgml-doctools EXEC
 
-do_meson_build src/xorg/proto/xorgproto BIN
-do_autotools_build src/xorg/proto/xcbproto BIN
+do_meson_build src/xorg/proto/xorgproto EXEC
+do_autotools_build src/xorg/proto/xcbproto EXEC
 
-do_autotools_build src/xorg/util/bdftopcf BIN
-do_autotools_build src/xorg/util/lndir BIN
+do_autotools_build src/xorg/util/bdftopcf EXEC
+do_autotools_build src/xorg/util/lndir EXEC
 
 do_autotools_build src/xorg/font/util LIB
 
@@ -916,87 +916,87 @@ do_autotools_build src/xorg/lib/libXfontcache LIB_BINCOMPAT_2_7
 do_autotools_build src/xorg/lib/libXTrap LIB_BINCOMPAT_2_7
 do_autotools_build src/xorg/lib/libXxf86misc LIB_BINCOMPAT_2_7
 
-do_autotools_build src/xorg/data/bitmaps BIN
+do_autotools_build src/xorg/data/bitmaps EXEC
 
-do_autotools_build src/xorg/app/appres BIN
-do_autotools_build src/xorg/app/beforelight BIN
-do_autotools_build src/xorg/app/bitmap BIN
-do_autotools_build src/xorg/app/editres BIN
-do_autotools_build src/xorg/app/fonttosfnt BIN
-do_autotools_build src/xorg/app/fslsfonts BIN
-do_autotools_build src/xorg/app/fstobdf BIN
-do_autotools_build src/xorg/app/iceauth BIN
-do_autotools_build src/xorg/app/ico BIN
-do_autotools_build src/xorg/app/listres BIN
-do_autotools_build src/xorg/app/luit BIN
-do_autotools_build src/xorg/app/mkfontscale BIN
-do_autotools_build src/xorg/app/oclock BIN
-do_autotools_build src/xorg/app/quartz-wm BIN
-do_autotools_build src/xorg/app/rgb BIN
-do_autotools_build src/xorg/app/sessreg BIN
-do_autotools_build src/xorg/app/setxkbmap BIN
-do_autotools_build src/xorg/app/showfont BIN
-do_autotools_build src/xorg/app/smproxy BIN
-do_autotools_build src/xorg/app/twm BIN
-do_autotools_build src/xorg/app/viewres BIN
-do_autotools_build src/xorg/app/xauth BIN
-do_autotools_build src/xorg/app/xbacklight BIN
-do_autotools_build src/xorg/app/xcalc BIN
-do_autotools_build src/xorg/app/xclipboard BIN
-do_autotools_build src/xorg/app/xclock BIN
-do_autotools_build src/xorg/app/xcmsdb BIN
-do_autotools_build src/xorg/app/xcompmgr BIN
-do_autotools_build src/xorg/app/xconsole BIN
-do_autotools_build src/xorg/app/xcursorgen BIN
-do_autotools_build src/xorg/app/xditview BIN
-do_autotools_build src/xorg/app/xdm BIN
-do_autotools_build src/xorg/app/xdpyinfo BIN
-do_autotools_build src/xorg/app/xedit BIN
-do_autotools_build src/xorg/app/xev BIN
-do_autotools_build src/xorg/app/xeyes BIN
-do_autotools_build src/xorg/app/xfd BIN
-do_autotools_build src/xorg/app/xfontsel BIN
-do_autotools_build src/xorg/app/xfs BIN
-do_autotools_build src/xorg/app/xfsinfo BIN
-do_autotools_build src/xorg/app/xgamma BIN
-do_autotools_build src/xorg/app/xgc BIN
-do_autotools_build src/xorg/app/xhost BIN
-do_autotools_build src/xorg/app/xinit BIN
-do_autotools_build src/xorg/app/xinput BIN
-do_autotools_build src/xorg/app/xkbcomp BIN
-do_autotools_build src/xorg/app/xkbevd BIN
-do_autotools_build src/xorg/app/xkbprint BIN
-do_autotools_build src/xorg/app/xkbutils BIN
-do_autotools_build src/xorg/app/xkill BIN
-do_autotools_build src/xorg/app/xload BIN
-do_autotools_build src/xorg/app/xlogo BIN
-do_autotools_build src/xorg/app/xlsatoms BIN
-do_autotools_build src/xorg/app/xlsclients BIN
-do_autotools_build src/xorg/app/xlsfonts BIN
-do_autotools_build src/xorg/app/xmag BIN
-do_autotools_build src/xorg/app/xman BIN
-do_autotools_build src/xorg/app/xmessage BIN
-do_autotools_build src/xorg/app/xmh BIN
-do_autotools_build src/xorg/app/xmodmap BIN
-do_autotools_build src/xorg/app/xmore BIN
-do_autotools_build src/xorg/app/xpr BIN
-do_autotools_build src/xorg/app/xprop BIN
-do_autotools_build src/xorg/app/xrandr BIN
-do_autotools_build src/xorg/app/xrdb BIN
-do_autotools_build src/xorg/app/xrefresh BIN
-do_autotools_build src/xorg/app/xscope BIN
-do_autotools_build src/xorg/app/xset BIN
-do_autotools_build src/xorg/app/xsetmode BIN
-do_autotools_build src/xorg/app/xsetpointer BIN
-do_autotools_build src/xorg/app/xsetroot BIN
-do_autotools_build src/xorg/app/xsm BIN
-do_autotools_build src/xorg/app/xstdcmap BIN
-do_autotools_build src/xorg/app/xvinfo BIN
-do_autotools_build src/xorg/app/xwd BIN
-do_autotools_build src/xorg/app/xwininfo BIN
-do_autotools_build src/xorg/app/xwud BIN
+do_autotools_build src/xorg/app/appres EXEC
+do_autotools_build src/xorg/app/beforelight EXEC
+do_autotools_build src/xorg/app/bitmap EXEC
+do_autotools_build src/xorg/app/editres EXEC
+do_autotools_build src/xorg/app/fonttosfnt EXEC
+do_autotools_build src/xorg/app/fslsfonts EXEC
+do_autotools_build src/xorg/app/fstobdf EXEC
+do_autotools_build src/xorg/app/iceauth EXEC
+do_autotools_build src/xorg/app/ico EXEC
+do_autotools_build src/xorg/app/listres EXEC
+do_autotools_build src/xorg/app/luit EXEC
+do_autotools_build src/xorg/app/mkfontscale EXEC
+do_autotools_build src/xorg/app/oclock EXEC
+do_autotools_build src/xorg/app/quartz-wm EXEC
+do_autotools_build src/xorg/app/rgb EXEC
+do_autotools_build src/xorg/app/sessreg EXEC
+do_autotools_build src/xorg/app/setxkbmap EXEC
+do_autotools_build src/xorg/app/showfont EXEC
+do_autotools_build src/xorg/app/smproxy EXEC
+do_autotools_build src/xorg/app/twm EXEC
+do_autotools_build src/xorg/app/viewres EXEC
+do_autotools_build src/xorg/app/xauth EXEC
+do_autotools_build src/xorg/app/xbacklight EXEC
+do_autotools_build src/xorg/app/xcalc EXEC
+do_autotools_build src/xorg/app/xclipboard EXEC
+do_autotools_build src/xorg/app/xclock EXEC
+do_autotools_build src/xorg/app/xcmsdb EXEC
+do_autotools_build src/xorg/app/xcompmgr EXEC
+do_autotools_build src/xorg/app/xconsole EXEC
+do_autotools_build src/xorg/app/xcursorgen EXEC
+do_autotools_build src/xorg/app/xditview EXEC
+do_autotools_build src/xorg/app/xdm EXEC
+do_autotools_build src/xorg/app/xdpyinfo EXEC
+do_autotools_build src/xorg/app/xedit EXEC
+do_autotools_build src/xorg/app/xev EXEC
+do_autotools_build src/xorg/app/xeyes EXEC
+do_autotools_build src/xorg/app/xfd EXEC
+do_autotools_build src/xorg/app/xfontsel EXEC
+do_autotools_build src/xorg/app/xfs EXEC
+do_autotools_build src/xorg/app/xfsinfo EXEC
+do_autotools_build src/xorg/app/xgamma EXEC
+do_autotools_build src/xorg/app/xgc EXEC
+do_autotools_build src/xorg/app/xhost EXEC
+do_autotools_build src/xorg/app/xinit EXEC
+do_autotools_build src/xorg/app/xinput EXEC
+do_autotools_build src/xorg/app/xkbcomp EXEC
+do_autotools_build src/xorg/app/xkbevd EXEC
+do_autotools_build src/xorg/app/xkbprint EXEC
+do_autotools_build src/xorg/app/xkbutils EXEC
+do_autotools_build src/xorg/app/xkill EXEC
+do_autotools_build src/xorg/app/xload EXEC
+do_autotools_build src/xorg/app/xlogo EXEC
+do_autotools_build src/xorg/app/xlsatoms EXEC
+do_autotools_build src/xorg/app/xlsclients EXEC
+do_autotools_build src/xorg/app/xlsfonts EXEC
+do_autotools_build src/xorg/app/xmag EXEC
+do_autotools_build src/xorg/app/xman EXEC
+do_autotools_build src/xorg/app/xmessage EXEC
+do_autotools_build src/xorg/app/xmh EXEC
+do_autotools_build src/xorg/app/xmodmap EXEC
+do_autotools_build src/xorg/app/xmore EXEC
+do_autotools_build src/xorg/app/xpr EXEC
+do_autotools_build src/xorg/app/xprop EXEC
+do_autotools_build src/xorg/app/xrandr EXEC
+do_autotools_build src/xorg/app/xrdb EXEC
+do_autotools_build src/xorg/app/xrefresh EXEC
+do_autotools_build src/xorg/app/xscope EXEC
+do_autotools_build src/xorg/app/xset EXEC
+do_autotools_build src/xorg/app/xsetmode EXEC
+do_autotools_build src/xorg/app/xsetpointer EXEC
+do_autotools_build src/xorg/app/xsetroot EXEC
+do_autotools_build src/xorg/app/xsm EXEC
+do_autotools_build src/xorg/app/xstdcmap EXEC
+do_autotools_build src/xorg/app/xvinfo EXEC
+do_autotools_build src/xorg/app/xwd EXEC
+do_autotools_build src/xorg/app/xwininfo EXEC
+do_autotools_build src/xorg/app/xwud EXEC
 
-do_autotools_build src/xterm BIN
+do_autotools_build src/xterm EXEC
 
 do_autotools_build src/xorg/data/cursors LIB
 
@@ -1043,7 +1043,7 @@ do_meson_build src/mesa/glu LIB
 do_cmake_build src/freeglut LIB
 
 # Manually build glxinfo and glxgears
-setup_environment ${config} ${ARCHS_BIN}
+setup_environment ${config} ${ARCHS_EXEC}
 cd ${BASE_DIR}/src/mesa/demos/src/xdemos
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glxinfo.c
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glinfo_common.c
@@ -1063,12 +1063,12 @@ do_meson_build src/cairo LIB
 
 do_meson_build src/xkeyboard-config LIB
 
-do_meson_build src/xorg/xserver BIN
-do_autotools_build src/xorg/driver/xf86-input-void BIN
-do_autotools_build src/xorg/driver/xf86-video-dummy BIN
-do_autotools_build src/xorg/driver/xf86-video-nested BIN
+do_meson_build src/xorg/xserver EXEC
+do_autotools_build src/xorg/driver/xf86-input-void EXEC
+do_autotools_build src/xorg/driver/xf86-video-dummy EXEC
+do_autotools_build src/xorg/driver/xf86-video-nested EXEC
 
-do_meson_build src/xquartz/xserver BIN
+do_meson_build src/xquartz/xserver EXEC
 
 # We want X to be Xquartz by default
 sudo rm -f ${DESTDIR}${PREFIX}/bin/X
@@ -1077,13 +1077,13 @@ sudo rm -f ${PREFIX}/bin/X
 sudo ln -s Xquartz ${PREFIX}/bin/X
 
 # TODO: Do we want to do anything with the tests?
-#do_meson_build src/xorg/test/rendercheck BIN
-#do_autotools_build src/xorg/test/x11perf BIN
-#do_autotools_build src/xorg/test/xhiv BIN
-#do_autotools_build src/xorg/test/xorg-gtest BIN
-#do_autotools_build src/xorg/test/xorg-integration-tests BIN
-#do_meson_build src/xorg/test/xts BIN
-#do_meson_build src/xorg/test/xtsttopng BIN
+#do_meson_build src/xorg/test/rendercheck EXEC
+#do_autotools_build src/xorg/test/x11perf EXEC
+#do_autotools_build src/xorg/test/xhiv EXEC
+#do_autotools_build src/xorg/test/xorg-gtest EXEC
+#do_autotools_build src/xorg/test/xorg-integration-tests EXEC
+#do_meson_build src/xorg/test/xts EXEC
+#do_meson_build src/xorg/test/xtsttopng EXEC
 
 do_remove_legacy_protos
 
