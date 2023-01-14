@@ -179,6 +179,8 @@ remove() {
 }
 
 setup_environment() {
+    local config=${1}
+    shift
     local archs=${@}
     local arch_flags="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET}"
     local sdkdir
@@ -273,15 +275,15 @@ do_autotools_build() {
 
     if ! has i386 ${archs} ; then
         # x86_64 and arm64 can always be built together
-        do_autotools_build_sub fat ${confopt_file} ${archs}
+        do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
     elif [ -z "${SANITIZER_LIBS}" ] && ! has arm64 ${archs} ; then
         # i386 and x86_64 can be built together (against the older SDK) if we
         # don't also need an arm64 slice (eg: legacy bincompat dylibs)
-        do_autotools_build_sub fat ${confopt_file} ${archs}
+        do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
     else
         # We need to build an x86_64 slice along with i386 in order for it to execute on Apple Silico Macs
-        do_autotools_build_sub noarm "${confopt_file}" $(remove arm64 ${archs})
-        do_autotools_build_sub no32 "${confopt_file}" $(remove i386 ${archs})
+        do_autotools_build_sub noarm "${confopt_file}" ${config} $(remove arm64 ${archs})
+        do_autotools_build_sub no32 "${confopt_file}" ${config} $(remove i386 ${archs})
         do_lipo noarm i386 no32 "$(remove i386 ${archs})"
     fi
 
@@ -318,9 +320,11 @@ do_autotools_build_sub() {
     shift
     local confopt_file=${1}
     shift
+    local config=${1}
+    shift
     local archs=${@}
 
-    setup_environment ${archs} || die "Failed to setup environment"
+    setup_environment ${config} ${archs} || die "Failed to setup environment"
 
     ${SCAN_BUILD} ./configure --prefix=${PREFIX} --disable-static --enable-docs --enable-devel-docs --enable-builddocs --with-doxygen --with-xmlto --with-fop $(eval echo $(cat "${confopt_file}")) || die "Could not configure in $(pwd)"
 
@@ -407,7 +411,7 @@ do_meson_build() {
     # See https://mesonbuild.com/Cross-compilation.html
     # https://github.com/mesonbuild/meson/issues/8206
     for arch in ${archs} ; do
-        setup_environment ${arch} || die "Failed to setup environment"
+        setup_environment ${config} ${arch} || die "Failed to setup environment"
         meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${confopt_file}")) --cross-file ${meson_cross_dir}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
         ninja --verbose -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
@@ -465,7 +469,7 @@ do_cmake_build() {
     sudo rm -rf "${DESTDIR}".lipo.*
 
     for arch in ${archs} ; do
-        setup_environment ${arch} || die "Failed to setup environment"
+        setup_environment ${config} ${arch} || die "Failed to setup environment"
         mkdir -p "${project_dir}/build.${arch}" || die "Failed to create build directory: ${project_dir}/build.${arch}"
         cd "${project_dir}/build.${arch}" || die "Could not change directory to ${project_dir}/build.${arch}"
 
@@ -1039,7 +1043,7 @@ do_meson_build src/mesa/glu LIB
 do_cmake_build src/freeglut LIB
 
 # Manually build glxinfo and glxgears
-setup_environment ${ARCHS_BIN}
+setup_environment ${config} ${ARCHS_BIN}
 cd ${BASE_DIR}/src/mesa/demos/src/xdemos
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glxinfo.c
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glinfo_common.c
