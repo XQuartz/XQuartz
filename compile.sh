@@ -56,18 +56,20 @@ else
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/release.xml"
 fi
 
+SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+
+SANITIZER_CFLAGS="-fsanitize=address"
+SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
+
+SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
+for dylib in ${SANITIZER_LIBS} ; do
+    SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
+done
+
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     # Alpha builds use ASan
-    SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
-
-    SANITIZER_CFLAGS="-fsanitize=address"
-    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
-    SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
-
-    SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
-    for dylib in ${SANITIZER_LIBS} ; do
-        SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
-    done
+    SANITIZER_CONFIGS="EXEC LIB"
 
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
@@ -197,7 +199,7 @@ setup_environment() {
     export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
     export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
 
-    if ! has i386 ${archs} ; then
+    if ! has i386 ${archs} && has ${config} ${SANITIZER_CONFIGS}; then
         export CFLAGS="${CFLAGS} ${SANITIZER_CFLAGS}"
         export LDFLAGS="${LDFLAGS} ${SANITIZER_LDFLAGS}"
     fi
@@ -276,7 +278,7 @@ do_autotools_build() {
     if ! has i386 ${archs} ; then
         # x86_64 and arm64 can always be built together
         do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
-    elif [ -z "${SANITIZER_LIBS}" ] && ! has arm64 ${archs} ; then
+    elif ! has arm64 ${archs} && ! has ${config} ${SANITIZER_CONFIGS} ; then
         # i386 and x86_64 can be built together (against the older SDK) if we
         # don't also need an arm64 slice (eg: legacy bincompat dylibs)
         do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
@@ -300,7 +302,7 @@ do_autotools_build() {
     # Remove LC_RPATHs that the compiler adds for sanitizers (we set our own)
     find "${DESTDIR}.lipo.fat" -type f | while read file ; do
         if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
-            if [ -n "${SANITIZER_LIB_DIR_SRC}" ] ; then
+            if has ${config} ${SANITIZER_CONFIGS} ; then
                 sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
             fi
         fi
@@ -418,11 +420,13 @@ do_meson_build() {
 
         # Meson removes the LC_RPATH that we asked for.  This hack re-adds it
         # cf: https://github.com/mesonbuild/meson/issues/11109
-        find "${DESTDIR}.lipo.${arch}" -type f | while read file ; do
-            if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
-                sudo install_name_tool -add_rpath "${SANITIZER_LIB_DIR}" "${file}"
-            fi
-        done
+        if has ${config} ${SANITIZER_CONFIGS} ; then
+            find "${DESTDIR}.lipo.${arch}" -type f | while read file ; do
+                if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+                    sudo install_name_tool -add_rpath "${SANITIZER_LIB_DIR}" "${file}"
+                fi
+            done
+        fi
 
         # Prune the .la files that we don't want
         sudo rm -f "${DESTDIR}.lipo.${arch}${PREFIX}/lib"/*.la
@@ -608,7 +612,7 @@ do_strip_sign_dsyms() {
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
-            if [ -z "${SANITIZER_LIBS}" ] ; then
+            if [ -z "${SANITIZER_CONFIGS}" ] ; then
                 sudo strip -S "${file}"
             fi
 
@@ -621,7 +625,7 @@ do_strip_sign_dsyms() {
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
-            if [ -z "${SANITIZER_LIBS}" ] ; then
+            if [ -z "${SANITIZER_CONFIGS}" ] ; then
                 sudo strip -S "${file}"
             fi
         fi
@@ -791,7 +795,7 @@ fi
 sudo ditto ${BASE_DIR}/base ${DESTDIR}
 sudo ditto ${BASE_DIR}/base /
 
-if [ -n "${SANITIZER_LIBS}" ] ; then
+if [ -n "${SANITIZER_CONFIGS}" ] ; then
     sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${SANITIZER_LIB_DIR}
     sudo install -o root -g wheel -m 0755 -d ${SANITIZER_LIB_DIR}
 
