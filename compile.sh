@@ -242,8 +242,9 @@ do_patches() {
 #   SKIP_AUTORECONF can be set to YES
 do_autotools_build() {
     local project_dir="${BASE_DIR}/${1}"
-    shift
-    local archs=${@}
+    local config=${2}
+    local variable="ARCHS_${config}"
+    local archs=${!variable}
 
     local patches_dir="${project_dir}.patches"
     local confopt_file="${project_dir}.confopt"
@@ -381,8 +382,9 @@ do_lipo() {
 
 do_meson_build() {
     local project_dir="${BASE_DIR}/${1}"
-    shift
-    local archs=${@}
+    local config=${2}
+    local variable="ARCHS_${config}"
+    local archs=${!variable}
 
     local patches_dir="${project_dir}.patches"
     local confopt_file="${project_dir}.confopt"
@@ -443,8 +445,9 @@ do_meson_build() {
 
 do_cmake_build() {
     local project_dir="${BASE_DIR}/${1}"
-    shift
-    local archs=${@}
+    local config=${2}
+    local variable="ARCHS_${config}"
+    local archs=${!variable}
 
     local patches_dir="${project_dir}.patches"
     local confopt_file="${project_dir}.confopt"
@@ -810,230 +813,230 @@ sudo ditto ${DESTDIR}.Sparkle ${DESTDIR}
 sudo ditto ${DESTDIR}.Sparkle /
 
 # Bincompat versions of libpng
-do_autotools_build src/libpng/libpng12 ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/libpng/libpng14 ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/libpng/libpng15 ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/libpng/libpng12 LIB_BINCOMPAT_2_7
+do_autotools_build src/libpng/libpng14 LIB_BINCOMPAT_2_7
+do_autotools_build src/libpng/libpng15 LIB_BINCOMPAT_2_7
 sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/bin/libpng*-config
 sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng1?.dylib
 sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng12.0.*.dylib
 sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
 
-do_autotools_build src/libpng/libpng16 ${ARCHS_LIB}
+do_autotools_build src/libpng/libpng16 LIB
 
-do_meson_build src/freetype2 ${ARCHS_LIB}
-do_meson_build src/pixman ${ARCHS_LIB}
+do_meson_build src/freetype2 LIB
+do_meson_build src/pixman LIB
 
-do_meson_build src/fontconfig ${ARCHS_LIB}
+do_meson_build src/fontconfig LIB
 
-do_autotools_build src/xorg/util/macros ${ARCHS_BIN}
+do_autotools_build src/xorg/util/macros BIN
 
-do_autotools_build src/xorg/doc/xorg-docs ${ARCHS_BIN}
-do_autotools_build src/xorg/doc/xorg-sgml-doctools ${ARCHS_BIN}
+do_autotools_build src/xorg/doc/xorg-docs BIN
+do_autotools_build src/xorg/doc/xorg-sgml-doctools BIN
 
-do_meson_build src/xorg/proto/xorgproto ${ARCHS_BIN}
-do_autotools_build src/xorg/proto/xcbproto ${ARCHS_BIN}
+do_meson_build src/xorg/proto/xorgproto BIN
+do_autotools_build src/xorg/proto/xcbproto BIN
 
-do_autotools_build src/xorg/util/bdftopcf ${ARCHS_BIN}
-do_autotools_build src/xorg/util/lndir ${ARCHS_BIN}
+do_autotools_build src/xorg/util/bdftopcf BIN
+do_autotools_build src/xorg/util/lndir BIN
 
-do_autotools_build src/xorg/font/util ${ARCHS_LIB}
+do_autotools_build src/xorg/font/util LIB
 
-do_autotools_build src/xorg/lib/libxtrans ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/pthread-stubs ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libxtrans LIB
+do_autotools_build src/xorg/lib/pthread-stubs LIB
 
-do_autotools_build src/xorg/lib/libXau ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXau LIB
 
-do_autotools_build src/xorg/lib/libxcb ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-util ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-render-util ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-image ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-cursor ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-errors ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-keysyms ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxcb-wm ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libxcb LIB
+do_autotools_build src/xorg/lib/libxcb-util LIB
+do_autotools_build src/xorg/lib/libxcb-render-util LIB
+do_autotools_build src/xorg/lib/libxcb-image LIB
+do_autotools_build src/xorg/lib/libxcb-cursor LIB
+do_autotools_build src/xorg/lib/libxcb-errors LIB
+do_autotools_build src/xorg/lib/libxcb-keysyms LIB
+do_autotools_build src/xorg/lib/libxcb-wm LIB
 
-do_autotools_build src/xorg/lib/libXdmcp ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libX11 ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXext ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libAppleWM ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libdmx ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libfontenc ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxshmfence ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libFS ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libICE ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libSM ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXdmcp LIB
+do_autotools_build src/xorg/lib/libX11 LIB
+do_autotools_build src/xorg/lib/libXext LIB
+do_autotools_build src/xorg/lib/libAppleWM LIB
+do_autotools_build src/xorg/lib/libdmx LIB
+do_autotools_build src/xorg/lib/libfontenc LIB
+do_autotools_build src/xorg/lib/libxshmfence LIB
+do_autotools_build src/xorg/lib/libFS LIB
+do_autotools_build src/xorg/lib/libICE LIB
+do_autotools_build src/xorg/lib/libSM LIB
 
 # Bincompat
-do_autotools_build src/xorg/lib/libXt-flatnamespace ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXt7-stub ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXt-flatnamespace LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXt7-stub LIB_BINCOMPAT_2_7
 sudo install -o root -g wheel -m 0755 -d ${DESTDIR}${PREFIX}/lib/flat_namespace
 sudo mv ${DESTDIR}${PREFIX}/lib/libXt.6.dylib ${DESTDIR}${PREFIX}/lib/flat_namespace
 sudo install -o root -g wheel -m 0755 -d ${PREFIX}/lib/flat_namespace
 sudo mv ${PREFIX}/lib/libXt.6.dylib ${PREFIX}/lib/flat_namespace
 
-do_autotools_build src/xorg/lib/libXt ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXmu ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXpm ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXt LIB
+do_autotools_build src/xorg/lib/libXmu LIB
+do_autotools_build src/xorg/lib/libXpm LIB
 
 # Bincompat
-do_autotools_build src/xorg/lib/libXaw8 ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libXaw8 LIB_BINCOMPAT_2_7
 
-do_autotools_build src/xorg/lib/libXaw ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXaw3d ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXfixes ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXcomposite ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXrender ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXdamage ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXcursor ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXfont ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXfont2 ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXxf86vm ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXft ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXi ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXinerama ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libxkbfile ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXrandr ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXpresent ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXres ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXScrnSaver ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXtst ${ARCHS_LIB}
-do_autotools_build src/xorg/lib/libXv ${ARCHS_LIB}
-do_meson_build src/xorg/lib/libXvMC ${ARCHS_LIB}
-do_meson_build src/xorg/lib/libxcvt ${ARCHS_LIB}
+do_autotools_build src/xorg/lib/libXaw LIB
+do_autotools_build src/xorg/lib/libXaw3d LIB
+do_autotools_build src/xorg/lib/libXfixes LIB
+do_autotools_build src/xorg/lib/libXcomposite LIB
+do_autotools_build src/xorg/lib/libXrender LIB
+do_autotools_build src/xorg/lib/libXdamage LIB
+do_autotools_build src/xorg/lib/libXcursor LIB
+do_autotools_build src/xorg/lib/libXfont LIB
+do_autotools_build src/xorg/lib/libXfont2 LIB
+do_autotools_build src/xorg/lib/libXxf86vm LIB
+do_autotools_build src/xorg/lib/libXft LIB
+do_autotools_build src/xorg/lib/libXi LIB
+do_autotools_build src/xorg/lib/libXinerama LIB
+do_autotools_build src/xorg/lib/libxkbfile LIB
+do_autotools_build src/xorg/lib/libXrandr LIB
+do_autotools_build src/xorg/lib/libXpresent LIB
+do_autotools_build src/xorg/lib/libXres LIB
+do_autotools_build src/xorg/lib/libXScrnSaver LIB
+do_autotools_build src/xorg/lib/libXtst LIB
+do_autotools_build src/xorg/lib/libXv LIB
+do_meson_build src/xorg/lib/libXvMC LIB
+do_meson_build src/xorg/lib/libxcvt LIB
 
 # Bincompat
-do_autotools_build src/xorg/lib/libxkbui ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXp ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXevie ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXfontcache ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXTrap ${ARCHS_LIB_BINCOMPAT_2_7}
-do_autotools_build src/xorg/lib/libXxf86misc ${ARCHS_LIB_BINCOMPAT_2_7}
+do_autotools_build src/xorg/lib/libxkbui LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXp LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXevie LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXfontcache LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXTrap LIB_BINCOMPAT_2_7
+do_autotools_build src/xorg/lib/libXxf86misc LIB_BINCOMPAT_2_7
 
-do_autotools_build src/xorg/data/bitmaps ${ARCHS_BIN}
+do_autotools_build src/xorg/data/bitmaps BIN
 
-do_autotools_build src/xorg/app/appres ${ARCHS_BIN}
-do_autotools_build src/xorg/app/beforelight ${ARCHS_BIN}
-do_autotools_build src/xorg/app/bitmap ${ARCHS_BIN}
-do_autotools_build src/xorg/app/editres ${ARCHS_BIN}
-do_autotools_build src/xorg/app/fonttosfnt ${ARCHS_BIN}
-do_autotools_build src/xorg/app/fslsfonts ${ARCHS_BIN}
-do_autotools_build src/xorg/app/fstobdf ${ARCHS_BIN}
-do_autotools_build src/xorg/app/iceauth ${ARCHS_BIN}
-do_autotools_build src/xorg/app/ico ${ARCHS_BIN}
-do_autotools_build src/xorg/app/listres ${ARCHS_BIN}
-do_autotools_build src/xorg/app/luit ${ARCHS_BIN}
-do_autotools_build src/xorg/app/mkfontscale ${ARCHS_BIN}
-do_autotools_build src/xorg/app/oclock ${ARCHS_BIN}
-do_autotools_build src/xorg/app/quartz-wm ${ARCHS_BIN}
-do_autotools_build src/xorg/app/rgb ${ARCHS_BIN}
-do_autotools_build src/xorg/app/sessreg ${ARCHS_BIN}
-do_autotools_build src/xorg/app/setxkbmap ${ARCHS_BIN}
-do_autotools_build src/xorg/app/showfont ${ARCHS_BIN}
-do_autotools_build src/xorg/app/smproxy ${ARCHS_BIN}
-do_autotools_build src/xorg/app/twm ${ARCHS_BIN}
-do_autotools_build src/xorg/app/viewres ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xauth ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xbacklight ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xcalc ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xclipboard ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xclock ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xcmsdb ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xcompmgr ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xconsole ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xcursorgen ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xditview ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xdm ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xdpyinfo ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xedit ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xev ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xeyes ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xfd ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xfontsel ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xfs ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xfsinfo ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xgamma ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xgc ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xhost ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xinit ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xinput ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xkbcomp ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xkbevd ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xkbprint ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xkbutils ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xkill ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xload ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xlogo ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xlsatoms ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xlsclients ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xlsfonts ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xmag ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xman ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xmessage ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xmh ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xmodmap ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xmore ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xpr ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xprop ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xrandr ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xrdb ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xrefresh ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xscope ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xset ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xsetmode ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xsetpointer ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xsetroot ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xsm ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xstdcmap ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xvinfo ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xwd ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xwininfo ${ARCHS_BIN}
-do_autotools_build src/xorg/app/xwud ${ARCHS_BIN}
+do_autotools_build src/xorg/app/appres BIN
+do_autotools_build src/xorg/app/beforelight BIN
+do_autotools_build src/xorg/app/bitmap BIN
+do_autotools_build src/xorg/app/editres BIN
+do_autotools_build src/xorg/app/fonttosfnt BIN
+do_autotools_build src/xorg/app/fslsfonts BIN
+do_autotools_build src/xorg/app/fstobdf BIN
+do_autotools_build src/xorg/app/iceauth BIN
+do_autotools_build src/xorg/app/ico BIN
+do_autotools_build src/xorg/app/listres BIN
+do_autotools_build src/xorg/app/luit BIN
+do_autotools_build src/xorg/app/mkfontscale BIN
+do_autotools_build src/xorg/app/oclock BIN
+do_autotools_build src/xorg/app/quartz-wm BIN
+do_autotools_build src/xorg/app/rgb BIN
+do_autotools_build src/xorg/app/sessreg BIN
+do_autotools_build src/xorg/app/setxkbmap BIN
+do_autotools_build src/xorg/app/showfont BIN
+do_autotools_build src/xorg/app/smproxy BIN
+do_autotools_build src/xorg/app/twm BIN
+do_autotools_build src/xorg/app/viewres BIN
+do_autotools_build src/xorg/app/xauth BIN
+do_autotools_build src/xorg/app/xbacklight BIN
+do_autotools_build src/xorg/app/xcalc BIN
+do_autotools_build src/xorg/app/xclipboard BIN
+do_autotools_build src/xorg/app/xclock BIN
+do_autotools_build src/xorg/app/xcmsdb BIN
+do_autotools_build src/xorg/app/xcompmgr BIN
+do_autotools_build src/xorg/app/xconsole BIN
+do_autotools_build src/xorg/app/xcursorgen BIN
+do_autotools_build src/xorg/app/xditview BIN
+do_autotools_build src/xorg/app/xdm BIN
+do_autotools_build src/xorg/app/xdpyinfo BIN
+do_autotools_build src/xorg/app/xedit BIN
+do_autotools_build src/xorg/app/xev BIN
+do_autotools_build src/xorg/app/xeyes BIN
+do_autotools_build src/xorg/app/xfd BIN
+do_autotools_build src/xorg/app/xfontsel BIN
+do_autotools_build src/xorg/app/xfs BIN
+do_autotools_build src/xorg/app/xfsinfo BIN
+do_autotools_build src/xorg/app/xgamma BIN
+do_autotools_build src/xorg/app/xgc BIN
+do_autotools_build src/xorg/app/xhost BIN
+do_autotools_build src/xorg/app/xinit BIN
+do_autotools_build src/xorg/app/xinput BIN
+do_autotools_build src/xorg/app/xkbcomp BIN
+do_autotools_build src/xorg/app/xkbevd BIN
+do_autotools_build src/xorg/app/xkbprint BIN
+do_autotools_build src/xorg/app/xkbutils BIN
+do_autotools_build src/xorg/app/xkill BIN
+do_autotools_build src/xorg/app/xload BIN
+do_autotools_build src/xorg/app/xlogo BIN
+do_autotools_build src/xorg/app/xlsatoms BIN
+do_autotools_build src/xorg/app/xlsclients BIN
+do_autotools_build src/xorg/app/xlsfonts BIN
+do_autotools_build src/xorg/app/xmag BIN
+do_autotools_build src/xorg/app/xman BIN
+do_autotools_build src/xorg/app/xmessage BIN
+do_autotools_build src/xorg/app/xmh BIN
+do_autotools_build src/xorg/app/xmodmap BIN
+do_autotools_build src/xorg/app/xmore BIN
+do_autotools_build src/xorg/app/xpr BIN
+do_autotools_build src/xorg/app/xprop BIN
+do_autotools_build src/xorg/app/xrandr BIN
+do_autotools_build src/xorg/app/xrdb BIN
+do_autotools_build src/xorg/app/xrefresh BIN
+do_autotools_build src/xorg/app/xscope BIN
+do_autotools_build src/xorg/app/xset BIN
+do_autotools_build src/xorg/app/xsetmode BIN
+do_autotools_build src/xorg/app/xsetpointer BIN
+do_autotools_build src/xorg/app/xsetroot BIN
+do_autotools_build src/xorg/app/xsm BIN
+do_autotools_build src/xorg/app/xstdcmap BIN
+do_autotools_build src/xorg/app/xvinfo BIN
+do_autotools_build src/xorg/app/xwd BIN
+do_autotools_build src/xorg/app/xwininfo BIN
+do_autotools_build src/xorg/app/xwud BIN
 
-do_autotools_build src/xterm ${ARCHS_BIN}
+do_autotools_build src/xterm BIN
 
-do_autotools_build src/xorg/data/cursors ${ARCHS_LIB}
+do_autotools_build src/xorg/data/cursors LIB
 
-do_autotools_build src/xorg/font/encodings ${ARCHS_LIB}
-do_autotools_build src/xorg/font/adobe-100dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/adobe-75dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/adobe-utopia-100dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/adobe-utopia-75dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/adobe-utopia-type1 ${ARCHS_LIB}
-do_autotools_build src/xorg/font/alias ${ARCHS_LIB}
-do_autotools_build src/xorg/font/arabic-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-100dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-75dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-lucidatypewriter-100dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-lucidatypewriter-75dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-ttf ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bh-type1 ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bitstream-100dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bitstream-75dpi ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bitstream-speedo ${ARCHS_LIB}
-do_autotools_build src/xorg/font/bitstream-type1 ${ARCHS_LIB}
-do_autotools_build src/xorg/font/cronyx-cyrillic ${ARCHS_LIB}
-do_autotools_build src/xorg/font/cursor-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/daewoo-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/dec-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/ibm-type1 ${ARCHS_LIB}
-do_autotools_build src/xorg/font/isas-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/jis-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/micro-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/misc-cyrillic ${ARCHS_LIB}
-do_autotools_build src/xorg/font/misc-ethiopic ${ARCHS_LIB}
-do_autotools_build src/xorg/font/misc-meltho ${ARCHS_LIB}
-do_autotools_build src/xorg/font/misc-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/mutt-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/schumacher-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/screen-cyrillic ${ARCHS_LIB}
-do_autotools_build src/xorg/font/sony-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/sun-misc ${ARCHS_LIB}
-do_autotools_build src/xorg/font/winitzki-cyrillic ${ARCHS_LIB}
-do_autotools_build src/xorg/font/xfree86-type1 ${ARCHS_LIB}
+do_autotools_build src/xorg/font/encodings LIB
+do_autotools_build src/xorg/font/adobe-100dpi LIB
+do_autotools_build src/xorg/font/adobe-75dpi LIB
+do_autotools_build src/xorg/font/adobe-utopia-100dpi LIB
+do_autotools_build src/xorg/font/adobe-utopia-75dpi LIB
+do_autotools_build src/xorg/font/adobe-utopia-type1 LIB
+do_autotools_build src/xorg/font/alias LIB
+do_autotools_build src/xorg/font/arabic-misc LIB
+do_autotools_build src/xorg/font/bh-100dpi LIB
+do_autotools_build src/xorg/font/bh-75dpi LIB
+do_autotools_build src/xorg/font/bh-lucidatypewriter-100dpi LIB
+do_autotools_build src/xorg/font/bh-lucidatypewriter-75dpi LIB
+do_autotools_build src/xorg/font/bh-ttf LIB
+do_autotools_build src/xorg/font/bh-type1 LIB
+do_autotools_build src/xorg/font/bitstream-100dpi LIB
+do_autotools_build src/xorg/font/bitstream-75dpi LIB
+do_autotools_build src/xorg/font/bitstream-speedo LIB
+do_autotools_build src/xorg/font/bitstream-type1 LIB
+do_autotools_build src/xorg/font/cronyx-cyrillic LIB
+do_autotools_build src/xorg/font/cursor-misc LIB
+do_autotools_build src/xorg/font/daewoo-misc LIB
+do_autotools_build src/xorg/font/dec-misc LIB
+do_autotools_build src/xorg/font/ibm-type1 LIB
+do_autotools_build src/xorg/font/isas-misc LIB
+do_autotools_build src/xorg/font/jis-misc LIB
+do_autotools_build src/xorg/font/micro-misc LIB
+do_autotools_build src/xorg/font/misc-cyrillic LIB
+do_autotools_build src/xorg/font/misc-ethiopic LIB
+do_autotools_build src/xorg/font/misc-meltho LIB
+do_autotools_build src/xorg/font/misc-misc LIB
+do_autotools_build src/xorg/font/mutt-misc LIB
+do_autotools_build src/xorg/font/schumacher-misc LIB
+do_autotools_build src/xorg/font/screen-cyrillic LIB
+do_autotools_build src/xorg/font/sony-misc LIB
+do_autotools_build src/xorg/font/sun-misc LIB
+do_autotools_build src/xorg/font/winitzki-cyrillic LIB
+do_autotools_build src/xorg/font/xfree86-type1 LIB
 
-do_meson_build src/mesa/mesa ${ARCHS_LIB}
-do_meson_build src/mesa/glu ${ARCHS_LIB}
-do_cmake_build src/freeglut ${ARCHS_LIB}
+do_meson_build src/mesa/mesa LIB
+do_meson_build src/mesa/glu LIB
+do_cmake_build src/freeglut LIB
 
 # Manually build glxinfo and glxgears
 setup_environment ${ARCHS_BIN}
@@ -1052,16 +1055,16 @@ sudo install -o root -g wheel -m 0755 -d ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxinfo ${PREFIX}/bin
 sudo install -o root -g wheel -m 0755 glxgears ${PREFIX}/bin
 
-do_meson_build src/cairo ${ARCHS_LIB}
+do_meson_build src/cairo LIB
 
-do_meson_build src/xkeyboard-config ${ARCHS_LIB}
+do_meson_build src/xkeyboard-config LIB
 
-do_meson_build src/xorg/xserver ${ARCHS_BIN}
-do_autotools_build src/xorg/driver/xf86-input-void ${ARCHS_BIN}
-do_autotools_build src/xorg/driver/xf86-video-dummy ${ARCHS_BIN}
-do_autotools_build src/xorg/driver/xf86-video-nested ${ARCHS_BIN}
+do_meson_build src/xorg/xserver BIN
+do_autotools_build src/xorg/driver/xf86-input-void BIN
+do_autotools_build src/xorg/driver/xf86-video-dummy BIN
+do_autotools_build src/xorg/driver/xf86-video-nested BIN
 
-do_meson_build src/xquartz/xserver ${ARCHS_BIN}
+do_meson_build src/xquartz/xserver BIN
 
 # We want X to be Xquartz by default
 sudo rm -f ${DESTDIR}${PREFIX}/bin/X
@@ -1070,13 +1073,13 @@ sudo rm -f ${PREFIX}/bin/X
 sudo ln -s Xquartz ${PREFIX}/bin/X
 
 # TODO: Do we want to do anything with the tests?
-#do_meson_build src/xorg/test/rendercheck ${ARCHS_BIN}
-#do_autotools_build src/xorg/test/x11perf ${ARCHS_BIN}
-#do_autotools_build src/xorg/test/xhiv ${ARCHS_BIN}
-#do_autotools_build src/xorg/test/xorg-gtest ${ARCHS_BIN}
-#do_autotools_build src/xorg/test/xorg-integration-tests ${ARCHS_BIN}
-#do_meson_build src/xorg/test/xts ${ARCHS_BIN}
-#do_meson_build src/xorg/test/xtsttopng ${ARCHS_BIN}
+#do_meson_build src/xorg/test/rendercheck BIN
+#do_autotools_build src/xorg/test/x11perf BIN
+#do_autotools_build src/xorg/test/xhiv BIN
+#do_autotools_build src/xorg/test/xorg-gtest BIN
+#do_autotools_build src/xorg/test/xorg-integration-tests BIN
+#do_meson_build src/xorg/test/xts BIN
+#do_meson_build src/xorg/test/xtsttopng BIN
 
 do_remove_legacy_protos
 
