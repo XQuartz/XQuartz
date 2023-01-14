@@ -57,33 +57,33 @@ else
 fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
-     # Alpha builds use ASan
-     SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+    # Alpha builds use ASan
+    SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
 
-     SANITIZER_CFLAGS="-fsanitize=address"
-     SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
-     SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
+    SANITIZER_CFLAGS="-fsanitize=address"
+    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+    SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
 
-     SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
-     for dylib in ${SANITIZER_LIBS} ; do
-         SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
-     done
+    SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
+    for dylib in ${SANITIZER_LIBS} ; do
+        SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
+    done
 
-     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
+    OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
-     # ASan requires use to not use -D_FORTIFY_SOURCE=2, or it can lead to false-positives
-     HARDENING_CFLAGS="-fstack-protector-all"
-     export MACOSX_DEPLOYMENT_TARGET=10.10
+    # ASan requires use to not use -D_FORTIFY_SOURCE=2, or it can lead to false-positives
+    HARDENING_CFLAGS="-fstack-protector-all"
+    export MACOSX_DEPLOYMENT_TARGET=10.10
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
-     # Beta builds use full stack protection and disable optimizations
-     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
-     HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
-     export MACOSX_DEPLOYMENT_TARGET=10.9
+    # Beta builds use full stack protection and disable optimizations
+    OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
+    HARDENING_CFLAGS="-fstack-protector-all -D_FORTIFY_SOURCE=2"
+    export MACOSX_DEPLOYMENT_TARGET=10.9
 else
-     # Release-candidate and Release builds
-     OPT_CFLAGS="-Os"
-     HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
-     export MACOSX_DEPLOYMENT_TARGET=10.9
+    # Release-candidate and Release builds
+    OPT_CFLAGS="-Os"
+    HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
+    export MACOSX_DEPLOYMENT_TARGET=10.9
 fi
 
 ARCHS_BIN="arm64 x86_64"
