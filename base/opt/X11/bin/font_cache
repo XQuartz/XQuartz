@@ -147,6 +147,14 @@ setup_fontdirs() {
         ${X11DIR}/bin/lndir /System/Library/Fonts ${X11DIR}/share/system_fonts
     fi
 
+    # Remove problematic system fonts from the shadow
+    # https://github.com/XQuartz/XQuartz/issues/304
+    PROBLEM_FONTS="Supplemental/NISC18030.ttf"
+    for font in ${PROBLEM_FONTS} ; do
+        file="${X11DIR}/share/system_fonts/${font}"
+        [[ -h "${file}" ]] && rm "${file}"
+    done
+
     OIFS=$IFS
     IFS='
 '
