@@ -83,6 +83,8 @@ do_macports_preifx() {
     local BUILD_TOOLS_PREFIX=$1
     shift
 
+    push_pkgconfig ${BUILD_TOOLS_PREFIX}
+
     bootstrap_base "${BUILD_TOOLS_PREFIX}"
 
     export PATH="${BUILD_TOOLS_PREFIX}/bin:${BASE_PATH}"
@@ -92,6 +94,8 @@ do_macports_preifx() {
 
     # cmake can mess up the way meson searches for dependnecies, so deactivate it and the rest of the recursive leaves
     sudo ${BUILD_TOOLS_PREFIX}/bin/port deactivate rleaves
+
+    pop_pkgconfig ${BUILD_TOOLS_PREFIX}
 
     echo "MacPorts toolchain and Sparkle signing tools successfully installed in ${BUILD_TOOLS_PREFIX}"
 
@@ -108,6 +112,4 @@ done
 
 sudo ${BUILD_TOOLS_PREFIX_STD}/bin/port select python3 python310 || die "Could not select python3"
 
-exit
-
-do_sign_update
+#do_sign_update
