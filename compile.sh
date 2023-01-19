@@ -776,7 +776,7 @@ do_dist() {
     git submodule | egrep -v '(libXt-flatnamespace|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
-if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o
+if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o \
      -d ${BUILD_TOOLS_PREFIX_CMAKE}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_CMAKE}/lib/pkgconfig ] ; then
     die "Ensure that these directories don't exist as they can interfere with the build:
 ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig
