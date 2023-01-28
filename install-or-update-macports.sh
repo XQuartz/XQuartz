@@ -15,7 +15,7 @@ BUILD_TOOLS_PREFIX_STD="/opt/buildX11"
 BUILD_TOOLS_PREFIX_CMAKE="/opt/buildX11-cmake"
 
 # Note that docbook-utils is needed for fontconfig docs, but we're skipping it here because of https://trac.macports.org/ticket/62354
-PORTS_STD="autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc"
+PORTS_STD="autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc graphviz"
 PORTS_CMAKE="cmake"
 
 BASE_PATH="/usr/bin:/bin:/usr/sbin:/sbin"
