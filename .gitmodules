@@ -1,9 +1,6 @@
 [submodule "src/xorg/app/appres"]
 	path = src/xorg/app/appres
 	url = https://gitlab.freedesktop.org/xorg/app/appres.git
-[submodule "src/xorg/app/beforelight"]
-	path = src/xorg/app/beforelight
-	url = https://gitlab.freedesktop.org/xorg/app/beforelight.git
 [submodule "src/xorg/app/bitmap"]
 	path = src/xorg/app/bitmap
 	url = https://gitlab.freedesktop.org/xorg/app/bitmap.git
