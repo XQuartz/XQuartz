@@ -15,7 +15,7 @@ BUILD_TOOLS_PREFIX_STD="/opt/buildX11"
 BUILD_TOOLS_PREFIX_CMAKE="/opt/buildX11-cmake"
 
 # Note that docbook-utils is needed for fontconfig docs, but we're skipping it here because of https://trac.macports.org/ticket/62354
-PORTS_STD="autoconf automake pkgconfig libtool py310-mako meson xmlto asciidoc doxygen fop groff gtk-doc graphviz"
+PORTS_STD="autoconf automake pkgconfig libtool py311-mako meson xmlto asciidoc doxygen fop groff gtk-doc graphviz"
 PORTS_CMAKE="cmake"
 
 BASE_PATH="/usr/bin:/bin:/usr/sbin:/sbin"
@@ -110,6 +110,6 @@ for CONFIG in ${BUILD_TOOLS_CONFIGS} ; do
    do_macports_preifx "${!BUILD_TOOLS_PREFIX_VAR}" ${!PORTS_VAR}
 done
 
-sudo ${BUILD_TOOLS_PREFIX_STD}/bin/port select python3 python310 || die "Could not select python3"
+sudo ${BUILD_TOOLS_PREFIX_STD}/bin/port select python3 python311 || die "Could not select python3"
 
 #do_sign_update
