@@ -550,6 +550,11 @@ do_checks() {
             [ "${file/ubsan/}" != "${file}" ] && continue
             [ "${file/tsan/}" != "${file}" ] && continue
 
+            # Ignore libepoll.  It uses clock_gettime / CLOCK_MONOTONIC, which was added in macOS 10.12
+            # libepoll is being added to support wayland development, and we'll probably bump the minimum
+            # supported version of macOS by the time that actually ships.
+            [ "${file/epoll}" != "${file}" ] && continue
+
             # Ignore _voucher* symbols (mig) and symbols from libc++ and libobjc that the compiler might have added
             if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "_pthread_attr_set_qos_class_np" | grep -v "_pthread_mutexattr" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "(undefined) weak external" ; then
                 die "=== ${file} has a weak link ==="
@@ -833,6 +838,8 @@ sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng12.0.*.dylib
 sudo rm -f {${DESTDIR}${PREFIX},${PREFIX}}/lib/libpng.3.*.0.dylib
 
 do_autotools_build src/libpng/libpng16 LIB
+
+do_cmake_build src/epoll-shim EXEC
 
 do_meson_build src/freetype2 LIB
 do_meson_build src/pixman LIB

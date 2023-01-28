@@ -622,3 +622,6 @@
 [submodule "src/xorg/lib/libxcvt"]
 	path = src/xorg/lib/libxcvt
 	url = https://gitlab.freedesktop.org/xorg/lib/libxcvt.git
+[submodule "src/epoll-shim"]
+	path = src/epoll-shim
+	url = git@github.com:jiixyj/epoll-shim.git
