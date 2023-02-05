@@ -1,4 +1,3 @@
--Dgl-backend=gl \
 -Dpng=enabled \
 -Dquartz=disabled \
 -Dxlib=enabled \
