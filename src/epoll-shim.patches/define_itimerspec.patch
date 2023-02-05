@@ -14,3 +14,20 @@ index 504c4bc..fe2ed41 100644
  
  int timerfd_create(int, int);
  int timerfd_settime(int, int, struct itimerspec const *, struct itimerspec *);
+diff --git a/src/compat_itimerspec.h b/src/compat_itimerspec.h
+index 67662bd..edeb72e 100644
+--- a/src/compat_itimerspec.h
++++ b/src/compat_itimerspec.h
+@@ -4,11 +4,8 @@
+ #ifdef COMPAT_ENABLE_ITIMERSPEC
+ 
+ #include <time.h>
++#include <sys/timerfd.h>
+ 
+-struct itimerspec {
+-	struct timespec it_interval;
+-	struct timespec it_value;
+-};
+ #endif
+ 
+ #endif
