@@ -1056,7 +1056,7 @@ do_meson_build src/mesa/glu LIB
 do_cmake_build src/freeglut LIB
 
 # Manually build glxinfo and glxgears
-setup_environment ${config} ${ARCHS_EXEC}
+setup_environment EXEC ${ARCHS_EXEC}
 cd ${BASE_DIR}/src/mesa/demos/src/xdemos
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glxinfo.c
 ${CC} ${CPPFLAGS} ${CFLAGS} -c glinfo_common.c
