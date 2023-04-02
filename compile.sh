@@ -270,6 +270,8 @@ do_autotools_build() {
         ;;
     *)
         if [ ! -f configure -o "${SKIP_AUTORECONF}" != "YES" ] ; then
+            # With more recent tools, the m4 directory isn't created and is an error if not present... /shrug
+            mkdir -p m4
             autoreconf -fvi || die "Unable to autoreconf in $(pwd)"
         fi
         ;;
