@@ -6,7 +6,7 @@ index a066325b4..c0c5a67d3 100644
    files('builds/unix/configure.raw'),
    check: true).stdout().strip()
  
-+# Correct currnet and compatibility versions on darwin to match autotools-based builds
++# Correct current and compatibility versions on darwin to match autotools-based builds
 +ft2_pkgconfig_version_arr = ft2_pkgconfig_version.split('.')
 +ft2_pkgconfig_version_major = ft2_pkgconfig_version_arr[0].to_int()
 +ft2_pkgconfig_version_minor = ft2_pkgconfig_version_arr[1].to_int()
