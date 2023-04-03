@@ -709,7 +709,7 @@ do_dist() {
     openssl sha256 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha256sum
     openssl sha512 "${SYM_TARBALL}" > "${SYM_TARBALL}".sha512sum
 
-    if [ -f "${BASE_DIR}"/pkg/github.user -a "${BASE_DIR}"/pkg/github.token ] ; then
+    if [ -f "${BASE_DIR}"/pkg/github.user -a -f "${BASE_DIR}"/pkg/github.token ] ; then
         local gh_user="$(cat "${BASE_DIR}"/pkg/github.user)"
         local gh_token="$(cat "${BASE_DIR}"/pkg/github.token)"
         local gh_project=XQuartz
