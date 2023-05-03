@@ -202,12 +202,6 @@
 [submodule "src/xorg/app/xset"]
 	path = src/xorg/app/xset
 	url = https://gitlab.freedesktop.org/xorg/app/xset.git
-[submodule "src/xorg/app/xsetmode"]
-	path = src/xorg/app/xsetmode
-	url = https://gitlab.freedesktop.org/xorg/app/xsetmode.git
-[submodule "src/xorg/app/xsetpointer"]
-	path = src/xorg/app/xsetpointer
-	url = https://gitlab.freedesktop.org/xorg/app/xsetpointer.git
 [submodule "src/xorg/app/xsetroot"]
 	path = src/xorg/app/xsetroot
 	url = https://gitlab.freedesktop.org/xorg/app/xsetroot.git

@@ -1001,8 +1001,6 @@ do_autotools_build src/xorg/app/xrdb EXEC
 do_autotools_build src/xorg/app/xrefresh EXEC
 do_autotools_build src/xorg/app/xscope EXEC
 do_autotools_build src/xorg/app/xset EXEC
-do_autotools_build src/xorg/app/xsetmode EXEC
-do_autotools_build src/xorg/app/xsetpointer EXEC
 do_autotools_build src/xorg/app/xsetroot EXEC
 do_autotools_build src/xorg/app/xsm EXEC
 do_autotools_build src/xorg/app/xstdcmap EXEC
