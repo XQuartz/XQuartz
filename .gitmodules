@@ -603,7 +603,7 @@
 	url = https://github.com/XQuartz/xorg-server.git
 [submodule "src/xkeyboard-config"]
 	path = src/xkeyboard-config
-	url = https://github.com/freedesktop/xkeyboard-config.git
+	url = https://gitlab.freedesktop.org/xkeyboard-config/xkeyboard-config.git
 [submodule "src/xorg/driver/xf86-video-nested"]
 	path = src/xorg/driver/xf86-video-nested
 	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested.git
