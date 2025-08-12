@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
-# presently hard-coded to base branch "release-2.8"
-MACPORTS_VERSION="2.8"
+# presently hard-coded to base branch "release-2.11"
+MACPORTS_VERSION="2.11"
 BASE_DIR=$(pwd)
 
 die() {
