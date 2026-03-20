@@ -567,22 +567,22 @@
 	url = https://gitlab.freedesktop.org/mesa/demos.git
 [submodule "src/pixman"]
 	path = src/pixman
-	url = https://gitlab.freedesktop.org/pixman/pixman
+	url = https://gitlab.freedesktop.org/pixman/pixman.git
 [submodule "src/cairo"]
 	path = src/cairo
-	url = git://anongit.freedesktop.org/git/cairo
+	url = https://gitlab.freedesktop.org/cairo/cairo.git
 [submodule "src/libpng/libpng12"]
 	path = src/libpng/libpng12
-	url = git://git.code.sf.net/p/libpng/code
+	url = https://git.code.sf.net/p/libpng/code.git
 [submodule "src/libpng/libpng14"]
 	path = src/libpng/libpng14
-	url = git://git.code.sf.net/p/libpng/code
+	url = https://git.code.sf.net/p/libpng/code.git
 [submodule "src/libpng/libpng15"]
 	path = src/libpng/libpng15
-	url = git://git.code.sf.net/p/libpng/code
+	url = https://git.code.sf.net/p/libpng/code.git
 [submodule "src/libpng/libpng16"]
 	path = src/libpng/libpng16
-	url = git://git.code.sf.net/p/libpng/code
+	url = https://git.code.sf.net/p/libpng/code.git
 [submodule "src/freeglut"]
 	path = src/freeglut
 	url = https://github.com/dcnieho/FreeGLUT.git
@@ -591,7 +591,7 @@
 	url = https://github.com/ThomasDickey/xterm-snapshots.git
 [submodule "src/freetype2"]
 	path = src/freetype2
-	url = git://git.savannah.gnu.org/freetype/freetype2.git
+	url = https://git.savannah.gnu.org/git/freetype/freetype2.git
 [submodule "src/fontconfig"]
 	path = src/fontconfig
 	url = https://gitlab.freedesktop.org/fontconfig/fontconfig.git
@@ -615,4 +615,4 @@
 	url = https://gitlab.freedesktop.org/xorg/lib/libxcvt.git
 [submodule "src/epoll-shim"]
 	path = src/epoll-shim
-	url = git@github.com:jiixyj/epoll-shim.git
+	url = https://github.com/jiixyj/epoll-shim.git
