@@ -1,5 +1,4 @@
 #!/bin/sh -x -e
-
 # Note that the build system needs to be macOS 11.3 or newer, Intel or Apple Silicon
 #
 # Before building, be sure to checkout sources and configure the system:
@@ -56,7 +55,7 @@ else
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/release.xml"
 fi
 
-SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin | awk '{print $1}')
 
 SANITIZER_CFLAGS="-fsanitize=address"
 SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
