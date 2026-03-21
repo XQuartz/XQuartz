@@ -75,7 +75,7 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ]
 
     # ASan requires use to not use -D_FORTIFY_SOURCE=2, or it can lead to false-positives
     HARDENING_CFLAGS="-fstack-protector-all"
-    export MACOSX_DEPLOYMENT_TARGET=10.10
+    export MACOSX_DEPLOYMENT_TARGET=10.13
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
     # Beta builds use ASan for the main executables
     SANITIZER_CONFIGS="EXEC"
@@ -83,12 +83,12 @@ elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" 
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
     HARDENING_CFLAGS="-fstack-protector-all"
-    export MACOSX_DEPLOYMENT_TARGET=10.10
+    export MACOSX_DEPLOYMENT_TARGET=10.13
 else
     # Release-candidate and Release builds
     OPT_CFLAGS="-Os"
     HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
-    export MACOSX_DEPLOYMENT_TARGET=10.9
+    export MACOSX_DEPLOYMENT_TARGET=10.13
 fi
 
 ARCHS_EXEC="arm64 x86_64"
