@@ -827,6 +827,13 @@ xcodebuild install -configuration Release \
     GCC_GENERATE_DEBUGGING_SYMBOLS=YES
 
 sudo ditto ${DESTDIR}.Sparkle ${DESTDIR}
+
+# Handle flattened nibs
+# ditto: //Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Base.lproj/SUAutomaticUpdateAlert.nib: Is a directory
+# ditto: //Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Base.lproj/SUUpdateAlert.nib: Is a directory
+# ditto: //Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app/Contents/Resources/SUStatus.nib: Is a directory
+# ditto: //Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/SUStatus.nib: Is a directory
+sudo rm -rf /Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework
 sudo ditto ${DESTDIR}.Sparkle /
 
 # Bincompat versions of libpng
