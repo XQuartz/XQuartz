@@ -375,7 +375,7 @@
 	url = https://gitlab.freedesktop.org/xorg/lib/libXaw.git
 [submodule "src/xorg/lib/libXaw8"]
 	path = src/xorg/lib/libXaw8
-	url = https://gitlab.freedesktop.org/xorg/lib/libXaw
+	url = https://gitlab.freedesktop.org/xorg/lib/libXaw.git
 [submodule "src/xorg/lib/libXaw3d"]
 	path = src/xorg/lib/libXaw3d
 	url = https://gitlab.freedesktop.org/xorg/lib/libXaw3d.git
@@ -405,7 +405,7 @@
 	url = https://gitlab.freedesktop.org/xorg/lib/libXfont.git
 [submodule "src/xorg/lib/libXfont2"]
 	path = src/xorg/lib/libXfont2
-	url = https://gitlab.freedesktop.org/xorg/lib/libXfont
+	url = https://gitlab.freedesktop.org/xorg/lib/libXfont.git
 [submodule "src/xorg/lib/libXfontcache"]
 	path = src/xorg/lib/libXfontcache
 	url = https://gitlab.freedesktop.org/xorg/lib/libXfontcache.git
