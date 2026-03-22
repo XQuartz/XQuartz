@@ -186,6 +186,7 @@ setup_environment() {
     local config=${1}
     shift
     local archs=${@}
+    local cpp_arch_flags
     local arch_flags="-target fat-apple-macos${MACOSX_DEPLOYMENT_TARGET}"
     local sdkdir
 
@@ -195,9 +196,10 @@ setup_environment() {
 
     if has i386 ${archs} ; then
         sdkdir=${SDKROOT_i386}
+        cpp_arch_flags="-arch i386"
     fi
 
-    export CPPFLAGS="-I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
+    export CPPFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${cpp_arch_flags} -I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
     export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
     export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
 
