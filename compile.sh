@@ -28,6 +28,26 @@
 #
 # 6) Ensure the macOS keychain contains the private key for our Developer ID certificates
 #
+# 7) To build for i386, you need the macOS 10.13 SDK because all SDKs that Apple shipped
+#    with arm64 support did not contain i386 slices.  You can get the archived
+#    MacOSX10.13.sdk from an Xcode 9.4.1 (see https://xcodereleases.com)
+#
+# 8) Additionally, Xcode 15 and newer no longer support compiling for i386, so you will
+#    need to install a legacy version of Xcode with i386 support.  You can get the links
+#    https://xcodereleases.com.  Install it to /Applications/OlderXcodes/Xcode-14.2.app or
+#    adjust the XCODE_i386 variable below.  Note 14.3.1 has issues running on newer macOS,
+#    but the toolchain itself seems to still work fine.  If this xcrun issue becomes a
+#    problem, 14.2 might be a good option to try because it didn't fail here:
+#      $ DEVELOPER_DIR=/Applications/OlderXcodes/Xcode-14.3.1.app/Contents/Developer xcrun -f clang++
+#      Error loading required libraries. If there is an ongoing installation please wait for it to complete. Otherwise reinstall. (dlopen(@rpath/libxcodebuildLoader.dylib, 0x0001): Symbol not found: __ZN38pxrInternal_v0_21__aapl__pxrReserved__11TfSingletonINS_15TfDiagnosticMgrEE15_CreateInstanceEv
+#      Referenced from: <718775DA-E2F8-3DF0-8F50-8738F68B8C24> /Applications/Xcodes/Customer/Xcode-14.3.1.app/Contents/SystemFrameworks/USDKit.framework/Versions/A/USDKit
+#      Expected as weak-def export from some loaded dylib)
+#      xcrun: error: unable to locate xcodebuild, please make sure the path to the Xcode folder is set correctly!
+#      xcrun: error: You can set the path to the Xcode folder using /usr/bin/xcode-select -switch
+#
+#   Xcode 14.3.1 and later (until atleast 26.3) also have some issue stripping libGLESv1_CM.1.dylib:
+#       rdar://173113396 (strip reports "fatal error: indirect symbol table entry 1 (past the end of the symbol table)")
+#
 # To update a submodule to a newer version, just checkout the appropriate
 # branch in the submodule and then commit the changed hash at the top level.
 
@@ -43,6 +63,9 @@ CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_
 
 APPLICATION_VERSION=2.8.61
 APPLICATION_VERSION_STRING=2.8.6_beta2
+
+XCODE_i386=/Applications/OlderXcodes/Xcode-14.2.app
+SDKROOT_i386=/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk
 
 SPARKLE_PUBLIC_EDKEY="pgjiBdCBJJg1rSqFR3GtMPXaRKcU9Jjeh6OqfkH4j+8="
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
@@ -94,11 +117,12 @@ ARCHS_EXEC="arm64 x86_64"
 ARCHS_LIB="${ARCHS_EXEC}"
 ARCHS_LIB_BINCOMPAT_2_7="x86_64"
 
-if [ -d "/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk" ] ; then
-    SDKROOT_i386="/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk"
+if [ -d "${SDKROOT_i386}" -a -d "${XCODE_i386}" ] ; then
     ARCHS_LIB="${ARCHS_LIB} i386"
     ARCHS_LIB_BINCOMPAT_2_7="${ARCHS_LIB_BINCOMPAT_2_7} i386"
+    STRIP="${XCODE_i386}/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
 else
+    STRIP="/usr/bin/strip"
     echo "This build will not be distributable due to lack of i386 support."
 fi
 
@@ -211,10 +235,15 @@ setup_environment() {
     export CXXFLAGS="${CFLAGS}"
     export OBJCFLAGS="${CFLAGS}"
 
-    # These are all the same now, but could be conditionalized in the future
-    export CC="/usr/bin/clang"
-    export CXX="/usr/bin/clang++"
-    export OBJC="/usr/bin/clang"
+    if has i386 ${archs} ; then
+        export CC="${XCODE_i386}/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+        export CXX="${XCODE_i386}/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++"
+        export OBJC="${XCODE_i386}/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+    else
+        export CC="/usr/bin/clang"
+        export CXX="/usr/bin/clang++"
+        export OBJC="/usr/bin/clang"
+    fi
 
     # meson is strict about it's toolchain names, especially relevant when cross-compiling.
     # The machine doing the building is the build machine, and the tools
@@ -624,7 +653,7 @@ do_strip_sign_dsyms() {
             sudo cp "${file}" "${SYM_ROOT}"
 
             if [ -z "${SANITIZER_CONFIGS}" ] ; then
-                sudo strip -S "${file}"
+                sudo "${STRIP}" -S "${file}"
             fi
 
             sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
