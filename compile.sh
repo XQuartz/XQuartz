@@ -21,7 +21,6 @@
 #
 # 5) Add credential files to the pkg sundirectory:
 #        pkg/notarytool.* (see #4 above)
-#        pkg/sparkle_dsa_priv.pem
 #        pkg/sparkle_eddsa_priv.key
 #        pkg/github.token (see https://docs.github.com/en/articles/creating-an-access-token-for-command-line-use)
 #        pkg/github.user
@@ -796,7 +795,7 @@ do_dist() {
         echo "Visit https://github.com/${gh_project}/${gh_repo}/releases to review / publish the release."
     fi
 
-    if [ -f "${BASE_DIR}"/pkg/sparkle_dsa_priv.pem -a -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key ] ; then
+    if [ -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key ] ; then
         ED_SIG_AND_SIZE=$(${BUILD_TOOLS_PREFIX_STD}/bin/sign_update -f "${BASE_DIR}"/pkg/sparkle_eddsa_priv.key "${PKG}")
 
         echo "      <item>"
