@@ -1,25 +1,53 @@
-From 6540c141eabfa46fc093559a6a4eb4ccbfc08579 Mon Sep 17 00:00:00 2001
-From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
-Date: Sun, 10 Jan 2021 13:18:50 -0800
-Subject: [PATCH 1/2] SKIP_INSTALL=NO for framework
-
-Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
----
- Configurations/ConfigFramework.xcconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
+diff --git a/Configurations/ConfigDownloader.xcconfig b/Configurations/ConfigDownloader.xcconfig
+index 2154e794..09a79692 100644
+--- a/Configurations/ConfigDownloader.xcconfig
++++ b/Configurations/ConfigDownloader.xcconfig
+@@ -6,4 +6,5 @@ PRODUCT_BUNDLE_IDENTIFIER = ${DOWNLOADER_BUNDLE_ID}
+ PRODUCT_NAME = ${DOWNLOADER_NAME}
+ CODE_SIGN_ENTITLEMENTS = $(DOWNLOADER_SANDBOXED_ENTITLEMENTS)
+ GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
++SKIP_INSTALL = YES
+ CLANG_MODULES_AUTOLINK = NO
 diff --git a/Configurations/ConfigFramework.xcconfig b/Configurations/ConfigFramework.xcconfig
-index fb394e01..a458d3ed 100644
+index 32b4478a..dce679b8 100644
 --- a/Configurations/ConfigFramework.xcconfig
 +++ b/Configurations/ConfigFramework.xcconfig
-@@ -8,6 +8,6 @@ FRAMEWORK_VERSION = A
+@@ -15,7 +15,7 @@ FRAMEWORK_VERSION = B
+ 
  INFOPLIST_FILE = Sparkle/Sparkle-Info.plist
  GCC_PREPROCESSOR_DEFINITIONS = $(inherited) BUILDING_SPARKLE=1
- OTHER_LDFLAGS = -Wl,-U,_NSURLQuarantinePropertiesKey
 -SKIP_INSTALL = YES
 +SKIP_INSTALL = NO
  DEFINES_MODULE = YES
  PRODUCT_BUNDLE_IDENTIFIER = ${SPARKLE_BUNDLE_IDENTIFIER}
--- 
-2.29.2 (Apple Git-129)
-
+ STRINGS_FILE_OUTPUT_ENCODING = binary
+diff --git a/Configurations/ConfigInstallerConnection.xcconfig b/Configurations/ConfigInstallerConnection.xcconfig
+index 424985ed..aa167178 100644
+--- a/Configurations/ConfigInstallerConnection.xcconfig
++++ b/Configurations/ConfigInstallerConnection.xcconfig
+@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
+ PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_CONNECTION_BUNDLE_ID}
+ PRODUCT_NAME = ${INSTALLER_CONNECTION_NAME}
+ GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
++SKIP_INSTALL = YES
+ CLANG_MODULES_AUTOLINK = NO
+diff --git a/Configurations/ConfigInstallerLauncher.xcconfig b/Configurations/ConfigInstallerLauncher.xcconfig
+index 8c6196b6..7783073b 100644
+--- a/Configurations/ConfigInstallerLauncher.xcconfig
++++ b/Configurations/ConfigInstallerLauncher.xcconfig
+@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
+ PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_LAUNCHER_BUNDLE_ID}
+ PRODUCT_NAME = ${INSTALLER_LAUNCHER_NAME}
+ GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
++SKIP_INSTALL = YES
+ CLANG_MODULES_AUTOLINK = NO
+diff --git a/Configurations/ConfigInstallerStatus.xcconfig b/Configurations/ConfigInstallerStatus.xcconfig
+index 24657cea..5c804058 100644
+--- a/Configurations/ConfigInstallerStatus.xcconfig
++++ b/Configurations/ConfigInstallerStatus.xcconfig
+@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
+ PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_STATUS_BUNDLE_ID}
+ PRODUCT_NAME = ${INSTALLER_STATUS_NAME}
+ GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE=0 BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
++SKIP_INSTALL = YES
+ CLANG_MODULES_AUTOLINK = NO

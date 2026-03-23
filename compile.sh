@@ -670,7 +670,9 @@ do_strip_sign_dsyms() {
         fi
     done
 
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/Autoupdate.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc
     sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework
     sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime --entitlements ${BASE_DIR}/XQuartz-entitlements.plist "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
 }
@@ -809,7 +811,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libXt-flatnamespace|xorg/test|Sparkle2x)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule | egrep -v '(libXt-flatnamespace|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o \
