@@ -1,7 +1,8 @@
+-Dfontconfig=enabled \
+-Dfreetype=enabled \
 -Dpng=enabled \
 -Dquartz=disabled \
 -Dxlib=enabled \
 -Dxcb=enabled \
 -Dxlib-xcb=enabled \
--Dxml=enabled \
 -Dglib=disabled
