@@ -25,7 +25,9 @@
 #        pkg/github.token (see https://docs.github.com/en/articles/creating-an-access-token-for-command-line-use)
 #        pkg/github.user
 #
-# 6) Ensure the macOS keychain contains the private key for our Developer ID certificates
+# 6) Ensure the macOS keychain contains the private key for our Developer ID certificates.
+#    Add the intermediate CA certificate (https://www.apple.com/certificateauthority/)
+#    to the system keychain because we use `sudo codesign ...`
 #
 # 7) To build for i386, you need the macOS 10.13 SDK because all SDKs that Apple shipped
 #    with arm64 support did not contain i386 slices.  You can get the archived
