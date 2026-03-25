@@ -1,5 +1,5 @@
 diff --git a/meson.build b/meson.build
-index a066325b4..c0c5a67d3 100644
+index d51630cbb..23b355455 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -48,6 +48,15 @@ ft2_pkgconfig_version = run_command(python_exe,
@@ -18,7 +18,7 @@ index a066325b4..c0c5a67d3 100644
  ft2_includes = include_directories('include')
  
  freetype_includedir = join_paths(get_option('includedir'), 'freetype2')
-@@ -244,20 +253,6 @@ ft2_deps = []
+@@ -251,20 +260,6 @@ ft2_deps = []
  common_ldflags = []
  
  
@@ -26,7 +26,7 @@ index a066325b4..c0c5a67d3 100644
 -#
 -# OSX sets the compatibility_version (aka libtools version) differently from
 -# the library name.
--#
+-
 -if host_machine.system() == 'darwin'
 -  # maintain compatibility with autotools on macOS
 -  common_ldflags = [
@@ -39,7 +39,7 @@ index a066325b4..c0c5a67d3 100644
  # Generate `ftoption.h` based on available dependencies.
  
  process_header_command = [python_exe,
-@@ -399,6 +394,7 @@ ft2_lib = library('freetype',
+@@ -455,6 +450,7 @@ ft2_lib = library('freetype',
    dependencies: ft2_deps,
    install: true,
    version: ft2_so_version,
