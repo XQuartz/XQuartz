@@ -1000,7 +1000,7 @@ do_autotools_build src/xorg/app/xauth EXEC
 do_autotools_build src/xorg/app/xbacklight EXEC
 do_autotools_build src/xorg/app/xcalc EXEC
 do_autotools_build src/xorg/app/xclipboard EXEC
-do_autotools_build src/xorg/app/xclock EXEC
+do_meson_build src/xorg/app/xclock EXEC
 do_autotools_build src/xorg/app/xcmsdb EXEC
 do_autotools_build src/xorg/app/xcompmgr EXEC
 do_autotools_build src/xorg/app/xconsole EXEC
