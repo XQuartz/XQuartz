@@ -1055,13 +1055,13 @@ do_autotools_build src/xterm EXEC
 
 do_autotools_build src/xorg/data/cursors LIB
 
-do_autotools_build src/xorg/font/encodings LIB
+do_meson_build src/xorg/font/encodings LIB
 do_autotools_build src/xorg/font/adobe-100dpi LIB
 do_autotools_build src/xorg/font/adobe-75dpi LIB
 do_autotools_build src/xorg/font/adobe-utopia-100dpi LIB
 do_autotools_build src/xorg/font/adobe-utopia-75dpi LIB
 do_autotools_build src/xorg/font/adobe-utopia-type1 LIB
-do_autotools_build src/xorg/font/alias LIB
+do_meson_build src/xorg/font/alias LIB
 do_autotools_build src/xorg/font/arabic-misc LIB
 do_autotools_build src/xorg/font/bh-100dpi LIB
 do_autotools_build src/xorg/font/bh-75dpi LIB
