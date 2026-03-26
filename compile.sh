@@ -974,7 +974,7 @@ do_autotools_build src/xorg/lib/libXfontcache LIB_BINCOMPAT_2_7
 do_autotools_build src/xorg/lib/libXTrap LIB_BINCOMPAT_2_7
 do_autotools_build src/xorg/lib/libXxf86misc LIB_BINCOMPAT_2_7
 
-do_autotools_build src/xorg/data/bitmaps EXEC
+do_meson_build src/xorg/data/bitmaps EXEC
 
 do_autotools_build src/xorg/app/appres EXEC
 do_autotools_build src/xorg/app/bitmap EXEC
