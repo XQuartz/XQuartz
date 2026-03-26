@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
-# presently hard-coded to base branch "release-2.8"
-MACPORTS_VERSION="2.8"
+# presently hard-coded to base branch "release-2.12"
+MACPORTS_VERSION="2.12"
 BASE_DIR=$(pwd)
 
 die() {
@@ -73,7 +73,7 @@ do_sign_update() {
 
     SPARKLE_DSTROOT="${TMP_BASE}/Sparkle"
     mkdir -p "${SPARKLE_DSTROOT}"
-    cd "${BASE_DIR}/src/Sparkle2x"
+    cd "${BASE_DIR}/src/Sparkle"
     xcodebuild install -scheme sign_update "INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin" "DSTROOT=${SPARKLE_DSTROOT}"
     #xcodebuild install -scheme generate_keys "INSTALL_PATH=${BUILD_TOOLS_PREFIX}/bin" "DSTROOT=${SPARKLE_DSTROOT}"
     sudo ditto "${SPARKLE_DSTROOT}" /
