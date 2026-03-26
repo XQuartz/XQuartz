@@ -906,7 +906,7 @@ do_autotools_build src/xorg/font/util LIB
 do_autotools_build src/xorg/lib/libxtrans LIB
 do_autotools_build src/xorg/lib/pthread-stubs LIB
 
-do_autotools_build src/xorg/lib/libXau LIB
+do_meson_build src/xorg/lib/libXau LIB
 
 do_autotools_build src/xorg/lib/libxcb LIB
 do_autotools_build src/xorg/lib/libxcb-util LIB
@@ -922,8 +922,8 @@ do_autotools_build src/xorg/lib/libX11 LIB
 do_autotools_build src/xorg/lib/libXext LIB
 do_autotools_build src/xorg/lib/libAppleWM LIB
 do_autotools_build src/xorg/lib/libdmx LIB
-do_autotools_build src/xorg/lib/libfontenc LIB
-do_autotools_build src/xorg/lib/libxshmfence LIB
+do_meson_build src/xorg/lib/libfontenc LIB
+do_meson_build src/xorg/lib/libxshmfence LIB
 do_autotools_build src/xorg/lib/libFS LIB
 do_autotools_build src/xorg/lib/libICE LIB
 do_autotools_build src/xorg/lib/libSM LIB
@@ -945,24 +945,24 @@ do_autotools_build src/xorg/lib/libXaw8 LIB_BINCOMPAT_2_7
 
 do_autotools_build src/xorg/lib/libXaw LIB
 do_autotools_build src/xorg/lib/libXaw3d LIB
-do_autotools_build src/xorg/lib/libXfixes LIB
-do_autotools_build src/xorg/lib/libXcomposite LIB
-do_autotools_build src/xorg/lib/libXrender LIB
-do_autotools_build src/xorg/lib/libXdamage LIB
-do_autotools_build src/xorg/lib/libXcursor LIB
+do_meson_build src/xorg/lib/libXfixes LIB
+do_meson_build src/xorg/lib/libXcomposite LIB
+do_meson_build src/xorg/lib/libXrender LIB
+do_meson_build src/xorg/lib/libXdamage LIB
+do_meson_build src/xorg/lib/libXcursor LIB
 do_autotools_build src/xorg/lib/libXfont LIB
 do_autotools_build src/xorg/lib/libXfont2 LIB
-do_autotools_build src/xorg/lib/libXxf86vm LIB
-do_autotools_build src/xorg/lib/libXft LIB
+do_meson_build src/xorg/lib/libXxf86vm LIB
+do_meson_build src/xorg/lib/libXft LIB
 do_autotools_build src/xorg/lib/libXi LIB
-do_autotools_build src/xorg/lib/libXinerama LIB
-do_autotools_build src/xorg/lib/libxkbfile LIB
-do_autotools_build src/xorg/lib/libXrandr LIB
-do_autotools_build src/xorg/lib/libXpresent LIB
-do_autotools_build src/xorg/lib/libXres LIB
-do_autotools_build src/xorg/lib/libXScrnSaver LIB
+do_meson_build src/xorg/lib/libXinerama LIB
+do_meson_build src/xorg/lib/libxkbfile LIB
+do_meson_build src/xorg/lib/libXrandr LIB
+do_meson_build src/xorg/lib/libXpresent LIB
+do_meson_build src/xorg/lib/libXres LIB
+do_meson_build src/xorg/lib/libXScrnSaver LIB
 do_autotools_build src/xorg/lib/libXtst LIB
-do_autotools_build src/xorg/lib/libXv LIB
+do_meson_build src/xorg/lib/libXv LIB
 do_meson_build src/xorg/lib/libXvMC LIB
 do_meson_build src/xorg/lib/libxcvt LIB
 

@@ -1,0 +1,14 @@
+diff --git a/meson.build b/meson.build
+index dc0c34b..f44c14b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -35,8 +35,7 @@ if get_option('xthreads')
+   lib_args += '-DXTHREADS'
+   # This define is not in libXau specific code, but is part of the xproto header
+   # This may be only required by HP-UX.
+-  if cc.has_function('gethostbyname_r') or \
+-     cc.has_function('gethostbyname_r', dependencies : cc.find_library('nls'))
++  if cc.has_function('gethostbyname_r')
+     lib_args += '-DXUSE_MTSAFE_API=1'
+   endif
+   if host_machine.system() == 'sunos'
