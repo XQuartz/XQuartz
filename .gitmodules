@@ -28,9 +28,6 @@
 [submodule "src/xorg/app/luit"]
 	path = src/xorg/app/luit
 	url = https://gitlab.freedesktop.org/xorg/app/luit.git
-[submodule "src/xorg/app/mkfontdir"]
-	path = src/xorg/app/mkfontdir
-	url = https://gitlab.freedesktop.org/xorg/app/mkfontdir.git
 [submodule "src/xorg/app/mkfontscale"]
 	path = src/xorg/app/mkfontscale
 	url = https://gitlab.freedesktop.org/xorg/app/mkfontscale.git
@@ -463,9 +460,6 @@
 [submodule "src/xorg/lib/libXvMC"]
 	path = src/xorg/lib/libXvMC
 	url = https://gitlab.freedesktop.org/xorg/lib/libXvMC.git
-[submodule "src/xorg/lib/libXxf86dga"]
-	path = src/xorg/lib/libXxf86dga
-	url = https://gitlab.freedesktop.org/xorg/lib/libXxf86dga.git
 [submodule "src/xorg/lib/libXxf86misc"]
 	path = src/xorg/lib/libXxf86misc
 	url = https://gitlab.freedesktop.org/xorg/lib/libXxf86misc.git
@@ -607,9 +601,6 @@
 [submodule "src/xorg/driver/xf86-video-nested"]
 	path = src/xorg/driver/xf86-video-nested
 	url = https://gitlab.freedesktop.org/xorg/driver/xf86-video-nested.git
-[submodule "src/Sparkle2x"]
-	path = src/Sparkle2x
-	url = https://github.com/sparkle-project/Sparkle.git
 [submodule "src/xorg/lib/libxcvt"]
 	path = src/xorg/lib/libxcvt
 	url = https://gitlab.freedesktop.org/xorg/lib/libxcvt.git
