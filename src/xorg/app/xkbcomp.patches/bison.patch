@@ -1,0 +1,13 @@
+diff --git a/meson.build b/meson.build
+index bff3911..02eb1a6 100644
+--- a/meson.build
++++ b/meson.build
+@@ -67,7 +67,7 @@ cflags = [
+ ]
+ add_project_arguments(cc.get_supported_arguments(cflags), language: 'c')
+ 
+-bison = find_program('bison', 'win_bison', required: false, version: '>= 2.3a')
++bison = find_program('bison', 'win_bison', required: false, version: '>= 2.3')
+ if bison.found()
+     yacc = bison
+     yacc_gen = generator(
