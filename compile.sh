@@ -659,7 +659,7 @@ do_strip_sign_dsyms() {
                 sudo "${STRIP}" -S "${file}"
             fi
 
-            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
+            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
         fi
     done
 
@@ -674,11 +674,11 @@ do_strip_sign_dsyms() {
         fi
     done
 
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework
-    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha1,sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime --entitlements ${BASE_DIR}/XQuartz-entitlements.plist "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app/Contents/Frameworks/Sparkle.framework
+    sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --deep --force --preserve-metadata=identifier,entitlements,requirements,flags --options runtime --entitlements ${BASE_DIR}/XQuartz-entitlements.plist "${PKG_ROOT}${APPLICATION_PATH}"/XQuartz.app
 }
 
 do_sym_tarball() {
