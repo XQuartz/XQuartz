@@ -8,6 +8,6 @@ endian = 'little'
 ipc_rmid_deferred_release = 'false'
 
 [binaries]
-pkgconfig = '/opt/buildX11/bin/pkg-config'
+pkg-config = '/opt/buildX11/bin/pkg-config'
 cmake = '/opt/buildX11/bin/cmake'
 strip = '/usr/bin/strip'
