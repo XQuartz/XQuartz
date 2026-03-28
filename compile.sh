@@ -92,8 +92,7 @@ done
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     # Alpha builds use ASan
-    # TODO: Re-enable once rdar://173133252 is fixed
-    #SANITIZER_CONFIGS="EXEC LIB"
+    SANITIZER_CONFIGS="EXEC LIB"
 
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
@@ -102,8 +101,7 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ]
     export MACOSX_DEPLOYMENT_TARGET=10.13
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
     # Beta builds use ASan for the main executables
-    # TODO: Re-enable once rdar://173133252 is fixed
-    #SANITIZER_CONFIGS="EXEC"
+    SANITIZER_CONFIGS="EXEC"
 
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
