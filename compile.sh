@@ -454,11 +454,20 @@ do_meson_build() {
         ninja --verbose -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
 
-        # Meson removes the LC_RPATH that we asked for.  This hack re-adds it
-        # cf: https://github.com/mesonbuild/meson/issues/11109
+
+    # adjust LC_RPATHs
         if has ${config} ${SANITIZER_CONFIGS} ; then
             find "${DESTDIR}.lipo.${arch}" -type f | while read file ; do
                 if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+
+                    # remove LC_RPATHs that the compiler adds for sanitizers (we set our own)
+                    sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
+
+                    # some meson builds, eg xclock, are not adding the LC_RPATH to the sanitizers that we asked for.
+                    # https://github.com/XQuartz/XQuartz/issues/463
+                    # force it to be added until this can be properly sorted out.
+
+                    sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR}" "${file}" >& /dev/null || true
                     sudo install_name_tool -add_rpath "${SANITIZER_LIB_DIR}" "${file}"
                 fi
             done
