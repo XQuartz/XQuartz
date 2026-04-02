@@ -461,7 +461,8 @@ do_meson_build() {
                 if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
 
                     # remove LC_RPATHs that the compiler adds for sanitizers (we set our own)
-                    sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
+                    # disabled for now as xclock won't build with this
+                    # sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
 
                     # some meson builds, eg xclock, are not adding the LC_RPATH to the sanitizers that we asked for.
                     # https://github.com/XQuartz/XQuartz/issues/463
