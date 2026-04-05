@@ -455,21 +455,14 @@ do_meson_build() {
         sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
 
 
-    # adjust LC_RPATHs
+        # adjust LC_RPATHs
         if has ${config} ${SANITIZER_CONFIGS} ; then
             find "${DESTDIR}.lipo.${arch}" -type f | while read file ; do
                 if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
 
                     # remove LC_RPATHs that the compiler adds for sanitizers (we set our own)
-                    # disabled for now as xclock won't build with this
-                    # sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
+                    sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR_SRC}" "${file}" >& /dev/null || true
 
-                    # some meson builds, eg xclock, are not adding the LC_RPATH to the sanitizers that we asked for.
-                    # https://github.com/XQuartz/XQuartz/issues/463
-                    # force it to be added until this can be properly sorted out.
-
-                    sudo install_name_tool -delete_rpath "${SANITIZER_LIB_DIR}" "${file}" >& /dev/null || true
-                    sudo install_name_tool -add_rpath "${SANITIZER_LIB_DIR}" "${file}"
                 fi
             done
         fi
