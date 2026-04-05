@@ -1,0 +1,21 @@
+dep_iconv is detected in meson.build but was never added to the executable's
+dependencies list, causing iconv symbols to be unresolved at link time. The
+workaround was a xclock.confopt setting -Dc_link_args='-liconv', but that
+causes meson to replace (rather than augment) the LDFLAGS-derived link args,
+dropping the sanitizer rpath /opt/X11/lib/sanitizers.
+
+Fix by adding dep_iconv to the executable's dependencies so meson handles
+iconv linking through its own mechanism, preserving LDFLAGS as expected.
+
+diff --git a/meson.build b/meson.build
+index 6b4754d..809babb 100644
+--- a/meson.build
++++ b/meson.build
+@@ -124,7 +124,7 @@ add_project_arguments('-D_CONST_X_STRING', language: ['c'])
+ executable(
+   'xclock',
+   [config_h, 'Clock.c', 'Clock.h', 'ClockP.h', 'xclock.c'],
+-  dependencies: [deps, extra_deps],
++  dependencies: [deps, extra_deps, dep_iconv],
+   install: true
+ )
