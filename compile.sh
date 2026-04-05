@@ -148,12 +148,6 @@ export ac_cv_path_OPENSSL=/usr/bin/openssl
 # timespec_get() was added in macOS 10.15
 export ac_cv_func_timespec_get=no
 
-# clock_gettime was added in macOS 10.12
-export ac_cv_func_clock_gettime=no
-
-# mkostemp was added in macOS 10.12
-export ac_cv_func_mkostemp=no
-
 export XMLTO=${BUILD_TOOLS_PREFIX_STD}/bin/xmlto
 export ASCIIDOC=${BUILD_TOOLS_PREFIX_STD}/bin/asciidoc
 export DOXYGEN=${BUILD_TOOLS_PREFIX_STD}/bin/doxygen
