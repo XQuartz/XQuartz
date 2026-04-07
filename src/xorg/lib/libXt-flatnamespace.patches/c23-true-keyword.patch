@@ -1,0 +1,18 @@
+In C23, 'true' is a keyword, not just a macro from <stdbool.h>. Rename the
+local variable 'true' in _XtShellAncestorSensitive() to avoid the conflict.
+
+diff --git a/src/Shell.c b/src/Shell.c
+index f160527..7d686ee 100644
+--- a/src/Shell.c
++++ b/src/Shell.c
+@@ -961,8 +961,8 @@ void _XtShellAncestorSensitive(
+     int closure,
+     XrmValue *value)
+ {
+-   static Boolean true = True;
+-   if (widget->core.parent == NULL) value->addr = (XPointer)(&true);
++   static Boolean xtrue = True;
++   if (widget->core.parent == NULL) value->addr = (XPointer)(&xtrue);
+    else _XtCopyFromParent (widget,closure,value);
+ }
+ 
