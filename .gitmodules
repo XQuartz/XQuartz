@@ -607,3 +607,6 @@
 [submodule "src/epoll-shim"]
 	path = src/epoll-shim
 	url = https://github.com/jiixyj/epoll-shim.git
+[submodule "src/llvm-project"]
+	path = src/llvm-project
+	url = https://github.com/llvm/llvm-project.git
