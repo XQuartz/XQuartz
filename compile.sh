@@ -52,6 +52,12 @@
 # To update a submodule to a newer version, just checkout the appropriate
 # branch in the submodule and then commit the changed hash at the top level.
 
+# Ask for sudo upfront
+sudo -v
+
+# Keep-alive: update timestamp until script finishes
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 PREFIX=/opt/X11
 BUILD_TOOLS_PREFIX_STD="/opt/buildX11"
 BUILD_TOOLS_PREFIX_CMAKE="/opt/buildX11-cmake"
