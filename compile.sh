@@ -493,6 +493,7 @@ do_meson_build() {
 do_cmake_build() {
     local project_dir="${BASE_DIR}/${1}"
     local config=${2}
+    local source_subdir="${3:-.}"
     local variable="ARCHS_${config}"
     local archs=${!variable}
 
@@ -527,7 +528,7 @@ do_cmake_build() {
               -DCMAKE_OSX_ARCHITECTURES="${arch}" \
               -DCMAKE_OSX_SYSROOT="${sdkdir}" \
               -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
-              $(eval echo $(cat "${confopt_file}")) .. || die "Could not configure in $(pwd)"
+              $(eval echo $(cat "${confopt_file}")) "../${source_subdir}" || die "Could not configure in $(pwd)"
 
         ${SCAN_BUILD} ${MAKE} ${MAKE_OPTS} VERBOSE=1 || die "Could not make in $(pwd)"
         sudo ${MAKE} install DESTDIR=${DESTDIR}.lipo.${arch} VERBOSE=1 || die "Could not make install in $(pwd)"
@@ -1093,6 +1094,8 @@ do_autotools_build src/xorg/font/sony-misc LIB
 do_autotools_build src/xorg/font/sun-misc LIB
 do_autotools_build src/xorg/font/winitzki-cyrillic LIB
 do_autotools_build src/xorg/font/xfree86-type1 LIB
+
+do_cmake_build src/llvm-project LIB llvm
 
 do_meson_build src/mesa/mesa LIB
 do_meson_build src/mesa/glu LIB

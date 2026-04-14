@@ -1,0 +1,21 @@
+diff --git a/meson.build b/meson.build
+index 22ed56bb0bb..668a185381d 100644
+--- a/meson.build
++++ b/meson.build
+@@ -182,7 +182,15 @@ if gallium_drivers.contains('auto')
+     endif
+   elif ['windows'].contains(host_machine.system())
+     gallium_drivers = ['llvmpipe', 'softpipe', 'zink', 'd3d12']
+-  elif ['darwin', 'cygwin', 'haiku'].contains(host_machine.system())
++  elif ['darwin'].contains(host_machine.system())
++    # On Intel (x86/x86_64), we want to use the Apple GL framework path for HW accel
++    # this is only enabled (see below) if there is just one gallium driver, softpipe
++    if ['x86', 'x86_64'].contains(host_machine.cpu_family())
++      gallium_drivers = ['softpipe']
++    else
++      gallium_drivers = ['llvmpipe', 'softpipe']
++    endif
++  elif ['cygwin', 'haiku'].contains(host_machine.system())
+     gallium_drivers = ['llvmpipe', 'softpipe']
+   else
+     error('Unknown OS @0@. Please pass -Dgallium-drivers to set driver options. Patches gladly accepted to fix this.'.format(
