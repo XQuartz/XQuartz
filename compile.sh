@@ -86,6 +86,9 @@ else
 fi
 
 SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin | awk '{print $2}')
+if [[ -z "${SANITIZER_LIB_DIR_SRC}" ]] ; then
+    SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+fi
 
 SANITIZER_CFLAGS="-fsanitize=address"
 SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
