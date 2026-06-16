@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ken Cunningham <kencu@macports.org>
+Date: Mon, 15 Jun 2026 17:30:00 -0700
+Subject: [PATCH] install_megadrivers: stop stripping aliases at extensionless
+ names
+
+When --libname-suffix is dylib but the DRI driver alias is still named
+*.so, the alias-generation loop never reaches .dylib.  For example:
+
+  driver = swrast_dri.so
+  libname_suffix = dylib
+
+The first iteration creates:
+
+  swrast_dri -> swrast_dri.so
+
+Then splitext('swrast_dri') returns ('swrast_dri', ''), so the loop
+continues forever, repeatedly unlinking and recreating the same symlink.
+
+Stop when there is no extension left.  This preserves the existing
+progressive alias creation for names with versioned suffixes, while
+avoiding an infinite loop for extensionless names.
+---
+ bin/install_megadrivers.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bin/install_megadrivers.py b/bin/install_megadrivers.py
+index 00000000000..00000000000 100755
+--- a/bin/install_megadrivers.py
++++ b/bin/install_megadrivers.py
+@@ -79,7 +79,7 @@ def main():
+             os.chdir(to)
+ 
+             name, ext = os.path.splitext(driver)
+-            while ext != '.' + args.libname_suffix:
++            while ext and ext != '.' + args.libname_suffix:
+                 if os.path.lexists(name):
+                     os.unlink(name)
+                 os.symlink(driver, name)
+-- 
+2.39.5
