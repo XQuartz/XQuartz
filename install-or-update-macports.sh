@@ -1,5 +1,11 @@
 #!/bin/sh -e
 
+# Ask for sudo upfront
+sudo -v
+
+# Keep-alive: update timestamp until script finishes
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 # presently hard-coded to base branch "release-2.12"
 MACPORTS_VERSION="2.12"
 BASE_DIR=$(pwd)
