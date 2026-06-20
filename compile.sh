@@ -85,23 +85,12 @@ else
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/release.xml"
 fi
 
-SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin | awk '{print $2}')
-if [[ -z "${SANITIZER_LIB_DIR_SRC}" ]] ; then
-    SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
-fi
-
-SANITIZER_CFLAGS="-fsanitize=address"
-SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
-SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
-
-SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
-for dylib in ${SANITIZER_LIBS} ; do
-    SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
-done
-
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     # Alpha builds use ASan
     SANITIZER_CONFIGS="EXEC LIB"
+
+    SANITIZER_CFLAGS="-fsanitize=address"
+    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
@@ -112,6 +101,9 @@ elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" 
     # Beta builds use ASan for the main executables
     SANITIZER_CONFIGS="EXEC"
 
+    SANITIZER_CFLAGS="-fsanitize=address"
+    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
     HARDENING_CFLAGS="-fstack-protector-all"
@@ -121,6 +113,19 @@ else
     OPT_CFLAGS="-Os"
     HARDENING_CFLAGS="-fstack-protector-strong -D_FORTIFY_SOURCE=2"
     export MACOSX_DEPLOYMENT_TARGET=10.13
+fi
+
+if [ -n "${SANITIZER_CONFIGS}" ] ; then
+    SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin | awk '{print $2}')
+    if [[ -z "${SANITIZER_LIB_DIR_SRC}" ]] ; then
+        SANITIZER_LIB_DIR_SRC=$(echo $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/lib/darwin)
+    fi
+
+    SANITIZER_LIB_DIR="${PREFIX}/lib/sanitizers"
+    SANITIZER_LDFLAGS="-Wl,-rpath,${SANITIZER_LIB_DIR}"
+    for dylib in ${SANITIZER_LIBS} ; do
+        SANITIZER_LDFLAGS="${SANITIZER_LDFLAGS} -Wl,${SANITIZER_LIB_DIR}/${dylib}"
+    done
 fi
 
 ARCHS_EXEC="arm64 x86_64"
