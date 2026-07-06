@@ -505,6 +505,7 @@ do_cmake_build() {
     local source_subdir="${3:-.}"
     local variable="ARCHS_${config}"
     local archs=${!variable}
+    local cmake_archs
 
     local patches_dir="${project_dir}.patches"
     local confopt_file="${project_dir}.confopt"
@@ -532,9 +533,14 @@ do_cmake_build() {
             sdkdir=$(xcrun --show-sdk-path)
         fi
 
+        cmake_archs=${arch}
+        if [ "${arch}" == "i386" ] ; then
+            cmake_archs="i386;x86_64"
+        fi
+
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
               -DCMAKE_INSTALL_NAME_DIR="${PREFIX}/lib" \
-              -DCMAKE_OSX_ARCHITECTURES="${arch}" \
+              -DCMAKE_OSX_ARCHITECTURES="${cmake_archs}" \
               -DCMAKE_OSX_SYSROOT="${sdkdir}" \
               -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
               $(eval echo $(cat "${confopt_file}")) "../${source_subdir}" || die "Could not configure in $(pwd)"
@@ -648,6 +654,9 @@ do_removals() {
 
     # I don't see a way to turn this off in mesa/glu
     sudo rm -f ${DESTDIR}${PREFIX}/lib/libGLU.a
+
+    # Don't ship llvm or any other build support
+    sudo rm -rf ${DESTDIR}/opt/buildX11*
 }
 
 do_strip_sign_dsyms() {
@@ -863,6 +872,9 @@ if [ -n "${SANITIZER_CONFIGS}" ] ; then
         sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR_SRC}/${dylib} ${SANITIZER_LIB_DIR}
     done
 fi
+
+# Build LLVM
+do_cmake_build src/llvm-project LIB llvm
 
 # Build Sparkle
 cd ${BASE_DIR}/src/Sparkle
