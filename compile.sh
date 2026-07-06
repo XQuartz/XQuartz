@@ -524,6 +524,7 @@ do_cmake_build() {
 
     for arch in ${archs} ; do
         setup_environment ${config} ${arch} || die "Failed to setup environment"
+
         mkdir -p "${project_dir}/build.${arch}" || die "Failed to create build directory: ${project_dir}/build.${arch}"
         cd "${project_dir}/build.${arch}" || die "Could not change directory to ${project_dir}/build.${arch}"
 
@@ -542,7 +543,7 @@ do_cmake_build() {
               -DCMAKE_INSTALL_NAME_DIR="${PREFIX}/lib" \
               -DCMAKE_OSX_ARCHITECTURES="${cmake_archs}" \
               -DCMAKE_OSX_SYSROOT="${sdkdir}" \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
+              -DCMAKE_OSX_DEPLOYMENT_TARGET="${cmake_deployment_target}" \
               $(eval echo $(cat "${confopt_file}")) "../${source_subdir}" || die "Could not configure in $(pwd)"
 
         ${SCAN_BUILD} ${MAKE} ${MAKE_OPTS} VERBOSE=1 || die "Could not make in $(pwd)"
@@ -853,6 +854,8 @@ if [ ! -f submodules.initialized ] ; then
     touch submodules.initialized
 fi
 
+if false; then
+
 # Install our base configs and other misc content
 sudo ditto ${BASE_DIR}/base ${DESTDIR}
 sudo ditto ${BASE_DIR}/base /
@@ -891,6 +894,26 @@ sudo ditto ${DESTDIR}.Sparkle ${DESTDIR}
 # ditto: //Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework/Versions/A/Resources/SUStatus.nib: Is a directory
 sudo rm -rf /Applications/Utilities/XQuartz.app/Contents/Frameworks/Sparkle.framework
 sudo ditto ${DESTDIR}.Sparkle /
+
+
+cd ${BASE_DIR}/src/mesa/MoltenVK
+do_patches ${BASE_DIR}/mesa/MoltenVK.patches
+
+OLD_MACOSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET}
+export MACOSX_DEPLOYMENT_TARGET=12.0
+./fetchDependencies --macos
+
+xcodebuild install -project MoltenVKPackaging.xcodeproj -scheme "MoltenVK Package (macOS only)" -configuration "Debug" \
+    ARCHS="$(remove i386 ${ARCHS_LIB})" \
+    DSTROOT="${DESTDIR}.MoltenVK" \
+    INSTALL_PATH="/opt/X11" \
+    MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
+    DEAD_CODE_STRIPPING=NO \
+    GCC_GENERATE_DEBUGGING_SYMBOLS=YES
+
+fi
+
+if false; then
 
 # Bincompat versions of libpng
 do_autotools_build src/libpng/libpng12 LIB_BINCOMPAT_2_7
@@ -1112,6 +1135,8 @@ do_autotools_build src/xorg/font/sony-misc LIB
 do_autotools_build src/xorg/font/sun-misc LIB
 do_autotools_build src/xorg/font/winitzki-cyrillic LIB
 do_autotools_build src/xorg/font/xfree86-type1 LIB
+
+fi
 
 do_meson_build src/mesa/mesa LIB
 do_meson_build src/mesa/glu LIB

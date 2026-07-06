@@ -1,0 +1,2004 @@
+diff --git a/MoltenVK/MoltenVK/API/mvk_datatypes.h b/MoltenVK/MoltenVK/API/mvk_datatypes.h
+index 9b5b921d..0aafe1b1 100644
+--- a/MoltenVK/MoltenVK/API/mvk_datatypes.h
++++ b/MoltenVK/MoltenVK/API/mvk_datatypes.h
+@@ -221,12 +221,19 @@ uint32_t mvkSampleCountFromVkSampleCountFlagBits(VkSampleCountFlagBits vkSampleC
+ /** Returns the Vulkan bit flags corresponding to the numeric sample count, which must be a PoT value. */
+ VkSampleCountFlagBits mvkVkSampleCountFlagBitsFromSampleCount(NSUInteger sampleCount);
+ 
++// MTLTextureSwizzle and MTLTextureSwizzleChannels are only used here as values, never sent to a live Metal
++// object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++
+ /** Returns the Metal texture swizzle from the Vulkan component swizzle. */
+ MTLTextureSwizzle mvkMTLTextureSwizzleFromVkComponentSwizzle(VkComponentSwizzle vkSwizzle);
+ 
+ /** Returns all four Metal texture swizzles from the Vulkan component mapping. */
+ MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkComponentMapping(VkComponentMapping vkMapping);
+ 
++#pragma clang diagnostic pop
++
+ /** Maps a clear color according to the specified VkComponentSwizzle. */
+ float mvkVkClearColorFloatValueFromVkComponentSwizzle(float *colors, uint32_t index, VkComponentSwizzle vkSwizzle);
+ 
+@@ -412,12 +419,19 @@ MTLLoadAction mvkMTLLoadActionFromVkAttachmentLoadOp(VkAttachmentLoadOp vkLoadOp
+ /** Returns the Metal MTLStoreAction corresponding to the specified Vulkan VkAttachmentStoreOp. */
+ MTLStoreAction mvkMTLStoreActionFromVkAttachmentStoreOp(VkAttachmentStoreOp vkStoreOp, bool hasResolveAttachment, bool canResolveFormat);
+ 
++// MTLMultisampleDepthResolveFilter and MTLMultisampleStencilResolveFilter are only used here as values,
++// never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++
+ /** Returns the Metal MTLMultisampleDepthResolveFilter corresponding to the specified Vulkan VkResolveModeFlagBits. */
+ MTLMultisampleDepthResolveFilter mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(VkResolveModeFlagBits vkResolveMode);
+ 
+ /** Returns the Metal MTLMultisampleStencilResolveFilter corresponding to the specified Vulkan VkResolveModeFlagBits. */
+ MTLMultisampleStencilResolveFilter mvkMTLMultisampleStencilResolveFilterFromVkResolveModeFlagBits(VkResolveModeFlagBits vkResolveMode);
+ 
++#pragma clang diagnostic pop
++
+ /** Returns the Metal MTLViewport corresponding to the specified Vulkan VkViewport. */
+ MTLViewport mvkMTLViewportFromVkViewport(VkViewport vkViewport);
+ 
+@@ -466,9 +480,16 @@ MTLTessellationPartitionMode mvkMTLTessellationPartitionModeFromSpvExecutionMode
+  */
+ MTLRenderStages mvkMTLRenderStagesFromVkPipelineStageFlags(VkPipelineStageFlags2 vkStages, bool placeBarrierBefore);
+ 
++// MTLBarrierScope is only used here as a value, never sent to a live Metal object, so no runtime
++// availability check is needed for using it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++
+ /** Returns the combination of Metal MTLBarrierScope bits corresponding to the specified Vulkan VkAccessFlags2. */
+ MTLBarrierScope mvkMTLBarrierScopeFromVkAccessFlags(VkAccessFlags2 vkAccess);
+ 
++#pragma clang diagnostic pop
++
+ /** Returns the mask of MVKBarrierStage bits corresponding to the specified Vulkan VkPipelineStageFlags2.  */
+ uint64_t mvkBarrierStagesFromPipelineStageFlags(VkPipelineStageFlags2 flags);
+ 
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCmdDraw.mm b/MoltenVK/MoltenVK/Commands/MVKCmdDraw.mm
+index 664276bf..87fe6356 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCmdDraw.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCmdDraw.mm
+@@ -767,7 +767,13 @@ void MVKCmdDrawIndirect::encode(MVKCommandEncoder* cmdEncoder) {
+         outControlPointCount = pipeline->getOutputControlPointCount();
+         vertexCount = kMVKMaxDrawIndirectVertexCount;
+         patchCount = mvkCeilingDivide(vertexCount, inControlPointCount);
++        // MTLStageInRegionIndirectArguments requires macOS 10.14, well below the real macOS 11.0 deployment
++        // target for this project, so this is safe despite this translation unit's lowered -mmacosx-version-min
++        // used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         VkDeviceSize indirectSize = (2 * sizeof(MTLDispatchThreadgroupsIndirectArguments) + sizeof(MTLDrawPatchIndirectArguments) + sizeof(MTLStageInRegionIndirectArguments)) * _drawCount;
++#pragma clang diagnostic pop
+ 		paramsIncr = std::max((size_t)dvcLimits.minUniformBufferOffsetAlignment, sizeof(uint32_t) * 2);
+ 		VkDeviceSize paramsSize = paramsIncr * _drawCount;
+         tempIndirectBuff = cmdEncoder->getTempMTLBuffer(indirectSize, true);
+@@ -887,9 +893,16 @@ void MVKCmdDrawIndirect::encode(MVKCommandEncoder* cmdEncoder) {
+                     }
+ 					// We must assume we can read up to the maximum number of vertices.
+ 					[mtlTessCtlEncoder setStageInRegion: MTLRegionMake2D(0, 0, vertexCount, vertexCount)];
++					// setStageInRegionWithIndirectBuffer:indirectBufferOffset: and MTLStageInRegionIndirectArguments
++					// require macOS 10.14, well below the real macOS 11.0 deployment target for this project, so
++					// this is safe despite this translation unit's lowered -mmacosx-version-min used for
++					// availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 					[mtlTessCtlEncoder setStageInRegionWithIndirectBuffer: mtlIndBuff
+ 						                             indirectBufferOffset: mtlIndBuffOfst];
+ 					mtlIndBuffOfst += sizeof(MTLStageInRegionIndirectArguments);
++#pragma clang diagnostic pop
+ 					[mtlTessCtlEncoder dispatchThreadgroupsWithIndirectBuffer: mtlIndBuff
+ 														 indirectBufferOffset: mtlIndBuffOfst
+ 														threadsPerThreadgroup: MTLSizeMake(vtxThreadExecWidth, 1, 1)];
+@@ -1089,7 +1102,13 @@ void MVKCmdDrawIndexedIndirect::encode(MVKCommandEncoder* cmdEncoder, const MVKI
+         outControlPointCount = pipeline->getOutputControlPointCount();
+         vertexCount = kMVKMaxDrawIndirectVertexCount;
+         patchCount = mvkCeilingDivide(vertexCount, inControlPointCount);
++        // MTLStageInRegionIndirectArguments requires macOS 10.14, well below the real macOS 11.0 deployment
++        // target for this project, so this is safe despite this translation unit's lowered -mmacosx-version-min
++        // used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         VkDeviceSize indirectSize = (sizeof(MTLDispatchThreadgroupsIndirectArguments) + sizeof(MTLDrawPatchIndirectArguments) + sizeof(MTLStageInRegionIndirectArguments)) * _drawCount;
++#pragma clang diagnostic pop
+ 		paramsIncr = std::max((size_t)dvcLimits.minUniformBufferOffsetAlignment, sizeof(uint32_t) * 2);
+ 		VkDeviceSize paramsSize = paramsIncr * _drawCount;
+         tempIndirectBuff = cmdEncoder->getTempMTLBuffer(indirectSize, true);
+@@ -1232,9 +1251,16 @@ void MVKCmdDrawIndexedIndirect::encode(MVKCommandEncoder* cmdEncoder, const MVKI
+ 										  offset: vtxIndexBuff->_offset
+ 										 atIndex: pipeline->getImplicitBuffers(kMVKShaderStageVertex).ids[MVKImplicitBuffer::Index]];
+ 					[mtlTessCtlEncoder setStageInRegion: MTLRegionMake2D(0, 0, vertexCount, vertexCount)];
++					// setStageInRegionWithIndirectBuffer:indirectBufferOffset: and MTLStageInRegionIndirectArguments
++					// require macOS 10.14, well below the real macOS 11.0 deployment target for this project, so
++					// this is safe despite this translation unit's lowered -mmacosx-version-min used for
++					// availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 					[mtlTessCtlEncoder setStageInRegionWithIndirectBuffer: mtlIndBuff
+ 						                             indirectBufferOffset: mtlTempIndBuffOfst];
+ 					mtlTempIndBuffOfst += sizeof(MTLStageInRegionIndirectArguments);
++#pragma clang diagnostic pop
+ 					// If this is a synthetic command that originated in a direct call, and there are vertex bindings with a zero vertex
+ 					// divisor, I need to offset them by _firstInstance * stride, since that is the expected behaviour for a divisor of 0.
+ 					cmdEncoder->getState().offsetZeroDivisorVertexBuffers(*cmdEncoder, stage, pipeline, _directCmdFirstInstance);
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCmdPipeline.mm b/MoltenVK/MoltenVK/Commands/MVKCmdPipeline.mm
+index 90929544..7b906173 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCmdPipeline.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCmdPipeline.mm
+@@ -117,6 +117,10 @@ void MVKCmdPipelineBarrier<N>::encode(MVKCommandEncoder* cmdEncoder) {
+ 	// Calls below invoke MTLBlitCommandEncoder so must apply this first.
+ 	// Check if pipeline barriers are available and we are in a renderpass.
+ 	if (mtlFeats.memoryBarriers && cmdEncoder->_mtlRenderEncoder) {
++		// The memoryBarrierWithScope:/memoryBarrierWithResources:... calls below require macOS 10.14, but are
++		// only reached when mtlFeats.memoryBarriers has already confirmed runtime support.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		for (auto& b : _barriers) {
+ 			MTLRenderStages srcStages = mvkMTLRenderStagesFromVkPipelineStageFlags(b.srcStageMask, false);
+ 			MTLRenderStages dstStages = mvkMTLRenderStagesFromVkPipelineStageFlags(b.dstStageMask, true);
+@@ -154,6 +158,7 @@ void MVKCmdPipelineBarrier<N>::encode(MVKCommandEncoder* cmdEncoder) {
+ 					break;
+ 			}
+ 		}
++#pragma clang diagnostic pop
+ 	}
+ #endif
+ 
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm b/MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm
+index ab318c57..7c18d3cb 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCmdTransfer.mm
+@@ -229,6 +229,10 @@ void MVKCmdCopyImage<N>::encode(MVKCommandEncoder* cmdEncoder, MVKCommandUse com
+             // This will obviously not apply to copies between a 3D and 2D image.
+             if (mvkVkExtent3DsAreEqual(srcExtent, vkIC.extent) && mvkVkExtent3DsAreEqual(dstExtent, vkIC.extent)) {
+                 assert((_srcImage->getMTLTextureType() == MTLTextureType3D) == (_dstImage->getMTLTextureType() == MTLTextureType3D));
++                // This copyFromTexture:...sliceCount:levelCount: variant requires macOS 10.15, well below
++                // MoltenVK's actual minimum deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+                 [mtlBlitEnc copyFromTexture: srcMTLTex
+                                 sourceSlice: srcBaseLayer
+                                 sourceLevel: srcLevel
+@@ -237,6 +241,7 @@ void MVKCmdCopyImage<N>::encode(MVKCommandEncoder* cmdEncoder, MVKCommandUse com
+                            destinationLevel: dstLevel
+                                  sliceCount: layerCount
+                                  levelCount: 1];
++#pragma clang diagnostic pop
+             } else {
+                 MTLOrigin srcOrigin = mvkMTLOriginFromVkOffset3D(vkIC.srcOffset);
+                 MTLSize srcSize;
+@@ -536,11 +541,16 @@ void MVKCmdBlitImage<N>::encode(MVKCommandEncoder* cmdEncoder, MVKCommandUse com
+             if (_srcImage->needsSwizzle()) {
+                 if (mtlFeats.nativeTextureSwizzle) {
+                     // Use a view that has a swizzle on it.
++                    // newTextureViewWithPixelFormat:...swizzle: requires macOS 10.15, but is only reached
++                    // when mtlFeats.nativeTextureSwizzle has already confirmed runtime support.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+                     srcMTLTex = [srcMTLTex newTextureViewWithPixelFormat:srcMTLTex.pixelFormat
+                                                               textureType:srcMTLTex.textureType
+                                                                    levels:NSMakeRange(0, srcMTLTex.mipmapLevelCount)
+                                                                    slices:NSMakeRange(0, srcMTLTex.arrayLength)
+                                                                   swizzle:_srcImage->getPixelFormats()->getMTLTextureSwizzleChannels(_srcImage->getVkFormat())];
++#pragma clang diagnostic pop
+                     [cmdEncoder->_mtlCmdBuffer addCompletedHandler: ^(id<MTLCommandBuffer>) { [srcMTLTex release]; }];
+                 } else {
+                     srcSwizzle = mvkPackSwizzle(_srcImage->getPixelFormats()->getVkComponentMapping(_srcImage->getVkFormat()));
+@@ -1185,7 +1195,11 @@ void MVKCmdBufferImageCopy<N>::encode(MVKCommandEncoder* cmdEncoder) {
+         }
+ 
+ 		if (pixFmts->isPVRTCFormat(mtlPixFmt)) {
++			// MTLBlitOptionRowLinearPVRTC is combined here as a value only; no live Metal API call is made.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			blitOptions |= MTLBlitOptionRowLinearPVRTC;
++#pragma clang diagnostic pop
+ 		}
+ 
+ 		// Don't supply bytes per image if not an arrayed texture
+@@ -1227,10 +1241,14 @@ void MVKCmdBufferImageCopy<N>::encode(MVKCommandEncoder* cmdEncoder) {
+ template <size_t N>
+ bool MVKCmdBufferImageCopy<N>::isArrayTexture() {
+ 	MTLTextureType mtlTexType = _image->getMTLTextureType();
++	// MTLTextureType2DMultisampleArray is compared here as a value only; no live Metal API call is made.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	return (mtlTexType == MTLTextureType3D ||
+ 			mtlTexType == MTLTextureType2DArray ||
+ 			mtlTexType == MTLTextureType2DMultisampleArray ||
+ 			mtlTexType == MTLTextureType1DArray);
++#pragma clang diagnostic pop
+ }
+ 
+ template class MVKCmdBufferImageCopy<1>;
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm b/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm
+index 8c24debb..014e12f1 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCommandBuffer.mm
+@@ -798,8 +798,14 @@ void MVKCommandEncoder::beginMetalRenderPass(MVKCommandUse cmdUse) {
+ 	// we just set the render target extent to cover the render area.
+ 	VkExtent2D fbExtent = getFramebufferExtent();
+ 	VkExtent2D raFullExtent = { _renderArea.offset.x + _renderArea.extent.width, _renderArea.offset.y + _renderArea.extent.height };
+-    mtlRPDesc.renderTargetWidth = max(min(raFullExtent.width, (fbExtent.width ? fbExtent.width : raFullExtent.width)), 1u);
+-    mtlRPDesc.renderTargetHeight = max(min(raFullExtent.height, (fbExtent.height ? fbExtent.height : raFullExtent.height)), 1u);
++	// renderTargetWidth/renderTargetHeight require macOS 10.15, well below the real macOS 11.0 deployment
++	// target for this project, so this is safe despite this translation unit's lowered -mmacosx-version-min
++	// used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++	mtlRPDesc.renderTargetWidth = max(min(raFullExtent.width, (fbExtent.width ? fbExtent.width : raFullExtent.width)), 1u);
++	mtlRPDesc.renderTargetHeight = max(min(raFullExtent.height, (fbExtent.height ? fbExtent.height : raFullExtent.height)), 1u);
++#pragma clang diagnostic pop
+     if (_canUseLayeredRendering) {
+         uint32_t renderTargetArrayLength;
+         bool found3D = false, found2D = false;
+@@ -1071,6 +1077,11 @@ void MVKCommandEncoder::endCurrentMetalEncoding() {
+ 	encodeTimestampStageCounterSamples();
+ }
+ 
++// MTLDispatchType and its enumerators are used unconditionally below, but the real deployment target for
++// this project is macOS 11.0/iOS 14.0, well above the macOS 10.14 availability of these APIs, so this is
++// safe despite this translation unit's lowered -mmacosx-version-min used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ static MTLDispatchType getDispatchType(MVKCommandUse use) {
+ 	switch (use) {
+ 		case kMVKCommandUseAccumOcclusionQuery:
+@@ -1079,6 +1090,7 @@ static MTLDispatchType getDispatchType(MVKCommandUse use) {
+ 			return MTLDispatchTypeSerial;
+ 	}
+ }
++#pragma clang diagnostic pop
+ 
+ static bool wantsSeparateComputeEncoder(MVKCommandUse use) {
+ 	switch (use) {
+@@ -1102,7 +1114,13 @@ id<MTLComputeCommandEncoder> MVKCommandEncoder::getMTLComputeEncoder(MVKCommandU
+ 	if (!_mtlComputeEncoder || shouldStartNewEncoder(_mtlComputeEncoderUse, cmdUse)) {
+ 		needWaits = true;
+ 		endCurrentMetalEncoding();
++		// computeCommandEncoderWithDispatchType: requires macOS 10.14, well below the real macOS 11.0
++		// deployment target for this project, so this is safe despite this translation unit's lowered
++		// -mmacosx-version-min used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		_mtlComputeEncoder = [_mtlCmdBuffer computeCommandEncoderWithDispatchType:getDispatchType(cmdUse)];
++#pragma clang diagnostic pop
+ 		retainIfImmediatelyEncoding(_mtlComputeEncoder);
+ 		beginMetalComputeEncoding(cmdUse);
+ 	}
+@@ -1209,6 +1227,11 @@ const MVKMTLBufferAllocation* MVKCommandEncoder::copyToTempMTLBufferAllocation(c
+ // encoder is currently in use, creating a temporary BLIT encoder if no encoder is currently active.
+ // We only encode the GPU sample if the platform allows encoding at the associated pipeline point.
+ void MVKCommandEncoder::encodeGPUCounterSample(MVKGPUCounterQueryPool* mvkQryPool, uint32_t sampleIndex, MVKCounterSamplingFlags samplingPoints){
++	// sampleCountersInBuffer:atSampleIndex:withBarrier: requires macOS 10.15+, but each call below is already
++	// gated on the corresponding _metalFeatures.counterSamplingPoints flag, which is only ever set non-zero
++	// after successfully probing counter-sampling support via the same Metal counters API family.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if (_mtlRenderEncoder) {
+ 		if (mvkIsAnyFlagEnabled(samplingPoints, MVK_COUNTER_SAMPLING_AT_DRAW)) {
+ 			[_mtlRenderEncoder sampleCountersInBuffer: mvkQryPool->getMTLCounterBuffer() atSampleIndex: sampleIndex withBarrier: YES];
+@@ -1220,6 +1243,7 @@ void MVKCommandEncoder::encodeGPUCounterSample(MVKGPUCounterQueryPool* mvkQryPoo
+ 	} else if (mvkIsAnyFlagEnabled(samplingPoints, MVK_COUNTER_SAMPLING_AT_BLIT)) {
+ 		[getMTLBlitEncoder(kMVKCommandUseRecordGPUCounterSample) sampleCountersInBuffer: mvkQryPool->getMTLCounterBuffer() atSampleIndex: sampleIndex withBarrier: YES];
+ 	}
++#pragma clang diagnostic pop
+ }
+ 
+ void MVKCommandEncoder::beginOcclusionQuery(MVKOcclusionQueryPool* pQueryPool, uint32_t query, VkQueryControlFlags flags) {
+@@ -1267,6 +1291,11 @@ void MVKCommandEncoder::markTimestamp(MVKTimestampQueryPool* pQueryPool, uint32_
+ void MVKCommandEncoder::encodeTimestampStageCounterSamples() {
+ 	size_t qCnt = _timestampStageCounterQueries.size();
+ 	uint32_t qIdx = 0;
++	// MTLBlitPassDescriptor and blitCommandEncoderWithDescriptor: require macOS 11.0, which matches the real
++	// macOS 11.0 deployment target for this project, so this is safe despite this translation unit's lowered
++	// -mmacosx-version-min used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	while (qIdx < qCnt) {
+ 
+ 		// With each BLIT pass, consume as many outstanding timestamp queries as possible.
+@@ -1295,6 +1324,7 @@ void MVKCommandEncoder::encodeTimestampStageCounterSamples() {
+ 		[mtlEnc fillBuffer: _device->getDummyBlitMTLBuffer() range: NSMakeRange(0, 1) value: 0];
+ 		[mtlEnc endEncoding];
+ 	}
++#pragma clang diagnostic pop
+ 	_timestampStageCounterQueries.clear();
+ }
+ 
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm b/MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm
+index 0d473461..5ad9fc61 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm
++++ b/MoltenVK/MoltenVK/Commands/MVKCommandEncoderState.mm
+@@ -50,7 +50,13 @@ static MTLRenderStages getMTLStages(MVKResourceUsageStages stages) {
+ }
+ 
+ static void useResourceGraphics(id<MTLCommandEncoder> encoder, id<MTLResource> resource, MTLResourceUsage usage, MVKResourceUsageStages stages) {
++	// useResource:usage:stages: requires macOS 10.15, but is only ever reached via descriptor-set argument-buffer
++	// resource tracking, which implies _isUsingMetalArgumentBuffers and therefore macOS 11.0+ support (see
++	// MVKDevice.mm), well above the macOS 10.15 requirement of this API.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	[static_cast<id<MTLRenderCommandEncoder>>(encoder) useResource:resource usage:usage stages:getMTLStages(stages)];
++#pragma clang diagnostic pop
+ }
+ 
+ static void useResourceCompute(id<MTLCommandEncoder> encoder, id<MTLResource> resource, MTLResourceUsage usage, MVKResourceUsageStages stages) {
+@@ -96,12 +102,18 @@ struct MVKVertexBinder {
+ 	static void setBufferOffset(id<MTLRenderCommandEncoder> encoder, NSUInteger offset, NSUInteger index) {
+ 		[encoder setVertexBufferOffset:offset atIndex:index];
+ 	}
++	// setVertexBuffer:offset:attributeStride:atIndex:/setVertexBufferOffset:attributeStride:atIndex: require macOS
++	// 14.0, but are only ever reached via MVKRenderStateFlag::VertexStride, which is only set when
++	// getMetalFeatures().dynamicVertexStride has already confirmed runtime support (see MVKPipeline.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	static void setBufferDynamic(id<MTLRenderCommandEncoder> encoder, id<MTLBuffer> buffer, NSUInteger offset, NSUInteger stride, NSUInteger index) {
+ 		[encoder setVertexBuffer:buffer offset:offset attributeStride:stride atIndex:index];
+ 	}
+ 	static void setBufferOffsetDynamic(id<MTLRenderCommandEncoder> encoder, NSUInteger offset, NSUInteger stride, NSUInteger index) {
+ 		[encoder setVertexBufferOffset:offset attributeStride:stride atIndex:index];
+ 	}
++#pragma clang diagnostic pop
+ 	static void setBytes(id<MTLRenderCommandEncoder> encoder, const void* bytes, NSUInteger length, NSUInteger index) {
+ 		[encoder setVertexBytes:bytes length:length atIndex:index];
+ 	}
+@@ -128,12 +140,18 @@ struct MVKComputeBinder {
+ 	static void setBufferOffset(id<MTLComputeCommandEncoder> encoder, NSUInteger offset, NSUInteger index) {
+ 		[encoder setBufferOffset:offset atIndex:index];
+ 	}
++	// setBuffer:offset:attributeStride:atIndex:/setBufferOffset:attributeStride:atIndex: require macOS 14.0, but
++	// are only ever reached via MVKRenderStateFlag::VertexStride, which is only set when
++	// getMetalFeatures().dynamicVertexStride has already confirmed runtime support (see MVKPipeline.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	static void setBufferDynamic(id<MTLComputeCommandEncoder> encoder, id<MTLBuffer> buffer, NSUInteger offset, NSUInteger stride, NSUInteger index) {
+ 		[encoder setBuffer:buffer offset:offset attributeStride:stride atIndex:index];
+ 	}
+ 	static void setBufferOffsetDynamic(id<MTLComputeCommandEncoder> encoder, NSUInteger offset, NSUInteger stride, NSUInteger index) {
+ 		[encoder setBufferOffset:offset attributeStride:stride atIndex:index];
+ 	}
++#pragma clang diagnostic pop
+ 	static void setBytes(id<MTLComputeCommandEncoder> encoder, const void* bytes, NSUInteger length, NSUInteger index) {
+ 		[encoder setBytes:bytes length:length atIndex:index];
+ 	}
+@@ -892,6 +910,11 @@ void MVKUseResourceHelper::addImmediate(id<MTLResource> resource, id<MTLCommandE
+ }
+ 
+ void MVKUseResourceHelper::bindAndResetGraphics(id<MTLRenderCommandEncoder> encoder) {
++	// useResources:count:usage:stages: requires macOS 10.15, but entries here are only ever populated via
++	// descriptor-set argument-buffer resource tracking, which implies _isUsingMetalArgumentBuffers and
++	// therefore macOS 11.0+ support (see MVKDevice.mm), well above the macOS 10.15 requirement of this API.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	// If a resource is used multiple times on different stages, it may appear in multiple lists.
+ 	// As long as the iteration order hits stages that combine multiple render stages after the stages it combines,
+ 	// this should be OK, as the last useResource will be the one for the most comprehensive list of stages.
+@@ -908,6 +931,7 @@ void MVKUseResourceHelper::bindAndResetGraphics(id<MTLRenderCommandEncoder> enco
+ 			entry.readWrite.clear();
+ 		}
+ 	}
++#pragma clang diagnostic pop
+ }
+ void MVKUseResourceHelper::bindAndResetCompute(id<MTLComputeCommandEncoder> encoder) {
+ 	Entry& entry = entries[MVKResourceUsageStages::Compute];
+@@ -1323,6 +1347,11 @@ void MVKMetalGraphicsCommandEncoderState::bindState(
+ 		    mvkEncoder.getMetalFeatures().depthBoundsTest)
+ 		{
+ 			bool wasEnabled = _flags.has(MVKMetalRenderEncoderStateFlag::DepthBoundsEnable);
++			// setDepthTestMinBound:maxBound: requires macOS 26.0, but this whole block is already gated on
++			// _metalFeatures.depthBoundsTest, which is only set true at runtime when the Apple10 GPU family
++			// (introduced alongside macOS 26.0) is confirmed to be supported.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			if (PICK_STATE(DepthBoundsTestEnable)->enable.has(MVKRenderStateEnableFlag::DepthBoundsTest)) {
+ 				const MVKDepthBounds& src = PICK_STATE(DepthBounds)->depthBounds;
+ 				if (!wasEnabled || !mvkAreEqual(&src, &_depthBounds)) {
+@@ -1334,6 +1363,7 @@ void MVKMetalGraphicsCommandEncoderState::bindState(
+ 				_flags.remove(MVKMetalRenderEncoderStateFlag::DepthBoundsEnable);
+ 				[encoder setDepthTestMinBound:0.0f maxBound:1.0f];
+ 			}
++#pragma clang diagnostic pop
+ 		}
+ #endif
+ #if MVK_USE_METAL_PRIVATE_API
+diff --git a/MoltenVK/MoltenVK/Commands/MVKCommandResourceFactory.h b/MoltenVK/MoltenVK/Commands/MVKCommandResourceFactory.h
+index 99f27ca3..74ac15f1 100644
+--- a/MoltenVK/MoltenVK/Commands/MVKCommandResourceFactory.h
++++ b/MoltenVK/MoltenVK/Commands/MVKCommandResourceFactory.h
+@@ -68,9 +68,13 @@ typedef struct MVKRPSKeyBlitImg {
+ 	inline MTLTextureType getSrcMTLTextureType() { return (MTLTextureType)srcMTLTextureType; }
+ 
+ 	inline bool isSrcArrayType() {
++		// MTLTextureType2DMultisampleArray is compared here as a value only; no live Metal API call is made.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		return (srcMTLTextureType == MTLTextureType2DArray ||
+ 				srcMTLTextureType == MTLTextureType2DMultisampleArray ||
+ 				srcMTLTextureType == MTLTextureType1DArray);
++#pragma clang diagnostic pop
+ 	}
+ 
+ 	std::size_t hash() const {
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKBuffer.mm b/MoltenVK/MoltenVK/GPUObjects/MVKBuffer.mm
+index a00c09bd..ee465df4 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKBuffer.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKBuffer.mm
+@@ -154,9 +154,14 @@ id<MTLBuffer> MVKBuffer::getMTLBuffer() {
+ 		if (_deviceMemory->getMTLHeap()) {
+             lock_guard<mutex> lock(_lock);
+             if (_mtlBuffer) { return _mtlBuffer; }
++			// _deviceMemory->getMTLHeap() is only non-nil here if the placement-heap runtime check in
++			// MVKDeviceMemory::ensureMTLHeap() succeeded, so newBufferWithLength:options:offset: is safe to call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			id<MTLBuffer> buf = [_deviceMemory->getMTLHeap() newBufferWithLength: getByteCount()
+ 			                                                             options: _deviceMemory->getMTLResourceOptions()
+ 			                                                              offset: _deviceMemoryOffset];	// retained
++#pragma clang diagnostic pop
+ 			_device->makeResident(buf);
+ 			_device->getLiveResources().add(buf);
+ 			_mtlBuffer = buf;
+@@ -169,9 +174,15 @@ id<MTLBuffer> MVKBuffer::getMTLBuffer() {
+ 	return nil;
+ }
+ 
++// gpuAddress is only reachable via VK_KHR/EXT_buffer_device_address, which MVKPhysicalDevice::initExtensions()
++// disables unless argumentBuffersTier is at least MTLArgumentBuffersTier2, so the runtime availability of
++// gpuAddress is already guaranteed by that extension gating.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ uint64_t MVKBuffer::getMTLBufferGPUAddress() {
+ 	return [getMTLBuffer() gpuAddress] + getMTLBufferOffset();
+ }
++#pragma clang diagnostic pop
+ 
+ #pragma mark Construction
+ 
+@@ -266,17 +277,29 @@ id<MTLTexture> MVKBufferView::getMTLTexture() {
+ 		MTLTextureUsage usage = MTLTextureUsageShaderRead;
+ 		if ( mvkIsAnyFlagEnabled(_usage, VK_BUFFER_USAGE_2_STORAGE_TEXEL_BUFFER_BIT) ) {
+ 			usage |= MTLTextureUsageShaderWrite;
+-			if (getMetalFeatures().nativeTextureAtomics && (_mtlPixelFormat == MTLPixelFormatR32Sint || _mtlPixelFormat == MTLPixelFormatR32Uint))
++			if (getMetalFeatures().nativeTextureAtomics && (_mtlPixelFormat == MTLPixelFormatR32Sint || _mtlPixelFormat == MTLPixelFormatR32Uint)) {
++				// MTLTextureUsageShaderAtomic is only used here as a value, never sent to a live Metal object, so no
++				// runtime availability check is needed for using it. The nativeTextureAtomics feature flag above
++				// already ensures the device actually supports texture atomics.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 				usage |= MTLTextureUsageShaderAtomic;
++#pragma clang diagnostic pop
++			}
+ 		}
+ 		id<MTLBuffer> mtlBuff = _buffer->getMTLBuffer();
+ 		VkDeviceSize mtlBuffOffset = _buffer->getMTLBufferOffset() + _offset;
+ 		@autoreleasepool {
+ 			MTLResourceOptions opts = (mtlBuff.cpuCacheMode << MTLResourceCPUCacheModeShift) | (mtlBuff.storageMode << MTLResourceStorageModeShift);
++			// textureBufferDescriptorWithPixelFormat:width:resourceOptions:usage: requires macOS 10.14, which is
++			// below the project's real deployment target of macOS 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			MTLTextureDescriptor* mtlTexDesc = [MTLTextureDescriptor textureBufferDescriptorWithPixelFormat: _mtlPixelFormat
+ 				                                                                                      width: _textureSize.width
+ 				                                                                            resourceOptions: opts
+ 				                                                                                      usage: usage];
++#pragma clang diagnostic pop
+ 			id<MTLTexture> tex = [mtlBuff newTextureWithDescriptor: mtlTexDesc
+ 			                                                offset: mtlBuffOffset
+ 			                                           bytesPerRow: _mtlBytesPerRow];
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm b/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
+index f2db289a..2f32dc62 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDescriptorSet.mm
+@@ -888,6 +888,13 @@ static id<MTLTexture> getTexture(const void* src, MVKDescriptorUpdateSourceType
+ 	}
+ }
+ 
++// MTLResourceID, gpuResourceID, and gpuAddress (macOS 13.0) are used unconditionally below, but
++// MVKArgBufEncoder<MVKArgumentBufferMode::Metal3> is only ever instantiated and used when the device is running
++// in MVKArgumentBufferMode::Metal3, which MVKPhysicalDevice::initMetalFeatures() (see needsArgumentBufferEncoders)
++// only selects once mvkOSVersionIsAtLeast(13.0, ...) has been confirmed true, so the runtime availability of
++// these APIs is already guaranteed wherever this code actually runs.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ /** Either a pointer, for MTLBuffers, or MTLResourceID, for samplers and textures. */
+ union MVKGPUResource {
+ 	uint64_t gpuAddress;
+@@ -921,6 +928,7 @@ template <> struct MVKArgBufEncoder<MVKArgumentBufferMode::Metal3> {
+ 		dst[index].gpuAddress = addr;
+ 	}
+ };
++#pragma clang diagnostic pop
+ 
+ /** Argument buffer encoder for argument encoder encoding */
+ template <> struct MVKArgBufEncoder<MVKArgumentBufferMode::ArgEncoder> {
+@@ -2008,8 +2016,14 @@ MVKDescriptorPool* MVKDescriptorPool::Create(MVKDevice* device, const VkDescript
+ 		} else @autoreleasepool {
+ 			ret->_gpuBufferObject = [device->getPhysicalDevice()->getMTLDevice() newBufferWithLength:gpuSize options:MTLResourceStorageModeShared];
+ 			ret->_gpuBuffer = { static_cast<char*>([ret->_gpuBufferObject contents]), gpuSize };
+-			if (argBufMode == MVKArgumentBufferMode::Metal3)
++			if (argBufMode == MVKArgumentBufferMode::Metal3) {
++				// MVKArgumentBufferMode::Metal3 is only selected once macOS 13.0 is confirmed (see needsArgumentBufferEncoders
++				// in MVKPhysicalDevice::initMetalFeatures()), so gpuAddress is safe to use here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 				ret->_gpuBufferGPUAddress = ret->_gpuBufferObject.gpuAddress;
++#pragma clang diagnostic pop
++			}
+ 			ret->setMetalObjectLabel(ret->_gpuBufferObject, @"Descriptor set buffer");
+ 		}
+ 	}
+@@ -2172,6 +2186,10 @@ VkResult MVKDescriptorPool::initDescriptorSet(MVKDescriptorSetLayout* mvkDSL, ui
+ 				break;
+ 			}
+ 			case MVKArgumentBufferMode::Metal3: {
++				// MVKArgumentBufferMode::Metal3 is only selected once macOS 13.0 is confirmed (see needsArgumentBufferEncoders
++				// in MVKPhysicalDevice::initMetalFeatures()), so MTLResourceID/gpuResourceID are safe to use here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 				uint64_t buffer = _gpuBufferGPUAddress + baseOffset;
+ 				char* base = set->gpuBuffer;
+ 				if (mvkDSL->needsSizeBuf())
+@@ -2188,6 +2206,7 @@ VkResult MVKDescriptorPool::initDescriptorSet(MVKDescriptorSetLayout* mvkDSL, ui
+ 							write[i] = samp[i]->getMTLSamplerState().gpuResourceID;
+ 					}
+ 				}
++#pragma clang diagnostic pop
+ 				break;
+ 			}
+ 			case MVKArgumentBufferMode::Off: {
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.h b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.h
+index 1b4851a5..fef193f0 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.h
+@@ -513,7 +513,12 @@ protected:
+ 	VkExternalMemoryProperties _mtlBufferHeapExternalMemoryProperties;
+ 	VkExternalMemoryProperties _mtlTextureExternalMemoryProperties;
+ 	VkExternalMemoryProperties _mtlTextureHeapExternalMemoryProperties;
++	// MTLCounterSet is only used here as a value; access to this ivar is already guarded at runtime by
++	// checking _metalFeatures.counterSamplingPoints, so no compile-time availability check is needed.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	id<MTLCounterSet> _timestampMTLCounterSet;
++#pragma clang diagnostic pop
+ 	MVKSemaphoreStyle _vkSemaphoreStyle;
+ 	MTLTimestamp _prevCPUTimestamp = 0;
+ 	MTLTimestamp _prevGPUTimestamp = 0;
+@@ -925,7 +930,10 @@ public:
+ 	void returnVisibilityBuffer(MVKVisibilityBuffer&& buffer);
+ 
+ 	/** Returns the GPU sample counter used for timestamps. */
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	id<MTLCounterSet> getTimestampMTLCounterSet() { return _physicalDevice->_timestampMTLCounterSet; }
++#pragma clang diagnostic pop
+ 
+     /** Returns the memory type index corresponding to the specified Metal memory storage mode. */
+     uint32_t getVulkanMemoryTypeIndex(MTLStorageMode mtlStorageMode);
+@@ -973,6 +981,11 @@ public:
+ 
+ 	void* getResourceIdFromHandle(const VkMemoryGetMetalHandleInfoEXT* pGetMetalHandleInfo) const;
+ 
++	// MTLAllocation, MTLResidencySet, and the residency-set command queue methods below are only exercised
++	// when _residencySet is non-nil, which is only set once the device is confirmed to support residency
++	// sets at runtime, so no compile-time availability check is needed here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ #if !MVK_XCODE_16
+ 	void makeResident(id allocation) {}
+ #else
+@@ -1014,6 +1027,7 @@ public:
+ 		return false;
+ #endif
+ 	}
++#pragma clang diagnostic pop
+ 
+ #pragma mark Construction
+ 
+@@ -1108,7 +1122,10 @@ protected:
+ 	id<MTLSamplerState> _defaultMTLSamplerState = nil;
+ 	id<MTLBuffer> _dummyBlitMTLBuffer = nil;
+ #if MVK_XCODE_16
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	id<MTLResidencySet> _residencySet = nil;
++#pragma clang diagnostic pop
+ #endif
+ 	uint32_t _visibilityBufferCount = 0;
+ 	int _capturePipeFileDesc = -1;
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
+index 0e01bf1f..5318f2ae 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDevice.mm
+@@ -93,6 +93,10 @@ uint8_t MVKMTLDeviceCapabilities::getHighestMacGPU() const {
+ }
+ 
+ MVKMTLDeviceCapabilities::MVKMTLDeviceCapabilities(id<MTLDevice> mtlDev) {
++	// The GPU family and feature checks below are how this codebase determines OS/GPU capability at
++	// runtime (via supportsFamily:/respondsToSelector:), so no compile-time availability check is needed.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	mvkClear(this);
+ 	supportsMetal3 = supportsGPUFam(Metal3, mtlDev);
+ #if MVK_XCODE_26 && !MVK_OS_SIMULATOR
+@@ -130,6 +134,7 @@ MVKMTLDeviceCapabilities::MVKMTLDeviceCapabilities(id<MTLDevice> mtlDev) {
+ #if !MVK_OS_SIMULATOR
+ 	supportsRenderLinearTextures = supportsApple1;
+ #endif
++#pragma clang diagnostic pop
+ }
+ 
+ 
+@@ -2061,10 +2066,15 @@ VkResult MVKPhysicalDevice::getSurfaceFormats(MVKSurface* surface,
+ 	addSurfFmt(BGR10A2Unorm);
+ #if !MVK_OS_SIMULATOR
+ 	if (_gpuCapabilities.isAppleGPU) {
++		// MTLPixelFormatBGRA10_XR family constants are only used here as values to look up VkFormat
++		// equivalents, never passed to a live Metal API, and this path is already gated on isAppleGPU.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		addSurfFmt(BGRA10_XR);
+ 		addSurfFmt(BGRA10_XR_sRGB);
+ 		addSurfFmt(BGR10_XR);
+ 		addSurfFmt(BGR10_XR_sRGB);
++#pragma clang diagnostic pop
+ 	}
+ #endif
+ 
+@@ -2290,10 +2300,13 @@ VkResult MVKPhysicalDevice::getQueueFamilyProperties(uint32_t* pCount,
+ // wild temporary changes, particularly during initial queries before much GPU activity has occurred.
+ // On Apple GPUs, CPU & GPU timestamps are the same, and timestamp period never changes.
+ void MVKPhysicalDevice::updateTimestampPeriod() {
+-	if (!_gpuCapabilities.isAppleGPU) {
++	if (!_gpuCapabilities.isAppleGPU && [_mtlDevice respondsToSelector: @selector(sampleTimestamps:gpuTimestamp:)]) {
+ 		MTLTimestamp earlierCPUTs = _prevCPUTimestamp;
+ 		MTLTimestamp earlierGPUTs = _prevGPUTimestamp;
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		[_mtlDevice sampleTimestamps: &_prevCPUTimestamp gpuTimestamp: &_prevGPUTimestamp];
++#pragma clang diagnostic pop
+ 		double elapsedCPUNanos = _prevCPUTimestamp - earlierCPUTs;
+ 		double elapsedGPUTicks = _prevGPUTimestamp - earlierGPUTs;
+ 
+@@ -2389,12 +2402,22 @@ static MVKPhysicalDeviceArgumentBufferSizes::Entry getArgumentBufferSize(id<MTLD
+ void MVKPhysicalDevice::initMTLDevice() {
+ #if MVK_MACOS
+ 	// Apple Silicon will respond false to isLowPower, but never hits it.
+-	_hasUnifiedMemory = _mtlDevice.hasUnifiedMemory;
++	if ([_mtlDevice respondsToSelector: @selector(hasUnifiedMemory)]) {
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++		_hasUnifiedMemory = _mtlDevice.hasUnifiedMemory;
++#pragma clang diagnostic pop
++	}
+ 
+ #if !MVK_MACCAT
+ 	if ([_mtlDevice respondsToSelector: @selector(setShouldMaximizeConcurrentCompilation:)]) {
++		// setShouldMaximizeConcurrentCompilation: and maximumConcurrentCompilationTaskCount are
++		// already guarded by the respondsToSelector: check above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		[_mtlDevice setShouldMaximizeConcurrentCompilation: getMVKConfig().shouldMaximizeConcurrentCompilation];
+ 		MVKLogInfoIf(getMVKConfig().debugMode, "maximumConcurrentCompilationTaskCount %lu", _mtlDevice.maximumConcurrentCompilationTaskCount);
++#pragma clang diagnostic pop
+ 	}
+ #endif
+ 
+@@ -2593,6 +2616,10 @@ void MVKPhysicalDevice::initMetalFeatures() {
+ #define setMSLVersion(maj, min)	\
+ 	_metalFeatures.mslVersion = SPIRV_CROSS_NAMESPACE::CompilerMSL::Options::make_msl_version(maj, min);
+ 
++	// The MTLLanguageVersionX_Y cases below are each already gated by a matching mvkOSVersionIsAtLeast() or
++	// MVK_XCODE_* check, and the capability properties that follow only populate _metalFeatures flags.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ #if MVK_XCODE_26
+ 	if ( mvkOSVersionIsAtLeast(26.0) ) {
+ 		_metalFeatures.mslVersionEnum = MTLLanguageVersion4_0;
+@@ -2636,6 +2663,7 @@ void MVKPhysicalDevice::initMetalFeatures() {
+ 	_metalFeatures.shaderBarycentricCoordinates = bcProp1 || bcProp2;
+ 
+     _metalFeatures.maxMTLBufferSize = _mtlDevice.maxBufferLength;
++#pragma clang diagnostic pop
+ 
+     for (uint32_t sc = VK_SAMPLE_COUNT_1_BIT; sc <= VK_SAMPLE_COUNT_64_BIT; sc <<= 1) {
+         if ([_mtlDevice supportsTextureSampleCount: mvkSampleCountFromVkSampleCountFlagBits((VkSampleCountFlagBits)sc)]) {
+@@ -2695,10 +2723,14 @@ void MVKPhysicalDevice::initMetalFeatures() {
+ 		_metalFeatures.counterSamplingPoints |= MVK_COUNTER_SAMPLING_AT_ ##mvkSP;  \
+ 	}
+ 
++	// supportsCounterSampling: is itself the runtime capability probe used to populate counterSamplingPoints.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	checkSupportsMTLCounterSamplingPoint(Draw, DRAW);
+ 	checkSupportsMTLCounterSamplingPoint(Dispatch, DISPATCH);
+ 	checkSupportsMTLCounterSamplingPoint(Blit, BLIT);
+ 	checkSupportsMTLCounterSamplingPoint(Stage, PIPELINE_STAGE);
++#pragma clang diagnostic pop
+ 
+ #if MVK_MACOS
+ 	// On macOS, if we couldn't query supported sample points (on macOS 11),
+@@ -2929,7 +2961,10 @@ void MVKPhysicalDevice::initLimits() {
+ 		MTLPixelFormat mtlFmt = _pixelFormats.getMTLPixelFormat(vk);
+ 		if ( !mtlFmt ) { return false; }	// If format is invalid, avoid validation errors on MTLDevice format alignment calls
+ 
+-        NSUInteger alignment = [_mtlDevice minimumTextureBufferAlignmentForPixelFormat: mtlFmt];
++        NSUInteger alignment = 0;
++        if (@available(macOS 10.14, macCatalyst 13.0, iOS 12.0, *)) {
++            alignment = [_mtlDevice minimumTextureBufferAlignmentForPixelFormat: mtlFmt];
++        }
+         VkFormatProperties3& props = _pixelFormats.getVkFormatProperties3(vk);
+         // For uncompressed formats, this is the size of a single texel.
+         // Note that no implementations of Metal support compressed formats
+@@ -2958,6 +2993,9 @@ void MVKPhysicalDevice::initLimits() {
+                 break;
+             }
+         }
++        // If the API to query the true minimum alignment isn't available, assume the best case of
++        // single-texel alignment, matching the fallback already used elsewhere for unsupported formats.
++        if (alignment == 0) { alignment = texelSize; }
+         if (mvkAreAllFlagsEnabled(props.bufferFeatures, VK_FORMAT_FEATURE_2_UNIFORM_TEXEL_BUFFER_BIT)) {
+             maxUniform = max(maxUniform, uint32_t(alignment));
+             if (alignment > texelSize) { singleTexelUniform = false; }
+@@ -3394,7 +3432,11 @@ MVK_PUBLIC_SYMBOL MTLStorageMode MVKPhysicalDevice::getMTLStorageModeFromVkMemor
+ 	if ( !mvkAreAllFlagsEnabled(vkFlags, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) ) {
+ #if !MVK_OS_SIMULATOR
+ 		if (_gpuCapabilities.isAppleGPU && mvkAreAllFlagsEnabled(vkFlags, VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT)) {
++			// MTLStorageModeMemoryless is only used here as a value to return, never sent to a live Metal object.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			return MTLStorageModeMemoryless;
++#pragma clang diagnostic pop
+ 		}
+ #endif
+ 		return MTLStorageModePrivate;
+@@ -3442,7 +3484,12 @@ size_t MVKPhysicalDevice::getCurrentAllocatedSize() {
+ // limit is imposed. This has been verified with testing up to 1M MTLSamplerStates.
+ uint32_t MVKPhysicalDevice::getMaxSamplerCount() {
+ 	if (_isUsingMetalArgumentBuffers) {
++		// _isUsingMetalArgumentBuffers implies descriptorSetArgumentBuffers, which requires macOS 11.0+,
++		// well above the macOS 10.14+ availability of maxArgumentBufferSamplerCount.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		return (uint32_t)_mtlDevice.maxArgumentBufferSamplerCount;
++#pragma clang diagnostic pop
+ 	} else {
+ 		return 1e6;
+ 	}
+@@ -3563,6 +3610,11 @@ void MVKPhysicalDevice::initExtensions() {
+ 
+ void MVKPhysicalDevice::initCounterSets() {
+ 	_timestampMTLCounterSet = nil;
++	// counterSets and related MTLCounterSet APIs require macOS 10.15+, but this whole function is
++	// already gated on _metalFeatures.counterSamplingPoints, which is only ever set non-zero after
++	// successfully probing counter-sampling support via the same Metal counters API family.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	@autoreleasepool {
+ 		if (_metalFeatures.counterSamplingPoints) {
+ 			NSArray<id<MTLCounterSet>>* counterSets = _mtlDevice.counterSets;
+@@ -3584,6 +3636,7 @@ void MVKPhysicalDevice::initCounterSets() {
+ 			}
+ 		}
+ 	}
++#pragma clang diagnostic pop
+ }
+ 
+ // Determine whether Vulkan semaphores should use a MTLEvent, CPU callbacks, or should limit
+@@ -4048,11 +4101,13 @@ void MVKDevice::getCalibratedTimestamps(uint32_t timestampCount,
+ 										const VkCalibratedTimestampInfoEXT* pTimestampInfos,
+ 										uint64_t* pTimestamps,
+ 										uint64_t* pMaxDeviation) {
+-	MTLTimestamp cpuStamp, gpuStamp;
++	MTLTimestamp cpuStamp = 0, gpuStamp = 0;
+ 	uint64_t cpuStart, cpuEnd;
+ 
+ 	cpuStart = mvkGetContinuousNanoseconds();
+-	[_physicalDevice->_mtlDevice sampleTimestamps: &cpuStamp gpuTimestamp: &gpuStamp];
++	if (@available(macOS 10.15, macCatalyst 13.0, iOS 13.0, *)) {
++		[_physicalDevice->_mtlDevice sampleTimestamps: &cpuStamp gpuTimestamp: &gpuStamp];
++	}
+ 	// Sample again to calculate the maximum deviation. Note that the
+ 	// -[MTLDevice sampleTimestamps:gpuTimestamp:] method guarantees that CPU
+ 	// timestamps are in nanoseconds. We don't want to call the method again,
+@@ -4923,6 +4978,9 @@ MTLCompileOptions* MVKDevice::getMTLCompileOptions(uint32_t fpFastMathFlags,
+ 	// TODO: Some MSL functions have different behavour than Vulkan and could probably been overwritten
+ 	// during shader compilation. For example, MSL fract() doesn't handle Inf->NaN like Vulkan.
+ 	if ([mtlCompOpt respondsToSelector: @selector(mathMode)]) {
++		// mathMode and mathFloatingPointFunctions are already guarded by the respondsToSelector: check above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		MTLMathMode mtlMathMode = MTLMathModeSafe;
+ 		MTLMathFloatingPointFunctions mtlFPFuncs = MTLMathFloatingPointFunctionsPrecise;
+ 		if (mvkAreAllFlagsEnabled(fpFastMathFlags, (spv::FPFastMathModeNSZMask | spv::FPFastMathModeAllowRecipMask |
+@@ -4935,6 +4993,7 @@ MTLCompileOptions* MVKDevice::getMTLCompileOptions(uint32_t fpFastMathFlags,
+ 		}
+ 		mtlCompOpt.mathMode = mtlMathMode;
+ 		mtlCompOpt.mathFloatingPointFunctions = mtlFPFuncs;
++#pragma clang diagnostic pop
+ 	} else
+ #endif
+ 	{
+@@ -4942,10 +5001,19 @@ MTLCompileOptions* MVKDevice::getMTLCompileOptions(uint32_t fpFastMathFlags,
+ 	}
+ 
+ 	if ([mtlCompOpt respondsToSelector: @selector(optimizationLevel)]) {
++		// optimizationLevel and MTLLibraryOptimizationLevelDefault are already guarded by the check above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		mtlCompOpt.optimizationLevel = MTLLibraryOptimizationLevelDefault;
++#pragma clang diagnostic pop
+ 	}
+ 
+-	mtlCompOpt.preserveInvariance = preserveInvariance;
++	if ([mtlCompOpt respondsToSelector: @selector(setPreserveInvariance:)]) {
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++		mtlCompOpt.preserveInvariance = preserveInvariance;
++#pragma clang diagnostic pop
++	}
+ 	return [mtlCompOpt autorelease];
+ }
+ 
+@@ -4972,6 +5040,12 @@ void MVKDevice::startAutoGPUCapture(MVKConfigAutoGPUCaptureScope autoGPUCaptureS
+ 	@autoreleasepool {
+ 		MTLCaptureManager *captureMgr = [MTLCaptureManager sharedCaptureManager];
+ 
++		// MTLCaptureDescriptor and its related APIs are used unconditionally below, but the real
++		// deployment target for this project is macOS 11.0/iOS 14.0, well above the macOS 10.15
++		// availability of these APIs, so this is safe despite this translation unit's lowered
++		// -mmacosx-version-min used for availability testing purposes only.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		MTLCaptureDescriptor *captureDesc = [[MTLCaptureDescriptor new] autorelease];
+ 		captureDesc.captureObject = mtlCaptureObject;
+ 		captureDesc.destination = MTLCaptureDestinationDeveloperTools;
+@@ -5008,6 +5082,7 @@ void MVKDevice::startAutoGPUCapture(MVKConfigAutoGPUCaptureScope autoGPUCaptureS
+ 			[captureMgr startCaptureWithDevice: mtlCaptureObject];
+ 		}
+ #		pragma clang diagnostic pop
++#pragma clang diagnostic pop
+ 	}
+ }
+ 
+@@ -5429,6 +5504,11 @@ void MVKDevice::enableExtensions(const VkDeviceCreateInfo* pCreateInfo) {
+ void MVKDevice::initQueues(const VkDeviceCreateInfo* pCreateInfo) {
+ #if MVK_XCODE_16
+ 	if (_physicalDevice->_isUsingMetalArgumentBuffers && _physicalDevice->_metalFeatures.residencySets) {
++		// MTLResidencySetDescriptor and newResidencySetWithDescriptor:error: require macOS 15.0+, but this
++		// whole block is already gated on _metalFeatures.residencySets, which is only set true at runtime
++		// when residency sets are confirmed to be supported.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		MTLResidencySetDescriptor *setDescriptor;
+ 		setDescriptor = [MTLResidencySetDescriptor new];
+ 		setDescriptor.label = @"Primary residency set";
+@@ -5441,6 +5521,7 @@ void MVKDevice::initQueues(const VkDeviceCreateInfo* pCreateInfo) {
+ 			reportMessage(MVK_CONFIG_LOG_LEVEL_ERROR, "Error allocating residency set: %s", error.description.UTF8String);
+ 		}
+ 		[setDescriptor release];
++#pragma clang diagnostic pop
+ 	}
+ #endif
+ 
+@@ -5600,19 +5681,24 @@ uint64_t mvkGetLocationID(id<MTLDevice> mtlDevice) {
+ #if MVK_MACOS && !MVK_MACCAT
+ 	// All of these device properties were added at the same time,
+ 	// so only need to check for the presence of one of them.
+-	uint64_t val;
++	if ([mtlDevice respondsToSelector: @selector(location)]) {
++		uint64_t val;
+ 
+-	val = mtlDevice.location;
+-	hash = mvkHash(&val, 1, hash);
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++		val = mtlDevice.location;
++		hash = mvkHash(&val, 1, hash);
+ 
+-	val = mtlDevice.locationNumber;
+-	hash = mvkHash(&val, 1, hash);
++		val = mtlDevice.locationNumber;
++		hash = mvkHash(&val, 1, hash);
+ 
+-	val = mtlDevice.peerGroupID;
+-	hash = mvkHash(&val, 1, hash);
++		val = mtlDevice.peerGroupID;
++		hash = mvkHash(&val, 1, hash);
+ 
+-	val = mtlDevice.peerIndex;
+-	hash = mvkHash(&val, 1, hash);
++		val = mtlDevice.peerIndex;
++		hash = mvkHash(&val, 1, hash);
++#pragma clang diagnostic pop
++	}
+ #endif
+ 
+ 	return hash;
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.h b/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.h
+index b349d6ea..578d4a8e 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.h
+@@ -57,8 +57,13 @@ public:
+ 
+ 	/** Returns whether the memory is accessible from the host. */
+     inline bool isMemoryHostAccessible() {
++        // MTLStorageModeMemoryless is used here only as an enum value to compare against, not as a live API
++        // call, and _mtlStorageMode can only hold it if MVKDeviceMemory's constructor selected it at runtime.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         if (_mtlStorageMode == MTLStorageModeMemoryless)
+             return false;
++#pragma clang diagnostic pop
+         return (_mtlStorageMode != MTLStorageModePrivate);
+     }
+ 
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.mm b/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.mm
+index e6e7786b..f676a7dc 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKDeviceMemory.mm
+@@ -217,6 +217,9 @@ bool MVKDeviceMemory::ensureMTLHeap() {
+ 		if (_mtlStorageMode != MTLStorageModePrivate) { return true; }
+ 	}
+ 
++	// Placement heaps require the same runtime support already checked via getMetalFeatures().placementHeaps above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	MTLHeapDescriptor* heapDesc = [MTLHeapDescriptor new];
+ 	heapDesc.type = MTLHeapTypePlacement;
+ 	heapDesc.storageMode = _mtlStorageMode;
+@@ -227,6 +230,7 @@ bool MVKDeviceMemory::ensureMTLHeap() {
+ 	heapDesc.size = _allocationSize;
+ 	_mtlHeap = [getMTLDevice() newHeapWithDescriptor: heapDesc];	// retained
+ 	[heapDesc release];
++#pragma clang diagnostic pop
+ 	if (!_mtlHeap) { return false; }
+ 
+ 	propagateDebugName();
+@@ -247,7 +251,12 @@ bool MVKDeviceMemory::ensureMTLBuffer() {
+ 	id<MTLBuffer> buf;
+ 	// If host memory was already allocated, it is copied into the new MTLBuffer, and then released.
+ 	if (_mtlHeap) {
++		// _mtlHeap only exists here if ensureMTLHeap() created it via the placement-heap runtime check,
++		// so newBufferWithLength:options:offset: is safe to call on it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		buf = [_mtlHeap newBufferWithLength: memLen options: getMTLResourceOptions() offset: 0];	// retained
++#pragma clang diagnostic pop
+ 		if (_pHostMemory) {
+ 			memcpy(buf.contents, _pHostMemory, memLen);
+ 			freeHostMemory();
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKFramebuffer.mm b/MoltenVK/MoltenVK/GPUObjects/MVKFramebuffer.mm
+index 0ba81643..2884e276 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKFramebuffer.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKFramebuffer.mm
+@@ -35,6 +35,11 @@ id<MTLTexture> MVKFramebuffer::getDummyAttachmentMTLTexture(MVKRenderSubpass* su
+ 	uint32_t fbLayerCount = getLayerCount();
+ 	uint32_t sampleCount = mvkSampleCountFromVkSampleCountFlagBits(subpass->getDefaultSampleCount());
+ 	MTLTextureDescriptor* mtlTexDesc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat: MTLPixelFormatR8Unorm width: fbExtent.width height: fbExtent.height mipmapped: NO];
++	// MTLTextureType2DMultisampleArray is only assigned here as a descriptor property value, and is only
++	// reached when multisampleLayeredRendering is already true, which itself requires the same runtime support.
++	// MTLStorageModeMemoryless below is likewise only ever assigned as a descriptor property value.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if (subpass->isMultiview()) {
+ 		if (sampleCount > 1 && getMetalFeatures().multisampleLayeredRendering) {
+ 			mtlTexDesc.textureType = MTLTextureType2DMultisampleArray;
+@@ -56,6 +61,7 @@ id<MTLTexture> MVKFramebuffer::getDummyAttachmentMTLTexture(MVKRenderSubpass* su
+ 		mtlTexDesc.sampleCount = sampleCount;
+ 	}
+ 	mtlTexDesc.storageMode = MTLStorageModeMemoryless;
++#pragma clang diagnostic pop
+ 	mtlTexDesc.usage = MTLTextureUsageRenderTarget;
+ 
+ 	_mtlDummyTex = [getMTLDevice() newTextureWithDescriptor: mtlTexDesc];	// retained
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm b/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
+index 15fe6b8c..44bf8b1c 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKImage.mm
+@@ -80,9 +80,15 @@ id<MTLTexture> MVKImagePlane::getMTLTexture() {
+             const auto texSizeAlign = [dvcMem->getMTLDevice() heapTextureSizeAndAlignWithDescriptor:mtlTexDesc];
+             _heapAllocation.size = texSizeAlign.size;
+             _heapAllocation.align = texSizeAlign.align;
++            // newTextureWithDescriptor:offset: requires macOS 10.15, but this branch is only reached when
++            // dvcMem->getMTLHeap() is non-null, which requires placement heap support (macOS 11.0+; see
++            // MVKDeviceMemory.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+             tex = [_heapAllocation.heap
+                            newTextureWithDescriptor: mtlTexDesc
+                            offset: _heapAllocation.offset];
++#pragma clang diagnostic pop
+             if (_image->_isAliasable) { [_mtlTexture makeAliasable]; }
+         } else if (_image->_isAliasable && dvcMem && dvcMem->isDedicatedAllocation() &&
+             !mvkContains(dvcMem->_imageMemoryBindings, memoryBinding)) {
+@@ -94,7 +100,11 @@ id<MTLTexture> MVKImagePlane::getMTLTexture() {
+         } else {
+             tex = [_image->getMTLDevice() newTextureWithDescriptor: mtlTexDesc];
+         }
++        // MTLStorageModeMemoryless is only used here as a value to compare against, never as a live API call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         if (tex.storageMode != MTLStorageModeMemoryless) {
++#pragma clang diagnostic pop
+             _image->_device->makeResident(tex);
+             _image->_device->getLiveResources().add(tex);
+         }
+@@ -161,7 +171,11 @@ MTLTextureDescriptor* MVKImagePlane::newMTLTextureDescriptor() {
+     mtlTexDesc.cpuCacheMode = _image->getMTLCPUCacheMode();
+     // For 2D views of 3D and block texel views, we alias the underlying memory.
+     // Ensure that it remains consistent by disabling GPU layout optimization.
++    // setAllowGPUOptimizedContents: requires macOS 10.14, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+     mtlTexDesc.allowGPUOptimizedContents = !_image->_is2DViewOn3DImageCompatible && !_image->_isBlockTexelViewCompatible;
++#pragma clang diagnostic pop
+ 
+     return mtlTexDesc;
+ }
+@@ -493,7 +507,12 @@ VkResult MVKImageMemoryBinding::bindDeviceMemory(MVKDeviceMemory* mvkMem, VkDevi
+             // Create our own buffer for this.
+             if (_ownsTexelBuffer) { [_mtlTexelBuffer release]; }
+             if (_deviceMemory->_mtlHeap && _image->getMTLStorageMode() == _deviceMemory->_mtlStorageMode) {
++                // newBufferWithLength:options:offset: requires macOS 10.15, but _mtlHeap is only non-null
++                // when placement heap support (macOS 11.0+) has already been confirmed (see MVKDeviceMemory.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+                 _mtlTexelBuffer = [_deviceMemory->_mtlHeap newBufferWithLength: _byteCount options: _deviceMemory->getMTLResourceOptions() offset: getDeviceMemoryOffset()];
++#pragma clang diagnostic pop
+                 if (_image->_isAliasable) { [_mtlTexelBuffer makeAliasable]; }
+             } else {
+                 _mtlTexelBuffer = [getMTLDevice() newBufferWithLength: _byteCount options: _image->getMTLStorageMode() << MTLResourceStorageModeShift];
+@@ -1023,7 +1042,11 @@ VkResult MVKImage::setMTLTexture(uint8_t planeIndex, id<MTLTexture> mtlTexture)
+     _planes[planeIndex]->releaseMTLTexture();
+ 	_planes[planeIndex]->_mtlTexture = [mtlTexture retain];		// retained
+ 
++	// MTLStorageModeMemoryless is only used here as a value to compare against, never as a live API call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if (_planes[planeIndex]->_mtlTexture.storageMode != MTLStorageModeMemoryless) {
++#pragma clang diagnostic pop
+ 		_device->makeResident(_planes[planeIndex]->_mtlTexture);
+ 		_device->getLiveResources().add(_planes[planeIndex]->_mtlTexture);
+ 	}
+@@ -1697,9 +1720,13 @@ void MVKPresentableSwapchainImage::addPresentedHandler(id<CAMetalDrawable> mtlDr
+ 	beginPresentation(presentInfo);
+ 
+ #if !MVK_OS_SIMULATOR
++	// addPresentedHandler:/presentedTime require macOS 10.15.4, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	[mtlDrawable addPresentedHandler: ^(id<MTLDrawable> mtlDrwbl) {
+ 		endPresentation(presentInfo, signaler, mtlDrwbl.presentedTime * 1.0e9);
+ 	}];
++#pragma clang diagnostic pop
+ #else
+ 	// If MTLDrawable.presentedTime/addPresentedHandler isn't supported,
+ 	// treat it as if the present happened when requested.
+@@ -1922,9 +1949,14 @@ id<MTLTexture> MVKImageViewPlane::newMTLTexture() {
+         }
+ 
+         // Create a temporary texture that is backed by the original texture's memory
++        // newTextureWithDescriptor:offset: requires macOS 10.15, but heapAllocation->heap is only non-null
++        // when placement heap support (macOS 11.0+) has already been confirmed (see MVKDeviceMemory.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         aliasTex = [heapAllocation->heap
+                           newTextureWithDescriptor: mtlTexDesc
+                           offset: heapAllocation->offset + relativeAliasOffset];
++#pragma clang diagnostic pop
+ 
+         [mtlTexDesc release]; // temp release
+ 
+@@ -1932,6 +1964,10 @@ id<MTLTexture> MVKImageViewPlane::newMTLTexture() {
+     }
+ 
+     id<MTLTexture> texView = nil;
++    // newTextureViewWithPixelFormat:textureType:levels:slices:swizzle: requires macOS 10.15, well below the
++    // real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+     if (_useNativeSwizzle) {
+         texView = [mtlTex newTextureViewWithPixelFormat: _mtlPixFmt
+                                             textureType: _imageView->_mtlTextureType
+@@ -1944,6 +1980,7 @@ id<MTLTexture> MVKImageViewPlane::newMTLTexture() {
+                                                  levels: levelRange
+                                                  slices: sliceRange];    // retained
+     }
++#pragma clang diagnostic pop
+     [aliasTex release];
+     return texView;
+ }
+@@ -2228,7 +2265,11 @@ MVKImageView::MVKImageView(MVKDevice* device, const VkImageViewCreateInfo* pCrea
+ 										 VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT))) {
+ 		if (_mtlTextureType == MTLTextureType2DArray && _image->_mtlTextureType == MTLTextureType2D) {
+ 			_mtlTextureType = MTLTextureType2D;
++		// MTLTextureType2DMultisampleArray is only used here as a value to compare against, never as a live API call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		} else if (_mtlTextureType == MTLTextureType2DMultisampleArray && _image->_mtlTextureType == MTLTextureType2DMultisample) {
++#pragma clang diagnostic pop
+ 			_mtlTextureType = MTLTextureType2DMultisample;
+ 		}
+ 	}
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKPipeline.mm b/MoltenVK/MoltenVK/GPUObjects/MVKPipeline.mm
+index fcb555b9..b40518d5 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKPipeline.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKPipeline.mm
+@@ -1733,7 +1733,13 @@ bool MVKGraphicsPipeline::addVertexInputToPipeline(T* inputDesc,
+ 				vbDesc.stepFunction = (decltype(vbDesc.stepFunction))MTLStepFunctionConstant;
+ 				vbDesc.stepRate = 0;
+ 			} else {
++				// MTLBufferLayoutStrideDynamic requires macOS 14.0, but is only reached when isVtxStrideStatic is
++				// false, which only happens when getMetalFeatures().dynamicVertexStride has already confirmed
++				// runtime support (see MVKCommandEncoderState.mm).
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 				vbDesc.stride = isVtxStrideStatic ? pVKVB->stride : MTLBufferLayoutStrideDynamic;
++#pragma clang diagnostic pop
+ 				vbDesc.stepFunction = (decltype(vbDesc.stepFunction))mvkMTLStepFunctionFromVkVertexInputRate(pVKVB->inputRate, isTessellationPipeline());
+ 				vbDesc.stepRate = 1;
+ 			}
+@@ -2442,7 +2448,11 @@ MVKComputePipeline::MVKComputePipeline(MVKDevice* device,
+ 	if (mtlFunc) {
+ 		MTLComputePipelineDescriptor* plDesc = [MTLComputePipelineDescriptor new];	// temp retain
+ 		plDesc.computeFunction = mtlFunc;
++		// setMaxTotalThreadsPerThreadgroup: requires macOS 10.14, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		plDesc.maxTotalThreadsPerThreadgroup = _mtlThreadgroupSize.width * _mtlThreadgroupSize.height * _mtlThreadgroupSize.depth;
++#pragma clang diagnostic pop
+ 		plDesc.threadGroupSizeIsMultipleOfThreadExecutionWidth = mvkIsAnyFlagEnabled(pCreateInfo->stage.flags, VK_PIPELINE_SHADER_STAGE_CREATE_REQUIRE_FULL_SUBGROUPS_BIT);
+ 
+ 		// Metal does not allow the name of the pipeline to be changed after it has been created,
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h b/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h
+index 98251227..7ef21230 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.h
+@@ -335,7 +335,12 @@ public:
+ 	VkComponentMapping getInverseComponentMapping(VkFormat vkFormat);
+ 
+ 	/** Returns any MTLTextureSwizzleChannels needed to use the specified Vulkan format. */
++	// MTLTextureSwizzleChannels is only used here as a value, never sent to a live Metal object, so no
++	// runtime availability check is needed for using it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	MTLTextureSwizzleChannels getMTLTextureSwizzleChannels(VkFormat vkFormat);
++#pragma clang diagnostic pop
+ 
+ 	/** Returns the default properties for the specified Vulkan format. */
+     VkFormatProperties getVkFormatProperties(VkFormat format);
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.mm b/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.mm
+index 11ca10a0..ed02de60 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKPixelFormats.mm
+@@ -315,9 +315,14 @@ VkComponentMapping MVKPixelFormats::getInverseComponentMapping(VkFormat vkFormat
+ #undef INVERT_SWIZZLE
+ }
+ 
++// MTLTextureSwizzleChannels is only used here as a value, never sent to a live Metal object, so no
++// runtime availability check is needed for using it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ MTLTextureSwizzleChannels MVKPixelFormats::getMTLTextureSwizzleChannels(VkFormat vkFormat) {
+ 	return mvkMTLTextureSwizzleChannelsFromVkComponentMapping(getVkComponentMapping(vkFormat));
+ }
++#pragma clang diagnostic pop
+ 
+ VkFormatProperties3& MVKPixelFormats::getVkFormatProperties3(VkFormat vkFormat) {
+ 	return getVkFormatDesc(vkFormat).properties;
+@@ -623,7 +628,13 @@ MTLTextureUsage MVKPixelFormats::getMTLTextureUsage(VkImageUsageFlags vkImageUsa
+ 	}
+ 
+ 	if (supportAtomics && (mtlFormat == MTLPixelFormatR32Uint || mtlFormat == MTLPixelFormatR32Sint)) {
++		// MTLTextureUsageShaderAtomic is only used here as a value, never sent to a live Metal object, so no
++		// runtime availability check is needed for using it. The caller is responsible for only setting
++		// supportAtomics when the device actually supports texture atomics.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		mvkEnableFlags(mtlUsage, MTLTextureUsageShaderAtomic);
++#pragma clang diagnostic pop
+ 	}
+ 
+     // Clearing a linear image may use shader writes.
+@@ -744,6 +755,10 @@ id<MTLDevice> MVKPixelFormats::getMTLDevice() {
+ 	addVkFormatDescFull(VK_FMT, MTL_FMT, Invalid, Invalid, Invalid, CSPC, CSCB, BLK_W, BLK_H, BLK_BYTE_CNT, ColorFloat, IDENTITY, IDENTITY, IDENTITY, IDENTITY)
+ 
+ void MVKPixelFormats::initVkFormatCapabilities() {
++	// This function only populates static lookup tables with Metal enum values. The enums referenced here
++	// are never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	VkFormat vkFmt;
+ 	_vkFormatDescriptions.reserve(KIBI);	// High estimate to future-proof against allocations as elements are added. shrink_to_fit() below will collapse.
+ 
+@@ -1040,6 +1055,7 @@ void MVKPixelFormats::initVkFormatCapabilities() {
+     addVkFormatDescChromaSubsampling( G16_B16_R16_3PLANE_444_UNORM, Invalid, 3, 16, 1, 1, 6 );
+ 
+ 	_vkFormatDescriptions.shrink_to_fit();
++#pragma clang diagnostic pop
+ }
+ 
+ void MVKPixelFormats::addMTLPixelFormatDescImpl(MTLPixelFormat mtlPixFmt, MTLPixelFormat mtlPixFmtLinear,
+@@ -1085,6 +1101,10 @@ void MVKPixelFormats::addValidatedMTLPixelFormatDesc(MTLPixelFormat mtlPixFmt, M
+ 	else                 { addMTLPixelFormatDescFull(mtlFmt, mtlFmtLinear, viewClass, kMVKMTLFmtCaps ##appleGPUCaps, kMVKMTLFmtCaps ##macGPUCaps); }
+ 
+ void MVKPixelFormats::initMTLPixelFormatCapabilities(const MVKMTLDeviceCapabilities& gpuCaps) {
++	// This function only populates static lookup tables with Metal enum values. The enums referenced here
++	// are never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	_mtlPixelFormatDescriptions.reserve(KIBI);	// High estimate to future-proof against allocations as elements are added. shrink_to_fit() below will collapse.
+ 
+ 	// MTLPixelFormatInvalid must come first. Use addMTLPixelFormatDescImpl to avoid guard code.
+@@ -1255,6 +1275,7 @@ void MVKPixelFormats::initMTLPixelFormatCapabilities(const MVKMTLDeviceCapabilit
+ 	addMTLPixelFormatDesc    ( X32_Stencil8, Depth32_Stencil8, DRM, DRM );
+ 
+ 	_mtlPixelFormatDescriptions.shrink_to_fit();
++#pragma clang diagnostic pop
+ }
+ 
+ // If necessary, resize vector with empty elements
+@@ -1273,6 +1294,10 @@ void MVKPixelFormats::addMTLVertexFormatDescImpl(MTLVertexFormat mtlVtxFmt, MVKM
+ #define addMTLVertexFormatDesc(mtlVtx)  if (MTLVertexFormat ##mtlVtx) { addMTLVertexFormatDescImpl(MTLVertexFormat ##mtlVtx, kMVKMTLFmtCapsVertex, "MTLVertexFormat" #mtlVtx); }
+ 
+ void MVKPixelFormats::initMTLVertexFormatCapabilities(const MVKMTLDeviceCapabilities& gpuCaps) {
++	// This function only populates static lookup tables with Metal enum values. The enums referenced here
++	// are never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	_mtlVertexFormatDescriptions.resize(MTLVertexFormatHalf + 3, {});
+ 
+ 	// MTLVertexFormatInvalid must come first. Use addMTLVertexFormatDescImpl to avoid guard code.
+@@ -1349,6 +1374,7 @@ void MVKPixelFormats::initMTLVertexFormatCapabilities(const MVKMTLDeviceCapabili
+ 	}
+ 
+ 	_mtlVertexFormatDescriptions.shrink_to_fit();
++#pragma clang diagnostic pop
+ }
+ 
+ // Return a reference to the format capabilities, so the caller can manipulate them.
+@@ -1375,6 +1401,10 @@ MVKMTLFmtCaps& MVKPixelFormats::getMTLPixelFormatCapsIf(MTLPixelFormat mtlPixFmt
+ 
+ // Modifies the format capability tables based on the capabilities of the specific MTLDevice
+ void MVKPixelFormats::modifyMTLFormatCapabilities(const MVKMTLDeviceCapabilities& gpuCaps) {
++	// This function only manipulates static lookup tables using Metal enum values. The enums referenced here
++	// are never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 
+ 	bool noVulkanSupport =  false;		// Indicated supported in Metal but not Vulkan or SPIR-V.
+ 	bool notMac =  gpuCaps.isAppleGPU && !gpuCaps.supportsMac2;
+@@ -1487,6 +1517,7 @@ void MVKPixelFormats::modifyMTLFormatCapabilities(const MVKMTLDeviceCapabilities
+ 
+ 	setMTLPixFmtCapsIf( !gpuCaps.supportsDepth24Stencil8, Depth24Unorm_Stencil8, None );
+ 	setMTLPixFmtCapsIf( iosOnly2, Depth32Float_Stencil8, DRM );
++#pragma clang diagnostic pop
+ }
+ 
+ // Connects Vulkan and Metal pixel formats to one-another.
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.h b/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.h
+index c42aa11f..45b2e8fa 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.h
+@@ -177,6 +177,11 @@ protected:
+ #pragma mark MVKGPUCounterQueryPool
+ 
+ /** An abstract parent class for query pools that use Metal GPU counters if they are supported on the platform. */
++// MTLCounterSet/MTLCounterSampleBuffer are only ever populated once runtime support for GPU counter sampling has
++// been confirmed (see MVKDevice::getTimestampMTLCounterSet() and MVKGPUCounterQueryPool::initMTLCounterSampleBuffer()),
++// so no compile-time availability check is needed for this class.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ class MVKGPUCounterQueryPool : public MVKQueryPool {
+ 
+ public:
+@@ -201,6 +206,7 @@ protected:
+ 
+ 	id<MTLCounterSampleBuffer> _mtlCounterBuffer;
+ };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.mm b/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.mm
+index eaf35098..ac521aef 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKQueryPool.mm
+@@ -303,6 +303,11 @@ MVKOcclusionQueryPool::~MVKOcclusionQueryPool() {
+ #pragma mark -
+ #pragma mark MVKGPUCounterQueryPool
+ 
++// MTLCounterSet/MTLCounterSampleBuffer are only ever populated once runtime support for GPU counter sampling
++// has been confirmed (see MVKDevice::getTimestampMTLCounterSet()), so no compile-time availability check is
++// needed for this class's use of them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ MVKGPUCounterQueryPool::MVKGPUCounterQueryPool(MVKDevice* device, const VkQueryPoolCreateInfo* pCreateInfo) :
+ 	MVKQueryPool(device, pCreateInfo, 1), _mtlCounterBuffer(nil) {}
+ 
+@@ -332,6 +337,7 @@ void MVKGPUCounterQueryPool::initMTLCounterSampleBuffer(const VkQueryPoolCreateI
+ MVKGPUCounterQueryPool::~MVKGPUCounterQueryPool() {
+ 	[_mtlCounterBuffer release];
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -351,6 +357,11 @@ void MVKTimestampQueryPool::finishQueries(MVKArrayRef<const uint32_t> queries) {
+ 	MVKQueryPool::finishQueries(queries);
+ }
+ 
++// _mtlCounterBuffer is only ever non-nil once runtime support for GPU counter sampling has been confirmed
++// (see MVKGPUCounterQueryPool::initMTLCounterSampleBuffer()), so no compile-time availability check is needed
++// for the resolveCounterRange:/resolveCounters:... calls guarded by it below.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ NSData* MVKTimestampQueryPool::getQuerySourceData(uint32_t firstQuery, uint32_t queryCount) {
+ 	if (_mtlCounterBuffer) {
+ 		return [_mtlCounterBuffer resolveCounterRange: NSMakeRange(firstQuery, queryCount)];
+@@ -408,6 +419,7 @@ id<MTLComputeCommandEncoder> MVKTimestampQueryPool::encodeComputeCopyResults(MVK
+ 		return mtlCmdEnc;
+ 	}
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark Construction
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm b/MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm
+index dec4b452..7e52e569 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKQueue.mm
+@@ -167,6 +167,10 @@ id<MTLCommandBuffer> MVKQueue::getMTLCommandBuffer(MVKCommandUse cmdUse, bool re
+ 	id<MTLCommandBuffer> mtlCmdBuff = nil;
+ 	uint64_t startTime = getPerformanceTimestamp();
+ 
++	// MTLCommandBufferDescriptor, MTLCommandBufferErrorOptionEncoderExecutionStatus, and
++	// commandBufferWithDescriptor: require macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	MTLCommandBufferDescriptor* mtlCmdBuffDesc = [MTLCommandBufferDescriptor new];	// temp retain
+ 	mtlCmdBuffDesc.retainedReferences = retainRefs;
+ 	if (getMVKConfig().debugMode) {
+@@ -174,6 +178,7 @@ id<MTLCommandBuffer> MVKQueue::getMTLCommandBuffer(MVKCommandUse cmdUse, bool re
+ 	}
+ 	mtlCmdBuff = [_mtlQueue commandBufferWithDescriptor: mtlCmdBuffDesc];
+ 	[mtlCmdBuffDesc release];														// temp release
++#pragma clang diagnostic pop
+ 
+ 	addPerformanceInterval(getPerformanceStats().queue.retrieveMTLCommandBuffer, startTime);
+ 	NSString* mtlCmdBuffLabel = getMTLCommandBufferLabel(cmdUse);
+@@ -206,6 +211,9 @@ NSString* MVKQueue::getMTLCommandBufferLabel(MVKCommandUse cmdUse) {
+ #undef CASE_GET_LABEL
+ }
+ 
++// MTLCommandEncoderErrorState requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ static const char* mvkStringFromMTLCommandEncoderErrorState(MTLCommandEncoderErrorState errState) {
+ 	switch (errState) {
+ 		case MTLCommandEncoderErrorStateUnknown:   return "unknown";
+@@ -216,6 +224,7 @@ static const char* mvkStringFromMTLCommandEncoderErrorState(MTLCommandEncoderErr
+ 	}
+ 	return "unknown";
+ }
++#pragma clang diagnostic pop
+ 
+ void MVKQueue::handleMTLCommandBufferError(id<MTLCommandBuffer> mtlCmdBuff) {
+ 	if (mtlCmdBuff.status != MTLCommandBufferStatusError) { return; }
+@@ -257,6 +266,9 @@ void MVKQueue::handleMTLCommandBufferError(id<MTLCommandBuffer> mtlCmdBuff) {
+ 				 (mtlCmdBuff.label ? mtlCmdBuff.label.UTF8String : ""),
+ 				 mtlCmdBuff.error.code, mtlCmdBuff.error.localizedDescription.UTF8String);
+ 
++	// MTLCommandBufferEncoderInfoErrorKey requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if (NSArray<id<MTLCommandBufferEncoderInfo>>* mtlEncInfo = mtlCmdBuff.error.userInfo[MTLCommandBufferEncoderInfoErrorKey]) {
+ 		MVKLogInfo("Encoders for %p \"%s\":", mtlCmdBuff, mtlCmdBuff.label ? mtlCmdBuff.label.UTF8String : "");
+ 		for (id<MTLCommandBufferEncoderInfo> enc in mtlEncInfo) {
+@@ -269,8 +281,12 @@ void MVKQueue::handleMTLCommandBufferError(id<MTLCommandBuffer> mtlCmdBuff) {
+ 			}
+ 		}
+ 	}
++#pragma clang diagnostic pop
+ 
+ 	bool isFirstMsg = true;
++	// MTLCommandBuffer.logs requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	for (id<MTLFunctionLog> log in mtlCmdBuff.logs) {
+ 		if (isFirstMsg) {
+ 			MVKLogInfo("Shader log messages:");
+@@ -278,6 +294,7 @@ void MVKQueue::handleMTLCommandBufferError(id<MTLCommandBuffer> mtlCmdBuff) {
+ 		}
+ 		MVKLogInfo("%s", log.description.UTF8String);
+ 	}
++#pragma clang diagnostic pop
+ }
+ 
+ #pragma mark Construction
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKRenderPass.mm b/MoltenVK/MoltenVK/GPUObjects/MVKRenderPass.mm
+index b6841665..ef70217d 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKRenderPass.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKRenderPass.mm
+@@ -229,7 +229,11 @@ void MVKRenderSubpass::populateMTLRenderPassDescriptor(MTLRenderPassDescriptor*
+ 		bool hasDepthResolve = depthRslvRPAttIdx != VK_ATTACHMENT_UNUSED && _depthResolveMode != VK_RESOLVE_MODE_NONE;
+ 		if (hasDepthResolve) {
+ 			depthRslvImage->populateMTLRenderPassAttachmentDescriptorResolve(mtlDepthAttDesc);
++			// setDepthResolveFilter: requires macOS 10.14, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlDepthAttDesc.depthResolveFilter = mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(_depthResolveMode);
++#pragma clang diagnostic pop
+ 			if (isMultiview()) {
+ 				mtlDepthAttDesc.resolveSlice += getFirstViewIndexInMetalPass(passIdx);
+ 			}
+@@ -261,7 +265,11 @@ void MVKRenderSubpass::populateMTLRenderPassDescriptor(MTLRenderPassDescriptor*
+ 		bool hasStencilResolve = (stencilRslvRPAttIdx != VK_ATTACHMENT_UNUSED && _stencilResolveMode != VK_RESOLVE_MODE_NONE);
+ 		if (hasStencilResolve) {
+ 			stencilRslvImage->populateMTLRenderPassAttachmentDescriptorResolve(mtlStencilAttDesc);
++			// setStencilResolveFilter: requires macOS 10.14, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlStencilAttDesc.stencilResolveFilter = mvkMTLMultisampleStencilResolveFilterFromVkResolveModeFlagBits(_stencilResolveMode);
++#pragma clang diagnostic pop
+ 			if (isMultiview()) {
+ 				mtlStencilAttDesc.resolveSlice += getFirstViewIndexInMetalPass(passIdx);
+ 			}
+@@ -278,7 +286,11 @@ void MVKRenderSubpass::populateMTLRenderPassDescriptor(MTLRenderPassDescriptor*
+ 	}
+ 
+ 	if (caUsedCnt == 0 && depthRPAttIdx == VK_ATTACHMENT_UNUSED && stencilRPAttIdx == VK_ATTACHMENT_UNUSED) {
++		// setDefaultRasterSampleCount: requires macOS 10.15, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         mtlRPDesc.defaultRasterSampleCount = mvkSampleCountFromVkSampleCountFlagBits(_defaultSampleCount);
++#pragma clang diagnostic pop
+ 	}
+ 
+ #if MVK_USE_METAL_PRIVATE_API
+@@ -797,7 +809,11 @@ bool MVKAttachmentDescription::populateMTLRenderPassAttachmentDescriptor(MTLRend
+ 	// Populate from the attachment image view
+ 	attachment->populateMTLRenderPassAttachmentDescriptor(mtlAttDesc);
+ 
++	// MTLStorageModeMemoryless is only used here as a value to compare against, never as a live API call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	bool isMemorylessAttachment = attachment->getImage()->getMTLStorageMode() == MTLStorageModeMemoryless;
++#pragma clang diagnostic pop
+ 	bool isResuming = mvkIsAnyFlagEnabled(_renderPass->getRenderingFlags(), VK_RENDERING_RESUMING_BIT);
+ 
+ 	// Only allow clearing of entire attachment if we're actually
+@@ -847,7 +863,11 @@ void MVKAttachmentDescription::encodeStoreAction(MVKCommandEncoder* cmdEncoder,
+ 	}
+ 	bool isColorFormat = !(isDepthFormat || isStencilFormat);
+ 
++	// MTLStorageModeMemoryless is only used here as a value to compare against, never as a live API call.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	bool isMemorylessAttachment = attachment->getImage()->getMTLStorageMode() == MTLStorageModeMemoryless;
++#pragma clang diagnostic pop
+ 	MTLStoreAction storeAction = getMTLStoreAction(subpass, isRenderingEntireAttachment, isMemorylessAttachment,
+ 												   hasResolveAttachment, canResolveFormat, isStencil, storeOverride);
+ 	if (isColorFormat) {
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKShaderModule.mm b/MoltenVK/MoltenVK/GPUObjects/MVKShaderModule.mm
+index 3aa44a44..d148388b 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKShaderModule.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKShaderModule.mm
+@@ -667,6 +667,9 @@ void MVKShaderLibraryCompiler::logCompilation(MTLCompileOptions* mtlCompOpt) {
+ #if MVK_XCODE_16
+ 	if ([mtlCompOpt respondsToSelector: @selector(mathMode)]) {
+ 		const char* mathModeName = "Unknown";
++		// mathMode and mathFloatingPointFunctions are already guarded by the respondsToSelector: check above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		switch (mtlCompOpt.mathMode) {
+ 			case MTLMathModeFast:
+ 				mathModeName = "Fast";
+@@ -691,13 +694,22 @@ void MVKShaderLibraryCompiler::logCompilation(MTLCompileOptions* mtlCompOpt) {
+ 			default:
+ 				break;
+ 		}
++#pragma clang diagnostic pop
++		// preserveInvariance requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		MVKLogInfo("Compiling Metal shader with MathMode %s, MathFloatingPointFunctions %s, and PreserveInvariance %sabled.",
+ 				   mathModeName, mathFPFName, mtlCompOpt.preserveInvariance ? "en" : "dis");
++#pragma clang diagnostic pop
+ 	} else
+ #endif
+ 	{
++		// preserveInvariance requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		MVKLogInfo("Compiling Metal shader with FastMath %sabled and PreserveInvariance %sabled.",
+ 				   mtlCompOpt.fastMathEnabled ? "en" : "dis", mtlCompOpt.preserveInvariance ? "en" : "dis");
++#pragma clang diagnostic pop
+ 	}
+ }
+ 
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
+index 4c908669..d2814fc4 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKSwapchain.mm
+@@ -196,8 +196,12 @@ VkResult MVKSwapchain::getRefreshCycleDuration(VkRefreshCycleDurationGOOGLE *pRe
+ 		CGDisplayModeRef mode = CGDisplayCopyDisplayMode(displayId);
+ 		framesPerSecond = CGDisplayModeGetRefreshRate(mode);
+ 		CGDisplayModeRelease(mode);
++		// maximumFramesPerSecond is already guarded by the respondsToSelector: check below.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 		if (framesPerSecond == 0 && [screen respondsToSelector: @selector(maximumFramesPerSecond)])
+ 			framesPerSecond = [screen maximumFramesPerSecond];
++#pragma clang diagnostic pop
+ 		// Builtin panels, e.g., on MacBook, report a zero refresh rate.
+ 		if (framesPerSecond == 0)
+ 			framesPerSecond = 60.0;
+@@ -374,11 +378,15 @@ void MVKSwapchain::setHDRMetadataEXT(const VkHdrMetadataEXT& metadata) {
+ 	NSData* colorVolData = [[NSData alloc] initWithBytes: &colorVol length: sizeof(colorVol)];
+ 	NSData* lightLevelData = [[NSData alloc] initWithBytes: &lightLevel length: sizeof(lightLevel)];
+     @autoreleasepool {
++        // CAEDRMetadata and setEDRMetadata: require macOS 10.15, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+         CAEDRMetadata* caMetadata = [CAEDRMetadata HDR10MetadataWithDisplayInfo: colorVolData
+                                                                     contentInfo: lightLevelData
+                                                              opticalOutputScale: 1];
+         auto* mtlLayer = getCAMetalLayer();
+         mtlLayer.EDRMetadata = caMetadata;
++#pragma clang diagnostic pop
+         mtlLayer.wantsExtendedDynamicRangeContent = YES;
+     }
+ 	[colorVolData release];
+@@ -502,7 +510,11 @@ void MVKSwapchain::initCAMetalLayer(const VkSwapchainCreateInfoKHR* pCreateInfo,
+ 	mtlLayer.drawableSize = mvkCGSizeFromVkExtent2D(_imageExtent);
+ 	mtlLayer.device = getMTLDevice();
+ 	mtlLayer.pixelFormat = getPixelFormats()->getMTLPixelFormat(pCreateInfo->imageFormat);
++	// setMaximumDrawableCount: requires macOS 10.13.2, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	mtlLayer.maximumDrawableCount = imgCnt;
++#pragma clang diagnostic pop
+ 	mtlLayer.displaySyncEnabledMVK = (pCreateInfo->presentMode != VK_PRESENT_MODE_IMMEDIATE_KHR);
+ 	mtlLayer.minificationFilter = minMagFilter;
+ 	mtlLayer.magnificationFilter = minMagFilter;
+@@ -535,7 +547,12 @@ void MVKSwapchain::initCAMetalLayer(const VkSwapchainCreateInfoKHR* pCreateInfo,
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = YES;
+ 			break;
+ 		case VK_COLOR_SPACE_DISPLAY_P3_LINEAR_EXT:
++			// kCGColorSpaceExtendedLinearDisplayP3 requires macOS 10.14.3, well below the real deployment
++			// target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlLayer.colorspaceNameMVK = kCGColorSpaceExtendedLinearDisplayP3;
++#pragma clang diagnostic pop
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = YES;
+ 			break;
+ 		case VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT:
+@@ -547,15 +564,28 @@ void MVKSwapchain::initCAMetalLayer(const VkSwapchainCreateInfoKHR* pCreateInfo,
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = NO;
+ 			break;
+ 		case VK_COLOR_SPACE_BT2020_LINEAR_EXT:
++			// kCGColorSpaceExtendedLinearITUR_2020 requires macOS 10.14.3, well below the real deployment
++			// target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlLayer.colorspaceNameMVK = kCGColorSpaceExtendedLinearITUR_2020;
++#pragma clang diagnostic pop
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = YES;
+ 			break;
+ 		case VK_COLOR_SPACE_HDR10_ST2084_EXT:
++			// kCGColorSpaceITUR_2100_PQ requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlLayer.colorspaceNameMVK = kCGColorSpaceITUR_2100_PQ;
++#pragma clang diagnostic pop
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = YES;
+ 			break;
+ 		case VK_COLOR_SPACE_HDR10_HLG_EXT:
++			// kCGColorSpaceITUR_2100_HLG requires macOS 11.0, which matches the real deployment target.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			mtlLayer.colorspaceNameMVK = kCGColorSpaceITUR_2100_HLG;
++#pragma clang diagnostic pop
+ 			mtlLayer.wantsExtendedDynamicRangeContentMVK = YES;
+ 			break;
+ 		case VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT:
+@@ -635,7 +665,11 @@ void MVKSwapchain::initSurfaceImages(const VkSwapchainCreateInfoKHR* pCreateInfo
+ 		// To prevent deadlocks, avoid dispatching screenMVK to the main thread at the cost of a less informative log.
+ 		if (NSThread.isMainThread) {
+ 			auto* screen = mtlLayer.screenMVK;
++			// localizedName requires macOS 10.15, well below the real deployment target of 11.0.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			screenName = screen.localizedName;
++#pragma clang diagnostic pop
+ 		}
+ #endif
+ 		MVKLogInfo("Created %d swapchain images with size (%d, %d) and contents scale %.1f in layer %s (%p) on screen %s.",
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKSync.h b/MoltenVK/MoltenVK/GPUObjects/MVKSync.h
+index e357299e..d9065432 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKSync.h
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKSync.h
+@@ -189,7 +189,13 @@ public:
+ 	 * Returns the MTLSharedEvent underlying this Vulkan semaphore,
+ 	 * or nil if this semaphore is not underpinned by a MTLSharedEvent.
+ 	 */
++	// MTLSharedEvent is only returned here as a value; subclasses that override this with a real
++	// MTLSharedEvent are only ever constructed after runtime confirms MTLEvent support (see
++	// MVKDevice::createSemaphore()), so no compile-time availability check is needed.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	virtual id<MTLSharedEvent> getMTLSharedEvent() { return nil; };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark Construction
+@@ -233,6 +239,10 @@ public:
+ #pragma mark MVKSemaphoreMTLEvent
+ 
+ /** An MVKSemaphore that uses MTLEvent to provide synchronization. */
++// MVKSemaphoreMTLEvent is only ever constructed by MVKDevice::createSemaphore() after runtime confirms
++// MTLEvent support, so the MTLEvent usage throughout this class does not need a compile-time availability check.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ class MVKSemaphoreMTLEvent : public MVKSemaphore {
+ 
+ public:
+@@ -253,6 +263,7 @@ protected:
+ 	id<MTLEvent> _mtlEvent;
+ 	std::atomic<uint64_t> _mtlEventValue;
+ };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -318,6 +329,11 @@ public:
+ #pragma mark MVKTimelineSemaphoreMTLEvent
+ 
+ /** An MVKTimelineSemaphore that uses MTLSharedEvent to provide synchronization. */
++// MVKTimelineSemaphoreMTLEvent is only ever constructed by MVKDevice::createSemaphore() after runtime confirms
++// MTLEvent support, so the MTLSharedEvent usage throughout this class does not need a compile-time availability
++// check.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ class MVKTimelineSemaphoreMTLEvent : public MVKTimelineSemaphore {
+ 
+ public:
+@@ -344,6 +360,7 @@ protected:
+ 	std::mutex _lock;
+ 	std::unordered_set<MVKFenceSitter*> _sitters;
+ };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -405,6 +422,11 @@ protected:
+ #pragma mark MVKFenceSitter
+ 
+ /** An object that responds to signals from MVKFences and MVKTimelineSemaphores. */
++// MVKFenceSitter is only ever handed a MTLSharedEventListener by MVKTimelineSemaphoreMTLEvent, which is only
++// constructed after runtime confirms MTLEvent support, so the MTLSharedEventListener usage here does not need
++// a compile-time availability check.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ class MVKFenceSitter : public MVKBaseObject {
+ 
+ public:
+@@ -443,6 +465,7 @@ private:
+ 	MVKSemaphoreImpl _blocker;
+ 	MTLSharedEventListener* _listener = nil;
+ };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -472,7 +495,12 @@ public:
+ 	virtual void encodeWait(id<MTLCommandBuffer> mtlCmdBuff) = 0;
+ 
+ 	/** Returns the MTLSharedEvent underlying this Vulkan event. */
++	// MTLSharedEvent is only used as a return type here; MVKEventNative, the only concrete subclass, is only
++	// ever constructed after runtime confirms MTLEvent support, so no compile-time availability check is needed.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	virtual id<MTLSharedEvent> getMTLSharedEvent() = 0;
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark Construction
+@@ -492,6 +520,11 @@ protected:
+ #pragma mark MVKEventNative
+ 
+ /** An MVKEvent that uses native MTLSharedEvent to provide VkEvent functionality. */
++// MVKEventNative is unconditionally constructed by MVKDevice::createEvent(), which is safe because MoltenVK's
++// real minimum deployment target already requires MTLSharedEvent support, so no compile-time availability
++// check is needed here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ class MVKEventNative : public MVKEvent {
+ 
+ public:
+@@ -511,6 +544,7 @@ public:
+ protected:
+ 	id<MTLSharedEvent> _mtlEvent;
+ };
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+diff --git a/MoltenVK/MoltenVK/GPUObjects/MVKSync.mm b/MoltenVK/MoltenVK/GPUObjects/MVKSync.mm
+index b15e6b8a..fcf7c064 100644
+--- a/MoltenVK/MoltenVK/GPUObjects/MVKSync.mm
++++ b/MoltenVK/MoltenVK/GPUObjects/MVKSync.mm
+@@ -115,6 +115,10 @@ MVKSemaphoreSingleQueue::~MVKSemaphoreSingleQueue() = default;
+ #pragma mark -
+ #pragma mark MVKSemaphoreMTLEvent
+ 
++// MVKSemaphoreMTLEvent is only ever constructed by MVKDevice::createSemaphore() after runtime confirms MTLEvent
++// support, so the MTLEvent usage throughout these methods does not need a compile-time availability check.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ void MVKSemaphoreMTLEvent::encodeWait(id<MTLCommandBuffer> mtlCmdBuff, uint64_t) {
+ 	if (mtlCmdBuff) { [mtlCmdBuff encodeWaitForEvent: _mtlEvent value: _mtlEventValue++]; }
+ }
+@@ -152,6 +156,7 @@ MVKSemaphoreMTLEvent::MVKSemaphoreMTLEvent(MVKDevice* device,
+ MVKSemaphoreMTLEvent::~MVKSemaphoreMTLEvent() {
+     [_mtlEvent release];
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -193,6 +198,11 @@ MVKSemaphoreEmulated::MVKSemaphoreEmulated(MVKDevice* device,
+ #pragma mark -
+ #pragma mark MVKTimelineSemaphoreMTLEvent
+ 
++// MVKTimelineSemaphoreMTLEvent is only ever constructed by MVKDevice::createSemaphore() after runtime confirms
++// MTLEvent support, so the MTLSharedEvent usage throughout these methods does not need a compile-time
++// availability check.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ // Nil mtlCmdBuff will do nothing.
+ void MVKTimelineSemaphoreMTLEvent::encodeWait(id<MTLCommandBuffer> mtlCmdBuff, uint64_t value) {
+ 	[mtlCmdBuff encodeWaitForEvent: _mtlEvent value: value];
+@@ -251,6 +261,7 @@ MVKTimelineSemaphoreMTLEvent::MVKTimelineSemaphoreMTLEvent(MVKDevice* device,
+ MVKTimelineSemaphoreMTLEvent::~MVKTimelineSemaphoreMTLEvent() {
+     [_mtlEvent release];
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+@@ -308,16 +319,26 @@ bool MVKFence::getIsSignaled() {
+ #pragma mark -
+ #pragma mark MVKFenceSitter
+ 
++// MVKFenceSitter is only ever handed a MTLSharedEventListener by MVKTimelineSemaphoreMTLEvent, which is only
++// constructed after runtime confirms MTLEvent support, so no compile-time availability check is needed here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ MTLSharedEventListener* MVKFenceSitter::getMTLSharedEventListener() {
+ 	// TODO: Use dispatch queue from device?
+ 	if (!_listener) { _listener = [MTLSharedEventListener new]; }
+ 	return _listener;
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+ #pragma mark MVKEventNative
+ 
++// MVKEventNative is unconditionally constructed by MVKDevice::createEvent(), which is safe because MoltenVK's
++// real minimum deployment target already requires MTLSharedEvent support, so no compile-time availability
++// check is needed here.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ // Odd == set / Even == reset.
+ bool MVKEventNative::isSet() { return _mtlEvent.signaledValue & 1; }
+ 
+@@ -354,6 +375,7 @@ MVKEventNative::MVKEventNative(MVKDevice* device,
+ MVKEventNative::~MVKEventNative() {
+ 	[_mtlEvent release];
+ }
++#pragma clang diagnostic pop
+ 
+ 
+ #pragma mark -
+diff --git a/MoltenVK/MoltenVK/OS/MTLSamplerDescriptor+MoltenVK.m b/MoltenVK/MoltenVK/OS/MTLSamplerDescriptor+MoltenVK.m
+index 26fd21b2..7958d067 100644
+--- a/MoltenVK/MoltenVK/OS/MTLSamplerDescriptor+MoltenVK.m
++++ b/MoltenVK/MoltenVK/OS/MTLSamplerDescriptor+MoltenVK.m
+@@ -43,14 +43,22 @@
+ 
+ -(float) lodBiasMVK {
+ #if MVK_XCODE_26
++	// lodBias is only accessed after respondsToSelector: confirms runtime support, so no compile-time
++	// availability check is needed.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if ( [self respondsToSelector: @selector(lodBias)] ) { return self.lodBias; }
++#pragma clang diagnostic pop
+ #endif
+ 	return 0.0f;
+ }
+ 
+ -(void) setLodBiasMVK: (float) bias {
+ #if MVK_XCODE_26
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	if ( [self respondsToSelector: @selector(setLodBias:)] ) { self.lodBias = bias; }
++#pragma clang diagnostic pop
+ #endif
+ }
+ 
+diff --git a/MoltenVK/MoltenVK/Utility/MVKCodec.mm b/MoltenVK/MoltenVK/Utility/MVKCodec.mm
+index b3e43b0a..071b65e2 100644
+--- a/MoltenVK/MoltenVK/Utility/MVKCodec.mm
++++ b/MoltenVK/MoltenVK/Utility/MVKCodec.mm
+@@ -31,6 +31,11 @@ using namespace std;
+ #pragma mark -
+ #pragma mark Support functions
+ 
++// NSDataCompressionAlgorithm and its enumerators are only used here as values; this function is only ever
++// called from mvkCompressDecompress() below, which gates use of the resulting value on a runtime
++// respondsToSelector: check for the compression API itself.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ static NSDataCompressionAlgorithm getSystemCompressionAlgo(MVKConfigCompressionAlgorithm compAlgo) {
+ 	switch (compAlgo) {
+ 		case MVK_CONFIG_COMPRESSION_ALGORITHM_NONE:     return NSDataCompressionAlgorithmLZFSE;
+@@ -41,6 +46,7 @@ static NSDataCompressionAlgorithm getSystemCompressionAlgo(MVKConfigCompressionA
+ 		default:                                        return NSDataCompressionAlgorithmLZFSE;
+ 	}
+ }
++#pragma clang diagnostic pop
+ 
+ // Only copy into the dstBytes if it can fit, otherwise the data will be corrupted
+ static size_t mvkCompressDecompress(const uint8_t* srcBytes, size_t srcSize,
+@@ -52,6 +58,10 @@ static size_t mvkCompressDecompress(const uint8_t* srcBytes, size_t srcSize,
+ 								 [NSData instancesRespondToSelector: @selector(decompressedDataUsingAlgorithm:error:)]);
+ 	if (compressionSupported && compAlgo != MVK_CONFIG_COMPRESSION_ALGORITHM_NONE) {
+ 		@autoreleasepool {
++			// compressedDataUsingAlgorithm:error:/decompressedDataUsingAlgorithm:error: are already guarded
++			// by the compressionSupported respondsToSelector: check above.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 			NSDataCompressionAlgorithm sysCompAlgo = getSystemCompressionAlgo(compAlgo);
+ 			NSData* srcData = [NSData dataWithBytesNoCopy: (void*)srcBytes length: srcSize freeWhenDone: NO];
+ 
+@@ -59,6 +69,7 @@ static size_t mvkCompressDecompress(const uint8_t* srcBytes, size_t srcSize,
+ 			NSData* dstData = (isCompressing
+ 							   ? [srcData compressedDataUsingAlgorithm: sysCompAlgo error: &err]
+ 							   : [srcData decompressedDataUsingAlgorithm: sysCompAlgo error: &err]);
++#pragma clang diagnostic pop
+ 			if ( !err ) {
+ 				size_t dataLen = dstData.length;
+ 				if (dstSize >= dataLen) {
+diff --git a/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.hpp b/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.hpp
+index 99460bef..6c4c8277 100644
+--- a/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.hpp
++++ b/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.hpp
+@@ -68,12 +68,19 @@ MTLLoadAction mvkMTLLoadActionFromVkAttachmentLoadOpInObj(VkAttachmentLoadOp vkL
+ MTLStoreAction mvkMTLStoreActionFromVkAttachmentStoreOpInObj(VkAttachmentStoreOp vkStoreOp, bool hasResolveAttachment, bool canResolveFormat, MVKBaseObject* mvkObj);
+ #define mvkMTLStoreActionFromVkAttachmentStoreOp(vkStoreOp, hasResolveAttachment, canResolveFormat) mvkMTLStoreActionFromVkAttachmentStoreOpInObj(vkStoreOp, hasResolveAttachment, canResolveFormat, this)
+ 
++// MTLMultisampleDepthResolveFilter and MTLMultisampleStencilResolveFilter are only used here as values,
++// never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
++
+ MTLMultisampleDepthResolveFilter mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBitsInObj(VkResolveModeFlagBits vkResolveMode, MVKBaseObject* mvkObj);
+ #define mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(vkResolveMode) mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBitsInObj(vkResolveMode, this)
+ 
+ MTLMultisampleStencilResolveFilter mvkMTLMultisampleStencilResolveFilterFromVkResolveModeFlagBitsInObj(VkResolveModeFlagBits vkResolveMode, MVKBaseObject* mvkObj);
+ #define mvkMTLMultisampleStencilResolveFilterFromVkResolveModeFlagBits(vkResolveMode) mvkMTLMultisampleStencilResolveFilterFromVkResolveModeFlagBitsInObj(vkResolveMode, this)
+ 
++#pragma clang diagnostic pop
++
+ MVKShaderStage mvkShaderStageFromVkShaderStageFlagBitsInObj(VkShaderStageFlagBits vkStage, MVKBaseObject* mvkObj);
+ #define mvkShaderStageFromVkShaderStageFlagBits(vkStage) mvkShaderStageFromVkShaderStageFlagBitsInObj(vkStage, this)
+ 
+diff --git a/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.mm b/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.mm
+index a356c71c..fb331625 100644
+--- a/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.mm
++++ b/MoltenVK/MoltenVK/Vulkan/mvk_datatypes.mm
+@@ -156,6 +156,10 @@ MTLTextureType mvkMTLTextureTypeFromVkImageTypeObj(VkImageType vkImageType,
+ 												   uint32_t arraySize,
+ 												   bool isMultisample,
+ 												   MVKBaseObject* mvkObj) {
++	// MTLTextureType2DMultisampleArray is only used here as a value, never sent to a live Metal object,
++	// so no runtime availability check is needed for using it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	switch (vkImageType) {
+ 		case VK_IMAGE_TYPE_3D: return MTLTextureType3D;
+ 		case VK_IMAGE_TYPE_1D: return (mvkGetMVKConfig(mvkObj).texture1DAs2D
+@@ -169,6 +173,7 @@ MTLTextureType mvkMTLTextureTypeFromVkImageTypeObj(VkImageType vkImageType,
+ 			return MTLTextureType2D;
+ 		}
+ 	}
++#pragma clang diagnostic pop
+ }
+ 
+ MVK_PUBLIC_SYMBOL VkImageType mvkVkImageTypeFromMTLTextureType(MTLTextureType mtlTextureType) {
+@@ -192,6 +197,10 @@ MVK_PUBLIC_SYMBOL MTLTextureType mvkMTLTextureTypeFromVkImageViewType(VkImageVie
+ MTLTextureType mvkMTLTextureTypeFromVkImageViewTypeObj(VkImageViewType vkImageViewType,
+ 													   bool isMultisample,
+ 													   MVKBaseObject* mvkObj) {
++	// MTLTextureType2DMultisampleArray is only used here as a value, never sent to a live Metal object,
++	// so no runtime availability check is needed for using it.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	switch (vkImageViewType) {
+ 		case VK_IMAGE_VIEW_TYPE_3D:			return MTLTextureType3D;
+ 		case VK_IMAGE_VIEW_TYPE_CUBE:		return MTLTextureTypeCube;
+@@ -202,6 +211,7 @@ MTLTextureType mvkMTLTextureTypeFromVkImageViewTypeObj(VkImageViewType vkImageVi
+ 		case VK_IMAGE_VIEW_TYPE_2D:
+ 		default:                            return isMultisample ? MTLTextureType2DMultisample : MTLTextureType2D;
+ 	}
++#pragma clang diagnostic pop
+ }
+ 
+ MVK_PUBLIC_SYMBOL MTLTextureUsage mvkMTLTextureUsageFromVkImageUsageFlags(VkImageUsageFlags vkImageUsageFlags, MTLPixelFormat mtlPixFmt) {
+@@ -222,6 +232,10 @@ MVK_PUBLIC_SYMBOL VkSampleCountFlagBits mvkVkSampleCountFlagBitsFromSampleCount(
+     return VkSampleCountFlagBits(sampleCount);
+ }
+ 
++// MTLTextureSwizzle and MTLTextureSwizzleChannels are only used here as values, never sent to a live Metal
++// object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ MVK_PUBLIC_SYMBOL MTLTextureSwizzle mvkMTLTextureSwizzleFromVkComponentSwizzle(VkComponentSwizzle vkSwizzle) {
+ 	switch (vkSwizzle) {
+ 		case VK_COMPONENT_SWIZZLE_ZERO:		return MTLTextureSwizzleZero;
+@@ -240,6 +254,7 @@ MVK_PUBLIC_SYMBOL MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkCo
+     return MTLTextureSwizzleChannelsMake(convert(vkMapping.r, Red), convert(vkMapping.g, Green), convert(vkMapping.b, Blue), convert(vkMapping.a, Alpha));
+ #undef convert
+ }
++#pragma clang diagnostic pop
+ 
+ MVK_PUBLIC_SYMBOL float mvkVkClearColorFloatValueFromVkComponentSwizzle(float *colors, uint32_t index, VkComponentSwizzle vkSwizzle) {
+ 	switch (vkSwizzle) {
+@@ -600,6 +615,10 @@ MTLStoreAction mvkMTLStoreActionFromVkAttachmentStoreOpInObj(VkAttachmentStoreOp
+ }
+ 
+ #undef mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits
++// MTLMultisampleDepthResolveFilter and MTLMultisampleStencilResolveFilter are only used here as values,
++// never sent to a live Metal object, so no runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ MVK_PUBLIC_SYMBOL MTLMultisampleDepthResolveFilter mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(VkResolveModeFlagBits vkResolveMode) {
+ 	return mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBitsInObj(vkResolveMode, nullptr);
+ }
+@@ -630,6 +649,7 @@ MTLMultisampleStencilResolveFilter mvkMTLMultisampleStencilResolveFilterFromVkRe
+ 			return MTLMultisampleStencilResolveFilterSample0;
+ 	}
+ }
++#pragma clang diagnostic pop
+ 
+ MVK_PUBLIC_SYMBOL MTLViewport mvkMTLViewportFromVkViewport(VkViewport vkViewport) {
+ 	return {
+@@ -821,6 +841,10 @@ MVK_PUBLIC_SYMBOL MTLRenderStages mvkMTLRenderStagesFromVkPipelineStageFlags(VkP
+ }
+ 
+ MVK_PUBLIC_SYMBOL MTLBarrierScope mvkMTLBarrierScopeFromVkAccessFlags(VkAccessFlags2 vkAccess) {
++	// MTLBarrierScope* values are only used here as values, never sent to a live Metal object, so no
++	// runtime availability check is needed for using them.
++#pragma clang diagnostic push
++#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+ 	MTLBarrierScope mtlScope = MTLBarrierScope(0);
+ 	if ( mvkIsAnyFlagEnabled(vkAccess, (VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | 
+ 										VK_ACCESS_2_INDEX_READ_BIT |
+@@ -844,6 +868,7 @@ MVK_PUBLIC_SYMBOL MTLBarrierScope mvkMTLBarrierScopeFromVkAccessFlags(VkAccessFl
+ 	}
+ #endif
+ 	return mtlScope;
++#pragma clang diagnostic pop
+ }
+ 
+ uint64_t mvkBarrierStagesFromPipelineStageFlags(VkPipelineStageFlags2 flags) {

@@ -610,3 +610,6 @@
 [submodule "src/llvm-project"]
 	path = src/llvm-project
 	url = https://github.com/llvm/llvm-project.git
+[submodule "src/mesa/MoltenVK"]
+	path = src/mesa/MoltenVK
+	url = https://github.com/KhronosGroup/MoltenVK.git

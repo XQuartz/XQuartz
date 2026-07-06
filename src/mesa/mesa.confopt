@@ -2,4 +2,5 @@
 -Degl=disabled \
 -Dllvm=enabled \
 -Dshared-llvm=disabled \
--Dgallium-drivers=softpipe,llvmpipe
+-Dmoltenvk-dir=/Users/jeremy/src/VulkanSDK/1.4.350.1 \
+-Dgallium-drivers=softpipe,llvmpipe,zink
