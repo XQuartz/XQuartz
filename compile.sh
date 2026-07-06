@@ -243,6 +243,7 @@ setup_environment() {
 
     export CXXFLAGS="${CFLAGS}"
     export OBJCFLAGS="${CFLAGS}"
+    export OBJCXXFLAGS="${CFLAGS}"
 
     if has i386 ${archs} ; then
         export CC="${XCODE_i386}/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
