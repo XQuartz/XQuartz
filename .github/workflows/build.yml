@@ -30,28 +30,8 @@ jobs:
       run: |
         ./compile.sh
         
-    - name: Create DMG
-      run: |
-        PKG_FILE=$(ls XQuartz-*.pkg 2>/dev/null || true)
-        if [ -n "$PKG_FILE" ]; then
-          mkdir -p dmg_content
-          cp "$PKG_FILE" dmg_content/
-          hdiutil create -volname "XQuartz Installer" -srcfolder dmg_content -ov -format UDZO XQuartz.dmg
-        else
-          # Fallback if PKG is not generated
-          echo "PKG file not found, creating DMG from DESTDIR directly..."
-          if [ -d build/XQuartz.dest/Applications/Utilities/XQuartz.app ]; then
-             mkdir -p dmg_content
-             cp -r build/XQuartz.dest/Applications/Utilities/XQuartz.app dmg_content/
-             hdiutil create -volname "XQuartz" -srcfolder dmg_content -ov -format UDZO XQuartz.dmg
-          else
-             echo "Failed to find built artifacts."
-             exit 1
-          fi
-        fi
-        
-    - name: Upload Artifact
+    - name: Upload Installer PKG
       uses: actions/upload-artifact@v4
       with:
-        name: XQuartz-DMG
-        path: XQuartz.dmg
+        name: XQuartz-Installer
+        path: XQuartz-*.pkg
