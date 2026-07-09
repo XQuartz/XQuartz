@@ -18,6 +18,7 @@ jobs:
         
     - name: Prepare MacPorts Cache Directories
       run: |
+        chmod +x *.sh
         sudo mkdir -p /opt/local /opt/local-cmake
         sudo chown -R $USER /opt/local /opt/local-cmake
 
