@@ -37,8 +37,9 @@ bootstrap_base() {
 
         if ! [ -d "${TMP_BASE}/macports-base" ] ; then
             git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
-            cd macports-base || die "Could not enter macports-base"
         fi
+        
+        cd macports-base || die "Could not enter macports-base"
 
         ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
         make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
