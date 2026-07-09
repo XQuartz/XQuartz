@@ -1,0 +1,57 @@
+name: Build XQuartz
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        
+    - name: Set up MacPorts and dependencies
+      run: |
+        sudo ./install-or-update-macports.sh
+        
+    - name: Disable Code Signing for CI
+      run: |
+        sed -i '' 's/--sign "${CODESIGN_IDENTITY_PKG}"//g' compile.sh
+        sed -i '' 's/--sign "${CODESIGN_IDENTITY_APP}"//g' compile.sh
+        sed -i '' '/codesign -s/d' compile.sh
+        
+    - name: Build XQuartz
+      run: |
+        ./compile.sh
+        
+    - name: Create DMG
+      run: |
+        PKG_FILE=$(ls XQuartz-*.pkg 2>/dev/null || true)
+        if [ -n "$PKG_FILE" ]; then
+          mkdir -p dmg_content
+          cp "$PKG_FILE" dmg_content/
+          hdiutil create -volname "XQuartz Installer" -srcfolder dmg_content -ov -format UDZO XQuartz.dmg
+        else
+          # Fallback if PKG is not generated
+          echo "PKG file not found, creating DMG from DESTDIR directly..."
+          if [ -d build/XQuartz.dest/Applications/Utilities/XQuartz.app ]; then
+             mkdir -p dmg_content
+             cp -r build/XQuartz.dest/Applications/Utilities/XQuartz.app dmg_content/
+             hdiutil create -volname "XQuartz" -srcfolder dmg_content -ov -format UDZO XQuartz.dmg
+          else
+             echo "Failed to find built artifacts."
+             exit 1
+          fi
+        fi
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: XQuartz-DMG
+        path: XQuartz.dmg
