@@ -87,10 +87,10 @@ fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     # Alpha builds use ASan
-    SANITIZER_CONFIGS="EXEC LIB"
+#    SANITIZER_CONFIGS="EXEC LIB"
 
-    SANITIZER_CFLAGS="-fsanitize=address"
-    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+#    SANITIZER_CFLAGS="-fsanitize=address"
+#    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
@@ -99,10 +99,11 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ]
     export MACOSX_DEPLOYMENT_TARGET=10.13
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
     # Beta builds use ASan for the main executables
-    SANITIZER_CONFIGS="EXEC"
+#    ASan is disabled while looking into rdar://182310802
+#    SANITIZER_CONFIGS="EXEC"
 
-    SANITIZER_CFLAGS="-fsanitize=address"
-    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+#    SANITIZER_CFLAGS="-fsanitize=address"
+#    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
