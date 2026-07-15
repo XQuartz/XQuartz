@@ -1022,7 +1022,7 @@ do_meson_build src/xorg/app/listres EXEC
 do_autotools_build src/xorg/app/luit EXEC
 do_meson_build src/xorg/app/mkfontscale EXEC
 do_meson_build src/xorg/app/oclock EXEC
-do_autotools_build src/xorg/app/quartz-wm EXEC
+do_meson_build src/xorg/app/quartz-wm EXEC
 do_autotools_build src/xorg/app/rgb EXEC
 do_meson_build src/xorg/app/sessreg EXEC
 do_meson_build src/xorg/app/setxkbmap EXEC
