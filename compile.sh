@@ -404,7 +404,7 @@ do_lipo() {
 
         pushd "${DESTDIR}.lipo.${set}"
         find . -type f | while read file ; do
-            if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+            if /usr/bin/file "${file}" | egrep -q "(Mach-O|ar archive)" ; then
                 for arch in $(lipo -archs "${file}") ; do
                     if ! has ${arch} ${archs} ; then
                         sudo lipo -remove ${arch} -output ${file}.lipo_result ${file} || die "lipo failed to remove ${arch} from ${file}"
@@ -421,7 +421,7 @@ do_lipo() {
 
     pushd "${DESTDIR}.lipo.fat"
     find . -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | egrep -q "(Mach-O|ar archive)" ; then
             unset input_files
             for set in ${sets} ; do
                 input_files="${input_files} ${DESTDIR}.lipo.${set}/${file}"
