@@ -74,6 +74,8 @@ APPLICATION_VERSION_STRING=2.8.6
 XCODE_i386=/Applications/OlderXcodes/Xcode-14.2.app
 SDKROOT_i386=/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk
 
+SDKROOT_XQUARTZ_OVERLAY=/Library/Developer/CommandLineTools/SDKs/XQuartzUpdates.sdk
+
 SPARKLE_PUBLIC_EDKEY="pgjiBdCBJJg1rSqFR3GtMPXaRKcU9Jjeh6OqfkH4j+8="
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     SPARKLE_FEED_URL="https://www.xquartz.org/releases/sparkle-r1/alpha.xml"
@@ -236,6 +238,11 @@ setup_environment() {
     export CPPFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${cpp_arch_flags} -I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
     export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
     export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+
+    if [[ -d "${SDKROOT_XQUARTZ_OVERLAY}" ]] ; then
+        export CPPFLAGS="${CPPFLAGS} -I${SDKROOT_XQUARTZ_OVERLAY}/usr/include"
+        export LDFLAGS="${LDFLAGS} -L${SDKROOT_XQUARTZ_OVERLAY}/usr/lib"
+    fi
 
     if ! has i386 ${archs} && has ${config} ${SANITIZER_CONFIGS}; then
         export CFLAGS="${CFLAGS} ${SANITIZER_CFLAGS}"
