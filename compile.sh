@@ -609,7 +609,7 @@ do_checks() {
     done
 }
 
-do_remove_legacy_protos() {
+do_removals() {
     sudo rm -rf ${DESTDIR}${PREFIX}/include/X11/PM
     sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/evieproto.h
     sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapbits.h
@@ -645,6 +645,9 @@ do_remove_legacy_protos() {
     sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/windowswmproto.pc
     sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xf86miscproto.pc
     sudo rm -f ${DESTDIR}${PREFIX}/share/man/man7/Xprint.7
+
+    # I don't see a way to turn this off in mesa/glu
+    sudo rm -f ${DESTDIR}${PREFIX}/lib/libGLU.a
 }
 
 do_strip_sign_dsyms() {
@@ -1151,7 +1154,7 @@ sudo ln -s Xquartz ${PREFIX}/bin/X
 #do_meson_build src/xorg/test/xts EXEC
 #do_meson_build src/xorg/test/xtsttopng EXEC
 
-do_remove_legacy_protos
+do_removals
 
 do_checks
 
