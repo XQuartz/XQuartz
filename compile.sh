@@ -682,7 +682,7 @@ do_strip_sign_dsyms() {
     sudo chown -R root:wheel "${PKG_ROOT}"
 
     find "${PKG_ROOT}/opt/X11" -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | grep -q "Mach-O" && /usr/bin/file "${file}" | grep -q -v "ar archive" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
@@ -695,7 +695,7 @@ do_strip_sign_dsyms() {
     done
 
     find "${PKG_ROOT}/Applications" -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | grep -q "Mach-O" && /usr/bin/file "${file}" | grep -q -v "ar archive" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
