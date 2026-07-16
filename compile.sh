@@ -816,7 +816,7 @@ do_dist() {
             if ! curl -i -u ${gh_user}:${gh_token} \
                     -o ${tmpfile} \
                     --progress-bar \
-                    --data-binary @${f} \
+                    --upload-file ${f} \
                     -H "Content-Type: application/octet-stream" \
                     https://uploads.github.com/repos/${gh_project}/${gh_repo}/releases/${id}/assets?name=$(basename ${f}) ; then
                 cat ${tmpfile} >&2
