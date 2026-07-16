@@ -846,7 +846,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libXt-flatnamespace|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule foreach --quiet 'echo "  * ${sm_path/src\//} $(git describe --tags --always) ($sha1)"' | egrep -v '(libXt-flatnamespace|xorg/test)'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o \
