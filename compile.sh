@@ -107,8 +107,8 @@ elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" 
 #    SANITIZER_CFLAGS="-fsanitize=address"
 #    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
-    # Beta builds use full stack protection and disable optimizations
-    OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
+    # Beta builds use full stack protection. Optimized (-O2) so perf tracks release.
+    OPT_CFLAGS="-O2 -fno-omit-frame-pointer"
     HARDENING_CFLAGS="-fstack-protector-all"
     export MACOSX_DEPLOYMENT_TARGET=10.13
 else
