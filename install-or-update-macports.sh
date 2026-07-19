@@ -31,15 +31,22 @@ trap "rm -rf ${TMP_BASE}" EXIT INT QUIT TERM
 
 bootstrap_base() {
     local BUILD_TOOLS_PREFIX=$1
+    # Each prefix gets its own macports-base checkout: the build tree bakes
+    # in --prefix at configure time, and `make install` for a second prefix
+    # against a checkout already configured/built for the first prefix fails
+    # partway through (e.g. "install-tcllibc: No such file or directory")
+    # because stale generated/staged files from the first build don't get
+    # regenerated for the new prefix.
+    local SRC_DIR="${TMP_BASE}/macports-base-$(basename "${BUILD_TOOLS_PREFIX}")"
 
     if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
         cd "${TMP_BASE}" || die "Could not change to tmp directory"
 
-        if ! [ -d "${TMP_BASE}/macports-base" ] ; then
-            git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
+        if ! [ -d "${SRC_DIR}" ] ; then
+            git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git "${SRC_DIR}" || die "Could not clone macports-base"
         fi
-        
-        cd macports-base || die "Could not enter macports-base"
+
+        cd "${SRC_DIR}" || die "Could not enter macports-base"
 
         ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
         make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
