@@ -88,7 +88,25 @@ jobs:
         sed -i '' 's/--sign "${CODESIGN_IDENTITY_PKG}"//g' compile.sh
         sed -i '' 's/--sign "${CODESIGN_IDENTITY_APP}"//g' compile.sh
         sed -i '' '/codesign -s/d' compile.sh
-        
+
+    - name: Reduce LLVM build parallelism for CI
+      # LLVM_PARALLEL_COMPILE_JOBS/LINK_JOBS (src/llvm-project.confopt) only
+      # work with CMake's Ninja generator via job pools -- this build uses
+      # the "Unix Makefiles" generator (do_cmake_build's own gnumake calls),
+      # where they're silently ignored. Confirmed via the resource-monitor
+      # data below: the runner still died from memory exhaustion with those
+      # set. The only parallelism knob Unix Makefiles actually obeys is
+      # make's own -j, controlled here by compile.sh's global MAKE_OPTS, so
+      # override it just around the LLVM build call instead of globally
+      # (everything else builds fine at full parallelism).
+      run: |
+        sed -i '' '/^do_cmake_build src\/llvm-project LIB llvm$/c\
+        _XQ_SAVED_MAKE_OPTS="${MAKE_OPTS}"\
+        MAKE_OPTS="V=1 -j1"\
+        do_cmake_build src/llvm-project LIB llvm\
+        MAKE_OPTS="${_XQ_SAVED_MAKE_OPTS}"
+        ' compile.sh
+
     - name: Build XQuartz
       run: |
         # Three prior runs got killed with no error message partway through
