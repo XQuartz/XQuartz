@@ -36,11 +36,29 @@ jobs:
           /opt/local-cmake
         key: macports-macos-15-${{ hashFiles('install-or-update-macports.sh') }}
 
+    - name: Rewrite /opt/buildX11 references to /opt/local
+      # Every file that hardcodes the build-tools prefix, not just the two
+      # install-or-update-macports.sh/compile.sh touch directly: the meson
+      # cross files (pkg-config/cmake/llvm-config lookup) also reference it,
+      # and were missed here before, which broke every meson-based build
+      # ("Found pkg-config: NO" / "Found CMake: NO") once the toolchain
+      # actually lived under /opt/local. This has to run every run,
+      # regardless of the MacPorts cache-hit status below: it rewrites
+      # checked-out source files, not the cached /opt/local contents, so
+      # skipping it on a cache hit would leave compile.sh pointing at a
+      # prefix (/opt/buildX11) that was never installed.
+      run: |
+        sed -i '' 's|/opt/buildX11|/opt/local|g' \
+          install-or-update-macports.sh \
+          compile.sh \
+          src/llvm-project.confopt \
+          meson_support/meson/cross/arm64-darwin-xquartz \
+          meson_support/meson/cross/i386-darwin-xquartz \
+          meson_support/meson/cross/x86_64-darwin-xquartz
+
     - name: Set up MacPorts and dependencies
       if: steps.cache-macports.outputs.cache-hit != 'true'
-      run: |
-        sed -i '' 's|/opt/buildX11|/opt/local|g' install-or-update-macports.sh compile.sh
-        sudo ./install-or-update-macports.sh
+      run: sudo ./install-or-update-macports.sh
 
     - name: Get LLVM submodule commit
       id: llvm-sha
@@ -48,20 +66,20 @@ jobs:
 
     - name: Prepare LLVM Cache Directory
       run: |
-        sudo mkdir -p /opt/buildX11-llvm
-        sudo chown -R $USER /opt/buildX11-llvm
+        sudo mkdir -p /opt/local-llvm
+        sudo chown -R $USER /opt/local-llvm
 
     - name: Cache LLVM build
       uses: actions/cache@v4
       with:
-        # /opt/buildX11-llvm is compile.sh's own hardcoded install prefix for
-        # this submodule (src/llvm-project.confopt), untouched by the
-        # /opt/buildX11 -> /opt/local sed above. compile.sh always runs
-        # do_cmake_build for it unconditionally (no cache-hit skip like the
-        # MacPorts step), so this only avoids rebuilding objects `make`
-        # already considers up to date -- it does not skip the step outright.
+        # /opt/local-llvm is src/llvm-project.confopt's install prefix, after
+        # the /opt/buildX11 -> /opt/local rewrite above (originally
+        # /opt/buildX11-llvm). compile.sh always runs do_cmake_build for it
+        # unconditionally (no cache-hit skip like the MacPorts step), so this
+        # only avoids rebuilding objects `make` already considers up to
+        # date -- it does not skip the step outright.
         path: |
-          /opt/buildX11-llvm
+          /opt/local-llvm
           src/llvm-project/build.arm64
           src/llvm-project/build.x86_64
         key: llvm-macos-15-${{ steps.llvm-sha.outputs.sha }}-${{ hashFiles('src/llvm-project.confopt') }}
