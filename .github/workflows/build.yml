@@ -91,8 +91,28 @@ jobs:
         
     - name: Build XQuartz
       run: |
+        # Two prior runs got killed with no error message partway through
+        # this step (a real gap in the log, confirmed via the log blob's own
+        # Last-Modified timestamp -- not a log-retrieval artifact), consistent
+        # with the runner running out of disk or memory. Sample both every
+        # 30s in the background so we have data either way instead of
+        # guessing again.
+        (while true; do
+          echo "=== $(date -u +%H:%M:%S) ==="
+          df -h /
+          vm_stat
+          sleep 30
+        done) > /tmp/resource-monitor.log 2>&1 &
+        MONITOR_PID=$!
         ./compile.sh
-        
+        BUILD_EXIT=$?
+        kill "${MONITOR_PID}" 2>/dev/null || true
+        exit ${BUILD_EXIT}
+
+    - name: Show resource usage during build
+      if: always()
+      run: cat /tmp/resource-monitor.log || echo "no monitor log captured"
+
     - name: Upload Installer PKG
       uses: actions/upload-artifact@v4
       with:
