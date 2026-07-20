@@ -1,0 +1,14 @@
+diff --git a/src/fcint.h b/src/fcint.h
+index 1fd9e1e5..39fd1821 100644
+--- a/src/fcint.h
++++ b/src/fcint.h
+@@ -37,6 +37,9 @@
+ #include <float.h>
+ #include <limits.h>
+ #include <locale.h>
++#ifdef HAVE_XLOCALE_H
++#  include <xlocale.h>
++#endif
+ #include <math.h>
+ #include <stdio.h>
+ #include <stdlib.h>

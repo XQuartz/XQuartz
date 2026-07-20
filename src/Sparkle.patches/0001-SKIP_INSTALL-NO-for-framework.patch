@@ -1,13 +1,3 @@
-diff --git a/Configurations/ConfigDownloader.xcconfig b/Configurations/ConfigDownloader.xcconfig
-index 2154e794..09a79692 100644
---- a/Configurations/ConfigDownloader.xcconfig
-+++ b/Configurations/ConfigDownloader.xcconfig
-@@ -6,4 +6,5 @@ PRODUCT_BUNDLE_IDENTIFIER = ${DOWNLOADER_BUNDLE_ID}
- PRODUCT_NAME = ${DOWNLOADER_NAME}
- CODE_SIGN_ENTITLEMENTS = $(DOWNLOADER_SANDBOXED_ENTITLEMENTS)
- GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
-+SKIP_INSTALL = YES
- CLANG_MODULES_AUTOLINK = NO
 diff --git a/Configurations/ConfigFramework.xcconfig b/Configurations/ConfigFramework.xcconfig
 index 32b4478a..dce679b8 100644
 --- a/Configurations/ConfigFramework.xcconfig
@@ -21,33 +11,3 @@ index 32b4478a..dce679b8 100644
  DEFINES_MODULE = YES
  PRODUCT_BUNDLE_IDENTIFIER = ${SPARKLE_BUNDLE_IDENTIFIER}
  STRINGS_FILE_OUTPUT_ENCODING = binary
-diff --git a/Configurations/ConfigInstallerConnection.xcconfig b/Configurations/ConfigInstallerConnection.xcconfig
-index 424985ed..aa167178 100644
---- a/Configurations/ConfigInstallerConnection.xcconfig
-+++ b/Configurations/ConfigInstallerConnection.xcconfig
-@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
- PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_CONNECTION_BUNDLE_ID}
- PRODUCT_NAME = ${INSTALLER_CONNECTION_NAME}
- GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
-+SKIP_INSTALL = YES
- CLANG_MODULES_AUTOLINK = NO
-diff --git a/Configurations/ConfigInstallerLauncher.xcconfig b/Configurations/ConfigInstallerLauncher.xcconfig
-index 8c6196b6..7783073b 100644
---- a/Configurations/ConfigInstallerLauncher.xcconfig
-+++ b/Configurations/ConfigInstallerLauncher.xcconfig
-@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
- PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_LAUNCHER_BUNDLE_ID}
- PRODUCT_NAME = ${INSTALLER_LAUNCHER_NAME}
- GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
-+SKIP_INSTALL = YES
- CLANG_MODULES_AUTOLINK = NO
-diff --git a/Configurations/ConfigInstallerStatus.xcconfig b/Configurations/ConfigInstallerStatus.xcconfig
-index 24657cea..5c804058 100644
---- a/Configurations/ConfigInstallerStatus.xcconfig
-+++ b/Configurations/ConfigInstallerStatus.xcconfig
-@@ -5,4 +5,5 @@ WRAPPER_EXTENSION = xpc
- PRODUCT_BUNDLE_IDENTIFIER = ${INSTALLER_STATUS_BUNDLE_ID}
- PRODUCT_NAME = ${INSTALLER_STATUS_NAME}
- GCC_PREPROCESSOR_DEFINITIONS = $(GCC_PREPROCESSOR_DEFINITIONS) BUILDING_SPARKLE=0 BUILDING_SPARKLE_SOURCES_EXTERNALLY=1
-+SKIP_INSTALL = YES
- CLANG_MODULES_AUTOLINK = NO

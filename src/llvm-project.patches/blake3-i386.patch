@@ -1,0 +1,32 @@
+diff --git a/llvm/lib/Support/BLAKE3/blake3_impl.h b/llvm/lib/Support/BLAKE3/blake3_impl.h
+index dd71e729f208..2459f3a3701e 100644
+--- a/llvm/lib/Support/BLAKE3/blake3_impl.h
++++ b/llvm/lib/Support/BLAKE3/blake3_impl.h
+@@ -44,6 +44,27 @@ enum blake3_flags {
+ #define IS_X86_32
+ #endif
+ 
++// LLVM only wires up the x86 SIMD implementations for x86-64: every .S file is
++// guarded by "#if defined(__x86_64__)" and the intrinsic .c fallbacks are not
++// compiled. In a macOS Universal build that includes a 32-bit x86 slice (e.g.
++// CMAKE_OSX_ARCHITECTURES=i386;x86_64), CMake still enables the assembly for the
++// whole fat compile, so the i386 slice would reference SSE2/SSE41/AVX2/AVX512
++// symbols that are never emitted. Force the portable fallback for 32-bit x86.
++#if defined(IS_X86_32)
++#ifndef BLAKE3_NO_SSE2
++#define BLAKE3_NO_SSE2
++#endif
++#ifndef BLAKE3_NO_SSE41
++#define BLAKE3_NO_SSE41
++#endif
++#ifndef BLAKE3_NO_AVX2
++#define BLAKE3_NO_AVX2
++#endif
++#ifndef BLAKE3_NO_AVX512
++#define BLAKE3_NO_AVX512
++#endif
++#endif
++
+ #if defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
+ #define IS_AARCH64
+ #endif

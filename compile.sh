@@ -68,11 +68,13 @@ CODESIGN_ASC_PROVIDER="NA574AWV7E"
 CODESIGN_IDENTITY_APP="Developer ID Application: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 CODESIGN_IDENTITY_PKG="Developer ID Installer: Apple Inc. - XQuartz (${CODESIGN_ASC_PROVIDER})"
 
-APPLICATION_VERSION=2.8.66
-APPLICATION_VERSION_STRING=2.8.6_rc2
+APPLICATION_VERSION=2.8.70
+APPLICATION_VERSION_STRING=2.8.7_beta1
 
 XCODE_i386=/Applications/OlderXcodes/Xcode-14.2.app
 SDKROOT_i386=/Library/Developer/CommandLineTools/SDKs/MacOSX10.13.sdk
+
+SDKROOT_XQUARTZ_OVERLAY=/Library/Developer/CommandLineTools/SDKs/XQuartzUpdates.sdk
 
 SPARKLE_PUBLIC_EDKEY="pgjiBdCBJJg1rSqFR3GtMPXaRKcU9Jjeh6OqfkH4j+8="
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
@@ -87,10 +89,10 @@ fi
 
 if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ] ; then
     # Alpha builds use ASan
-    SANITIZER_CONFIGS="EXEC LIB"
+#    SANITIZER_CONFIGS="EXEC LIB"
 
-    SANITIZER_CFLAGS="-fsanitize=address"
-    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+#    SANITIZER_CFLAGS="-fsanitize=address"
+#    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
 
@@ -99,10 +101,11 @@ if [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/alpha/}" ]
     export MACOSX_DEPLOYMENT_TARGET=10.13
 elif [ "${APPLICATION_VERSION_STRING}" != "${APPLICATION_VERSION_STRING/beta/}" ] ; then
     # Beta builds use ASan for the main executables
-    SANITIZER_CONFIGS="EXEC"
+#    ASan is disabled while looking into rdar://182310802
+#    SANITIZER_CONFIGS="EXEC"
 
-    SANITIZER_CFLAGS="-fsanitize=address"
-    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
+#    SANITIZER_CFLAGS="-fsanitize=address"
+#    SANITIZER_LIBS="libclang_rt.asan_osx_dynamic.dylib"
 
     # Beta builds use full stack protection and disable optimizations
     OPT_CFLAGS="-O0 -fno-optimize-sibling-calls -fno-omit-frame-pointer"
@@ -235,6 +238,11 @@ setup_environment() {
     export CPPFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${cpp_arch_flags} -I${PREFIX}/include -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks -DFAIL_HARD"
     export CFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} ${OPT_CFLAGS} ${DEBUG_CFLAGS} ${HARDENING_CFLAGS} ${WARNING_CFLAGS}"
     export LDFLAGS="${sdkdir:+-isysroot ${sdkdir}} ${arch_flags} -L${PREFIX}/lib -F${APPLICATION_PATH}/XQuartz.app/Contents/Frameworks"
+
+    if [[ -d "${SDKROOT_XQUARTZ_OVERLAY}" ]] ; then
+        export CPPFLAGS="${CPPFLAGS} -I${SDKROOT_XQUARTZ_OVERLAY}/usr/include"
+        export LDFLAGS="${LDFLAGS} -L${SDKROOT_XQUARTZ_OVERLAY}/usr/lib"
+    fi
 
     if ! has i386 ${archs} && has ${config} ${SANITIZER_CONFIGS}; then
         export CFLAGS="${CFLAGS} ${SANITIZER_CFLAGS}"
@@ -404,7 +412,7 @@ do_lipo() {
 
         pushd "${DESTDIR}.lipo.${set}"
         find . -type f | while read file ; do
-            if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+            if /usr/bin/file "${file}" | egrep -q "(Mach-O|ar archive)" ; then
                 for arch in $(lipo -archs "${file}") ; do
                     if ! has ${arch} ${archs} ; then
                         sudo lipo -remove ${arch} -output ${file}.lipo_result ${file} || die "lipo failed to remove ${arch} from ${file}"
@@ -421,7 +429,7 @@ do_lipo() {
 
     pushd "${DESTDIR}.lipo.fat"
     find . -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | egrep -q "(Mach-O|ar archive)" ; then
             unset input_files
             for set in ${sets} ; do
                 input_files="${input_files} ${DESTDIR}.lipo.${set}/${file}"
@@ -505,6 +513,7 @@ do_cmake_build() {
     local source_subdir="${3:-.}"
     local variable="ARCHS_${config}"
     local archs=${!variable}
+    local cmake_archs
 
     local patches_dir="${project_dir}.patches"
     local confopt_file="${project_dir}.confopt"
@@ -532,9 +541,14 @@ do_cmake_build() {
             sdkdir=$(xcrun --show-sdk-path)
         fi
 
+        cmake_archs=${arch}
+        if [ "${arch}" == "i386" ] ; then
+            cmake_archs="i386;x86_64"
+        fi
+
         cmake -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
               -DCMAKE_INSTALL_NAME_DIR="${PREFIX}/lib" \
-              -DCMAKE_OSX_ARCHITECTURES="${arch}" \
+              -DCMAKE_OSX_ARCHITECTURES="${cmake_archs}" \
               -DCMAKE_OSX_SYSROOT="${sdkdir}" \
               -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
               $(eval echo $(cat "${confopt_file}")) "../${source_subdir}" || die "Could not configure in $(pwd)"
@@ -602,14 +616,14 @@ do_checks() {
             [ "${file/epoll}" != "${file}" ] && continue
 
             # Ignore _voucher* symbols (mig) and symbols from libc++ and libobjc that the compiler might have added
-            if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "_pthread_attr_set_qos_class_np" | grep -v "_pthread_mutexattr" | grep -v "from libc++" | grep -v "from libobjc" | grep -q "(undefined) weak external" ; then
+            if nm -arch x86_64 -m "${file}"  | grep -v "_voucher" | grep -v "darwin_check_fd_set_overflow" | grep -v "_pthread_attr_set_qos_class_np" | grep -v "_pthread_mutexattr" | grep -v "from libc++" | grep -v "from libobjc" | grep -v "_dispatch_once_f" | grep -v "__availability_version_check" | grep -v "from libXplugin" | grep -q "(undefined) weak external" ; then
                 die "=== ${file} has a weak link ==="
             fi
         fi
     done
 }
 
-do_remove_legacy_protos() {
+do_removals() {
     sudo rm -rf ${DESTDIR}${PREFIX}/include/X11/PM
     sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/evieproto.h
     sudo rm -f ${DESTDIR}${PREFIX}/include/X11/extensions/xtrapbits.h
@@ -645,6 +659,12 @@ do_remove_legacy_protos() {
     sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/windowswmproto.pc
     sudo rm -f ${DESTDIR}${PREFIX}/share/pkgconfig/xf86miscproto.pc
     sudo rm -f ${DESTDIR}${PREFIX}/share/man/man7/Xprint.7
+
+    # I don't see a way to turn this off in mesa/glu
+    sudo rm -f ${DESTDIR}${PREFIX}/lib/libGLU.a
+
+    # Don't ship llvm or any other build support
+    sudo rm -rf ${DESTDIR}/opt/buildX11*
 }
 
 do_strip_sign_dsyms() {
@@ -662,7 +682,7 @@ do_strip_sign_dsyms() {
     sudo chown -R root:wheel "${PKG_ROOT}"
 
     find "${PKG_ROOT}/opt/X11" -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | grep -q "Mach-O" && /usr/bin/file "${file}" | grep -q -v "ar archive" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
@@ -675,7 +695,7 @@ do_strip_sign_dsyms() {
     done
 
     find "${PKG_ROOT}/Applications" -type f | while read file ; do
-        if /usr/bin/file "${file}" | grep -q "Mach-O" ; then
+        if /usr/bin/file "${file}" | grep -q "Mach-O" && /usr/bin/file "${file}" | grep -q -v "ar archive" ; then
             sudo dsymutil --out="${SYM_ROOT}"/$(basename "${file}").dSYM "${file}"
             sudo cp "${file}" "${SYM_ROOT}"
 
@@ -796,7 +816,7 @@ do_dist() {
             if ! curl -i -u ${gh_user}:${gh_token} \
                     -o ${tmpfile} \
                     --progress-bar \
-                    --data-binary @${f} \
+                    --upload-file ${f} \
                     -H "Content-Type: application/octet-stream" \
                     https://uploads.github.com/repos/${gh_project}/${gh_repo}/releases/${id}/assets?name=$(basename ${f}) ; then
                 cat ${tmpfile} >&2
@@ -826,7 +846,7 @@ do_dist() {
 
     echo "Commits For the release page:"
     cd "${BASE_DIR}"
-    git submodule | egrep -v '(libXt-flatnamespace|xorg/test)' | sed 's: *\(.*\) src/\(.*\) (\(.*\)):  * \2 \3 (\1):'
+    git submodule foreach --quiet 'echo "  * ${sm_path/src\//} $(git describe --tags --always) ($sha1)"' | egrep -v '(libXt-flatnamespace|xorg/test)'
 }
 
 if [ -d ${BUILD_TOOLS_PREFIX_STD}/share/pkgconfig -o -d ${BUILD_TOOLS_PREFIX_STD}/lib/pkgconfig -o \
@@ -860,6 +880,9 @@ if [ -n "${SANITIZER_CONFIGS}" ] ; then
         sudo install -o root -g wheel -m 0755 ${SANITIZER_LIB_DIR_SRC}/${dylib} ${SANITIZER_LIB_DIR}
     done
 fi
+
+# Build LLVM
+do_cmake_build src/llvm-project LIB llvm
 
 # Build Sparkle
 cd ${BASE_DIR}/src/Sparkle
@@ -999,7 +1022,7 @@ do_meson_build src/xorg/app/listres EXEC
 do_autotools_build src/xorg/app/luit EXEC
 do_meson_build src/xorg/app/mkfontscale EXEC
 do_meson_build src/xorg/app/oclock EXEC
-do_autotools_build src/xorg/app/quartz-wm EXEC
+do_meson_build src/xorg/app/quartz-wm EXEC
 do_autotools_build src/xorg/app/rgb EXEC
 do_meson_build src/xorg/app/sessreg EXEC
 do_meson_build src/xorg/app/setxkbmap EXEC
@@ -1151,7 +1174,7 @@ sudo ln -s Xquartz ${PREFIX}/bin/X
 #do_meson_build src/xorg/test/xts EXEC
 #do_meson_build src/xorg/test/xtsttopng EXEC
 
-do_remove_legacy_protos
+do_removals
 
 do_checks
 
