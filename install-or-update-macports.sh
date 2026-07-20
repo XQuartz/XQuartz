@@ -101,6 +101,17 @@ do_macports_preifx() {
 
     bootstrap_base "${BUILD_TOOLS_PREFIX}"
 
+    # A macports-base built from git source (this script) ships
+    # archive_sites.conf with every entry commented out -- unlike the
+    # official .pkg installer, it does not enable the public binary archive
+    # mirror. Without this, `port install` compiles every port from source
+    # (openssl, perl, python, ...), turning a several-minute install into
+    # hours. Enable the same default the official installer uses.
+    if ! grep -q '^name[[:space:]]*macports_archives' "${BUILD_TOOLS_PREFIX}/etc/macports/archive_sites.conf" 2>/dev/null ; then
+        printf '\nname\t\t\tmacports_archives\nurls\t\t\thttps://packages.macports.org/\n' | \
+            sudo tee -a "${BUILD_TOOLS_PREFIX}/etc/macports/archive_sites.conf" > /dev/null
+    fi
+
     export PATH="${BUILD_TOOLS_PREFIX}/bin:${BASE_PATH}"
 
     sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
