@@ -72,16 +72,15 @@ jobs:
     - name: Cache LLVM build
       uses: actions/cache@v4
       with:
-        # /opt/local-llvm is src/llvm-project.confopt's install prefix, after
-        # the /opt/buildX11 -> /opt/local rewrite above (originally
-        # /opt/buildX11-llvm). compile.sh always runs do_cmake_build for it
-        # unconditionally (no cache-hit skip like the MacPorts step), so this
-        # only avoids rebuilding objects `make` already considers up to
-        # date -- it does not skip the step outright.
-        path: |
-          /opt/local-llvm
-          src/llvm-project/build.arm64
-          src/llvm-project/build.x86_64
+        # Only the final install output, not src/llvm-project/build.arm64 and
+        # build.x86_64: those raw build trees are much larger (LLVM's
+        # intermediate object files easily run into the GBs per arch) and
+        # are suspected of contributing to a build that got killed with no
+        # error message on CI's limited disk. compile.sh always runs
+        # do_cmake_build for LLVM unconditionally (no cache-hit skip like the
+        # MacPorts step), so this doesn't skip the rebuild either way -- it's
+        # a safer, smaller trade than the build-dir cache was.
+        path: /opt/local-llvm
         key: llvm-macos-15-${{ steps.llvm-sha.outputs.sha }}-${{ hashFiles('src/llvm-project.confopt') }}
 
     - name: Disable Code Signing for CI
