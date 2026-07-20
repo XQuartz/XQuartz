@@ -48,7 +48,16 @@ bootstrap_base() {
 
         cd "${SRC_DIR}" || die "Could not enter macports-base"
 
-        ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
+        # Deliberately not passing --with-applications-dir: the official
+        # binary archives were built against the default /Applications/MacPorts,
+        # and MacPorts' archive-site matching (filter_sites in macports.tcl)
+        # requires an exact match on that path. Pointing it at our own
+        # prefix silently disables every binary archive -- port install then
+        # compiles every dependency from source (confirmed live in CI: no
+        # port ever attempted an archive fetch with a custom applications-dir).
+        # None of our ports install a .app bundle, so the shared default path
+        # is otherwise unused.
+        ./configure --prefix="${BUILD_TOOLS_PREFIX}" --without-startupitems || die "Could not configure macports"
         make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
         sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
     fi
@@ -100,17 +109,6 @@ do_macports_preifx() {
     push_pkgconfig ${BUILD_TOOLS_PREFIX}
 
     bootstrap_base "${BUILD_TOOLS_PREFIX}"
-
-    # A macports-base built from git source (this script) ships
-    # archive_sites.conf with every entry commented out -- unlike the
-    # official .pkg installer, it does not enable the public binary archive
-    # mirror. Without this, `port install` compiles every port from source
-    # (openssl, perl, python, ...), turning a several-minute install into
-    # hours. Enable the same default the official installer uses.
-    if ! grep -q '^name[[:space:]]*macports_archives' "${BUILD_TOOLS_PREFIX}/etc/macports/archive_sites.conf" 2>/dev/null ; then
-        printf '\nname\t\t\tmacports_archives\nurls\t\t\thttps://packages.macports.org/\n' | \
-            sudo tee -a "${BUILD_TOOLS_PREFIX}/etc/macports/archive_sites.conf" > /dev/null
-    fi
 
     export PATH="${BUILD_TOOLS_PREFIX}/bin:${BASE_PATH}"
 
