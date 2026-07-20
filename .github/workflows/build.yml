@@ -9,7 +9,11 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Pinned rather than macos-latest: MacPorts' binary archive buildbots lag
+    # behind brand-new macOS releases (macos-latest is now macOS 26, which has
+    # no prebuilt packages yet), so every port compiles from source and the
+    # job runs for hours instead of minutes.
+    runs-on: macos-15
     
     steps:
     - uses: actions/checkout@v4
@@ -30,7 +34,7 @@ jobs:
         path: |
           /opt/local
           /opt/local-cmake
-        key: macports-${{ runner.os }}-${{ hashFiles('install-or-update-macports.sh') }}
+        key: macports-macos-15-${{ hashFiles('install-or-update-macports.sh') }}
         
     - name: Set up MacPorts and dependencies
       if: steps.cache-macports.outputs.cache-hit != 'true'
