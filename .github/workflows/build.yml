@@ -125,7 +125,18 @@ jobs:
         sudo ln -sf "${GNU_SED}" /opt/local-cmake/bin/sed
 
     - name: Build XQuartz
+      env:
+        # Homebrew's llvm bottle is built with zstd support (ours, compiled
+        # from source, explicitly turned it off), so mesa's link of
+        # libgallium now pulls in "-lzstd" via llvm-config's reported
+        # dependencies -- confirmed by a real failure ("ld: library 'zstd'
+        # not found"). LIBRARY_PATH is read directly by clang's driver at
+        # link time (unlike LDFLAGS, which only affects flags baked in when
+        # meson/configure ran, already done by this point), so this reaches
+        # the failing link command without needing to reconfigure anything.
+        LIBRARY_PATH: /opt/homebrew/lib
       run: |
+        brew install zstd
         # Three prior runs got killed with no error message partway through
         # this step, and the follow-up "if: always()" diagnostics step never
         # even started -- the runner itself is dying (VM crash/reboot), not
