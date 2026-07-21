@@ -27,9 +27,9 @@ jobs:
         sudo mkdir -p /opt/local /opt/local-cmake
         sudo chown -R $USER /opt/local /opt/local-cmake
 
-    - name: Cache MacPorts
+    - name: Restore MacPorts cache
       id: cache-macports
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
       with:
         path: |
           /opt/local
@@ -60,52 +60,48 @@ jobs:
       if: steps.cache-macports.outputs.cache-hit != 'true'
       run: sudo ./install-or-update-macports.sh
 
-    - name: Get LLVM submodule commit
-      id: llvm-sha
-      run: echo "sha=$(git -C src/llvm-project rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-
-    - name: Prepare LLVM Cache Directory
-      run: |
-        sudo mkdir -p /opt/local-llvm
-        sudo chown -R $USER /opt/local-llvm
-
-    - name: Cache LLVM build
-      uses: actions/cache@v4
+    - name: Save MacPorts cache
+      # Explicit save right after this succeeds, rather than relying on
+      # actions/cache's own end-of-job save: this step (~45min-1h on a cold
+      # cache) has completed successfully on every single run so far, but
+      # the cache never persisted because the LLVM build later in the same
+      # job kept killing the whole runner outright (not just failing the
+      # step) -- and a dead runner never reaches any later "post" hook,
+      # including the implicit cache save. Save it the moment it's earned,
+      # so we stop re-paying for it on every attempt regardless of what
+      # LLVM does afterwards.
+      if: steps.cache-macports.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
       with:
-        # Only the final install output, not src/llvm-project/build.arm64 and
-        # build.x86_64: those raw build trees are much larger (LLVM's
-        # intermediate object files easily run into the GBs per arch) and
-        # are suspected of contributing to a build that got killed with no
-        # error message on CI's limited disk. compile.sh always runs
-        # do_cmake_build for LLVM unconditionally (no cache-hit skip like the
-        # MacPorts step), so this doesn't skip the rebuild either way -- it's
-        # a safer, smaller trade than the build-dir cache was.
-        path: /opt/local-llvm
-        key: llvm-macos-15-${{ steps.llvm-sha.outputs.sha }}-${{ hashFiles('src/llvm-project.confopt') }}
+        path: |
+          /opt/local
+          /opt/local-cmake
+        key: ${{ steps.cache-macports.outputs.cache-primary-key }}
+
+    - name: Install LLVM via Homebrew instead of building it
+      # Building src/llvm-project from source (do_cmake_build, twice: once
+      # per arch) is what's been killing the runner outright on every CI
+      # attempt so far -- OOM partway through, confirmed via the
+      # resource-monitor data in "Build XQuartz" below (LLVM_PARALLEL_*_JOBS
+      # and make -j1 both failed to fix it reliably). Homebrew's llvm bottle
+      # is prebuilt for this exact runner image, is built with
+      # -DLLVM_ENABLE_RTTI=ON (matching src/llvm-project.confopt's
+      # requirement for mesa's ABI) and ships both static (.a) and dylib
+      # libraries, so it's a drop-in replacement for what compile.sh would
+      # otherwise compile: point the meson cross files' llvm-config lookup
+      # (already rewritten to /opt/local-llvm above) at it directly.
+      run: |
+        brew install llvm
+        sudo mkdir -p /opt/local-llvm
+        sudo rm -rf /opt/local-llvm
+        sudo ln -s "$(brew --prefix llvm)" /opt/local-llvm
+        sed -i '' '/^do_cmake_build src\/llvm-project LIB llvm$/d' compile.sh
 
     - name: Disable Code Signing for CI
       run: |
         sed -i '' 's/--sign "${CODESIGN_IDENTITY_PKG}"//g' compile.sh
         sed -i '' 's/--sign "${CODESIGN_IDENTITY_APP}"//g' compile.sh
         sed -i '' '/codesign -s/d' compile.sh
-
-    - name: Reduce LLVM build parallelism for CI
-      # LLVM_PARALLEL_COMPILE_JOBS/LINK_JOBS (src/llvm-project.confopt) only
-      # work with CMake's Ninja generator via job pools -- this build uses
-      # the "Unix Makefiles" generator (do_cmake_build's own gnumake calls),
-      # where they're silently ignored. Confirmed via the resource-monitor
-      # data below: the runner still died from memory exhaustion with those
-      # set. The only parallelism knob Unix Makefiles actually obeys is
-      # make's own -j, controlled here by compile.sh's global MAKE_OPTS, so
-      # override it just around the LLVM build call instead of globally
-      # (everything else builds fine at full parallelism).
-      run: |
-        sed -i '' '/^do_cmake_build src\/llvm-project LIB llvm$/c\
-        _XQ_SAVED_MAKE_OPTS="${MAKE_OPTS}"\
-        MAKE_OPTS="V=1 -j1"\
-        do_cmake_build src/llvm-project LIB llvm\
-        MAKE_OPTS="${_XQ_SAVED_MAKE_OPTS}"
-        ' compile.sh
 
     - name: Build XQuartz
       run: |
