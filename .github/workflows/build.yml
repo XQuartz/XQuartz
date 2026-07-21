@@ -146,21 +146,26 @@ jobs:
         # Every other component in this build should see exactly the
         # headers it already expects; only libintl.h is actually missing.
         CPATH: /tmp/xq-libintl-shim
+        # mesa's libgallium link wants "-lzstd" (llvm-config reports it as a
+        # dependency of the Homebrew llvm bottle, regardless of what meson's
+        # own dependency check for it finds), but nothing in that link
+        # command adds "-L/opt/local/lib", where MacPorts' zstd port (below)
+        # installs it -- confirmed by "ld: library 'zstd' not found" even
+        # after installing it. Same narrow-shim reasoning as CPATH above:
+        # LIBRARY_PATH=/opt/local/lib broadly would work for zstd but risks
+        # the same class of regression the LIBRARY_PATH=/opt/homebrew/lib
+        # attempt caused (MacPorts' own libintl/libiconv use the same
+        # libiconv_open-style renaming GNU gettext always uses), so only
+        # expose the one library actually missing.
+        LIBRARY_PATH: /tmp/xq-zstd-shim
       run: |
-        mkdir -p /tmp/xq-libintl-shim
+        mkdir -p /tmp/xq-libintl-shim /tmp/xq-zstd-shim
         ln -sf /opt/local/include/libintl.h /tmp/xq-libintl-shim/libintl.h
-        # zstd, for the Homebrew llvm bottle's link-time dependency (mesa's
-        # libgallium link wants "-lzstd", confirmed by "ld: library 'zstd'
-        # not found"): install via MacPorts, not Homebrew. A first attempt
-        # with `brew install zstd` + LIBRARY_PATH=/opt/homebrew/lib fixed
-        # that but broke fontconfig's link instead -- Homebrew's libintl.dylib
-        # is arm64-only, and LIBRARY_PATH put it ahead of MacPorts' universal
-        # one for every link in the build, not just the one that needed it,
-        # so the x86_64 half of fontconfig's build lost its libintl symbols.
-        # MacPorts' zstd is already the same universal-binary architecture
-        # everything else here is, and already on the PATH/library search
-        # compile.sh itself sets up -- no env var override needed.
+        # zstd itself, via MacPorts (not Homebrew, for the same
+        # universal-vs-arch-native-binary reason as the LIBRARY_PATH
+        # decision above).
         sudo /opt/local/bin/port -N install zstd
+        ln -sf /opt/local/lib/libzstd.dylib /tmp/xq-zstd-shim/libzstd.dylib
         # Three prior runs got killed with no error message partway through
         # this step, and the follow-up "if: always()" diagnostics step never
         # even started -- the runner itself is dying (VM crash/reboot), not
