@@ -132,11 +132,23 @@ jobs:
         # though MacPorts' gettext port (already installed) provides it at
         # /opt/local/include. CPATH is read directly by clang's driver at
         # compile time, reaching the failing command without needing to
-        # reconfigure anything. Safe globally: MacPorts builds universal
-        # (arm64+x86_64) binaries matching the rest of this build, unlike
-        # Homebrew's arch-native-only ones (see the zstd install below).
-        CPATH: /opt/local/include
+        # reconfigure anything.
+        #
+        # This points at a narrow shim dir (just libintl.h), not
+        # /opt/local/include directly: a first attempt with the whole
+        # directory fixed xfd but broke xclock instead -- MacPorts' iconv.h
+        # in that same directory redefines iconv_open/iconv_close to
+        # libiconv_open/libiconv_close (its usual way of avoiding a clash
+        # with the system's own iconv), so xclock's Clock.c compiled
+        # against MacPorts' header but linked against the system's
+        # libiconv.dylib (via plain "-liconv"), which only has the
+        # unprefixed symbols -- "Undefined symbols ... _libiconv_open".
+        # Every other component in this build should see exactly the
+        # headers it already expects; only libintl.h is actually missing.
+        CPATH: /tmp/xq-libintl-shim
       run: |
+        mkdir -p /tmp/xq-libintl-shim
+        ln -sf /opt/local/include/libintl.h /tmp/xq-libintl-shim/libintl.h
         # zstd, for the Homebrew llvm bottle's link-time dependency (mesa's
         # libgallium link wants "-lzstd", confirmed by "ld: library 'zstd'
         # not found"): install via MacPorts, not Homebrew. A first attempt
