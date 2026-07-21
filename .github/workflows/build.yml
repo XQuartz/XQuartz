@@ -103,6 +103,19 @@ jobs:
         sed -i '' 's/--sign "${CODESIGN_IDENTITY_APP}"//g' compile.sh
         sed -i '' '/codesign -s/d' compile.sh
 
+    - name: Install GNU sed for the actual build
+      # Confirmed by a real failure: libX11's cpprules.in (upstream,
+      # unmodified) does `C_SED = LC_CTYPE=C $(SED)` -- already parameterized
+      # correctly -- but autoconf's sed detection resolves $(SED) to macOS's
+      # BSD sed, which throws "RE error: illegal byte sequence" on the
+      # non-ASCII bytes in libX11's locale/Compose data under LC_CTYPE=C.
+      # GNU sed just passes those bytes through. Only prepend it to PATH here
+      # (not earlier): the sed -i '' calls in prior steps are macOS/BSD sed
+      # syntax and would break under GNU sed's different -i argument handling.
+      run: |
+        brew install gnu-sed
+        echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> "$GITHUB_PATH"
+
     - name: Build XQuartz
       run: |
         # Three prior runs got killed with no error message partway through
