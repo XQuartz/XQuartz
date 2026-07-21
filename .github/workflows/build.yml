@@ -135,6 +135,13 @@ jobs:
         # meson/configure ran, already done by this point), so this reaches
         # the failing link command without needing to reconfigure anything.
         LIBRARY_PATH: /opt/homebrew/lib
+        # xfd's meson build detects "Use gettext: true" but its actual
+        # compile command has no -I for gettext's libintl.h -- confirmed by
+        # a real failure ("fatal error: 'libintl.h' file not found"), even
+        # though MacPorts' gettext port (already installed) provides it at
+        # /opt/local/include. CPATH is LIBRARY_PATH's equivalent for
+        # headers: read directly by clang's driver, same reasoning as above.
+        CPATH: /opt/local/include
       run: |
         brew install zstd
         # Three prior runs got killed with no error message partway through
