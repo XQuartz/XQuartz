@@ -31,16 +31,33 @@ trap "rm -rf ${TMP_BASE}" EXIT INT QUIT TERM
 
 bootstrap_base() {
     local BUILD_TOOLS_PREFIX=$1
+    # Each prefix gets its own macports-base checkout: the build tree bakes
+    # in --prefix at configure time, and `make install` for a second prefix
+    # against a checkout already configured/built for the first prefix fails
+    # partway through (e.g. "install-tcllibc: No such file or directory")
+    # because stale generated/staged files from the first build don't get
+    # regenerated for the new prefix.
+    local SRC_DIR="${TMP_BASE}/macports-base-$(basename "${BUILD_TOOLS_PREFIX}")"
 
     if ! [ -f "${BUILD_TOOLS_PREFIX}/bin/port" ] ; then
         cd "${TMP_BASE}" || die "Could not change to tmp directory"
 
-        if ! [ -d "${TMP_BASE}/macports-base" ] ; then
-            git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git || die "Could not clone macports-base"
-            cd macports-base || die "Could not enter macports-base"
+        if ! [ -d "${SRC_DIR}" ] ; then
+            git clone -b release-${MACPORTS_VERSION} --depth 1 https://github.com/macports/macports-base.git "${SRC_DIR}" || die "Could not clone macports-base"
         fi
 
-        ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
+        cd "${SRC_DIR}" || die "Could not enter macports-base"
+
+        # Deliberately not passing --with-applications-dir: the official
+        # binary archives were built against the default /Applications/MacPorts,
+        # and MacPorts' archive-site matching (filter_sites in macports.tcl)
+        # requires an exact match on that path. Pointing it at our own
+        # prefix silently disables every binary archive -- port install then
+        # compiles every dependency from source (confirmed live in CI: no
+        # port ever attempted an archive fetch with a custom applications-dir).
+        # None of our ports install a .app bundle, so the shared default path
+        # is otherwise unused.
+        ./configure --prefix="${BUILD_TOOLS_PREFIX}" --without-startupitems || die "Could not configure macports"
         make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
         sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
     fi

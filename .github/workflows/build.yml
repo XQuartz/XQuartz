@@ -1,0 +1,187 @@
+name: Build XQuartz
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # Pinned rather than macos-latest: MacPorts' binary archive buildbots lag
+    # behind brand-new macOS releases (macos-latest is now macOS 26, which has
+    # no prebuilt packages yet), so every port compiles from source and the
+    # job runs for hours instead of minutes.
+    runs-on: macos-15
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Fetch submodules (parallel)
+      run: git submodule update --init --recursive --depth 1 --jobs 8
+
+    - name: Prepare MacPorts Cache Directories
+      run: |
+        chmod +x *.sh
+        sudo mkdir -p /opt/local /opt/local-cmake
+        sudo chown -R $USER /opt/local /opt/local-cmake
+
+    - name: Restore MacPorts cache
+      id: cache-macports
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          /opt/local
+          /opt/local-cmake
+        key: macports-macos-15-${{ hashFiles('install-or-update-macports.sh') }}
+
+    - name: Rewrite /opt/buildX11 references to /opt/local
+      # Every file that hardcodes the build-tools prefix, not just the two
+      # install-or-update-macports.sh/compile.sh touch directly: the meson
+      # cross files (pkg-config/cmake/llvm-config lookup) also reference it,
+      # and were missed here before, which broke every meson-based build
+      # ("Found pkg-config: NO" / "Found CMake: NO") once the toolchain
+      # actually lived under /opt/local. This has to run every run,
+      # regardless of the MacPorts cache-hit status below: it rewrites
+      # checked-out source files, not the cached /opt/local contents, so
+      # skipping it on a cache hit would leave compile.sh pointing at a
+      # prefix (/opt/buildX11) that was never installed.
+      run: |
+        sed -i '' 's|/opt/buildX11|/opt/local|g' \
+          install-or-update-macports.sh \
+          compile.sh \
+          src/llvm-project.confopt \
+          meson_support/meson/cross/arm64-darwin-xquartz \
+          meson_support/meson/cross/i386-darwin-xquartz \
+          meson_support/meson/cross/x86_64-darwin-xquartz
+
+    - name: Set up MacPorts and dependencies
+      if: steps.cache-macports.outputs.cache-hit != 'true'
+      run: sudo ./install-or-update-macports.sh
+
+    - name: Save MacPorts cache
+      # Explicit save right after this succeeds, rather than relying on
+      # actions/cache's own end-of-job save: this step (~45min-1h on a cold
+      # cache) has completed successfully on every single run so far, but
+      # the cache never persisted because the LLVM build later in the same
+      # job kept killing the whole runner outright (not just failing the
+      # step) -- and a dead runner never reaches any later "post" hook,
+      # including the implicit cache save. Save it the moment it's earned,
+      # so we stop re-paying for it on every attempt regardless of what
+      # LLVM does afterwards.
+      if: steps.cache-macports.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          /opt/local
+          /opt/local-cmake
+        key: ${{ steps.cache-macports.outputs.cache-primary-key }}
+
+    - name: Disable llvmpipe for CI (mesa's only consumer of LLVM)
+      # Building src/llvm-project from source (do_cmake_build, twice: once
+      # per arch) is what's been killing the runner outright on every CI
+      # attempt so far -- OOM partway through, confirmed via the
+      # resource-monitor data in "Build XQuartz" below (LLVM_PARALLEL_*_JOBS
+      # and make -j1 both failed to fix it reliably).
+      #
+      # Tried swapping in Homebrew's prebuilt llvm bottle instead (fixed the
+      # OOM, and its -DLLVM_ENABLE_RTTI=ON does match what mesa's ABI needs),
+      # but it's a dead end for this build specifically: Homebrew only ships
+      # native-arch packages, and this is a universal (arm64+x86_64) build --
+      # the x86_64 link of libgallium came back with hundreds of undefined
+      # LLVM-C symbols because there's no x86_64 slice of Homebrew's
+      # arm64-only libLLVM*.a to link against.
+      #
+      # llvmpipe is mesa's LLVM-JIT software rasterizer, a fallback path, not
+      # something the multi-monitor/debounce work this fork exists for
+      # depends on. Disable it for CI, and also drop compile.sh's own
+      # separate, unconditional "# Build LLVM" step -- it calls
+      # do_cmake_build for src/llvm-project regardless of what mesa.confopt
+      # says, so turning llvm off in mesa alone wouldn't stop the OOM-prone
+      # from-source build from still running. mesa.confopt itself is left
+      # alone for a real build on real hardware with room for a proper
+      # from-source universal LLVM.
+      run: |
+        sed -i '' \
+          -e 's/-Dllvm=enabled/-Dllvm=disabled/' \
+          -e 's/-Dgallium-drivers=softpipe,llvmpipe/-Dgallium-drivers=softpipe/' \
+          src/mesa/mesa.confopt
+        sed -i '' '/^do_cmake_build src\/llvm-project LIB llvm$/d' compile.sh
+
+    - name: Disable Code Signing for CI
+      run: |
+        sed -i '' 's/--sign "${CODESIGN_IDENTITY_PKG}"//g' compile.sh
+        sed -i '' 's/--sign "${CODESIGN_IDENTITY_APP}"//g' compile.sh
+        sed -i '' '/codesign -s/d' compile.sh
+
+    - name: Install GNU sed for the actual build
+      # Confirmed by a real failure: libX11's cpprules.in (upstream,
+      # unmodified) does `C_SED = LC_CTYPE=C $(SED)` -- already parameterized
+      # correctly -- but autoconf's sed detection resolves $(SED) to macOS's
+      # BSD sed, which throws "RE error: illegal byte sequence" on the
+      # non-ASCII bytes in libX11's locale/Compose data under LC_CTYPE=C.
+      # GNU sed just passes those bytes through.
+      #
+      # Prepending to $GITHUB_PATH alone doesn't survive: compile.sh's
+      # do_autotools_build/do_cmake_build reset PATH themselves before every
+      # component build (e.g. "${PREFIX}/bin:${BUILD_TOOLS_PREFIX_STD}/bin:
+      # /usr/bin:..."), discarding whatever the job's ambient PATH was. Both
+      # of those prefix bin/ dirs are already on that fixed list and come
+      # before /usr/bin, so drop a `sed` symlink there instead -- it survives
+      # compile.sh's own PATH resets without needing to patch compile.sh.
+      run: |
+        brew install gnu-sed
+        GNU_SED="$(brew --prefix gnu-sed)/bin/gsed"
+        sudo ln -sf "${GNU_SED}" /opt/local/bin/sed
+        sudo ln -sf "${GNU_SED}" /opt/local-cmake/bin/sed
+
+    - name: Build XQuartz
+      env:
+        # xfd's meson build detects "Use gettext: true" but its actual
+        # compile command has no -I for gettext's libintl.h -- confirmed by
+        # a real failure ("fatal error: 'libintl.h' file not found"), even
+        # though MacPorts' gettext port (already installed) provides it at
+        # /opt/local/include. CPATH is read directly by clang's driver at
+        # compile time, reaching the failing command without needing to
+        # reconfigure anything.
+        #
+        # This points at a narrow shim dir (just libintl.h), not
+        # /opt/local/include directly: a first attempt with the whole
+        # directory fixed xfd but broke xclock instead -- MacPorts' iconv.h
+        # in that same directory redefines iconv_open/iconv_close to
+        # libiconv_open/libiconv_close (its usual way of avoiding a clash
+        # with the system's own iconv), so xclock's Clock.c compiled
+        # against MacPorts' header but linked against the system's
+        # libiconv.dylib (via plain "-liconv"), which only has the
+        # unprefixed symbols -- "Undefined symbols ... _libiconv_open".
+        # Every other component in this build should see exactly the
+        # headers it already expects; only libintl.h is actually missing.
+        CPATH: /tmp/xq-libintl-shim
+      run: |
+        mkdir -p /tmp/xq-libintl-shim
+        ln -sf /opt/local/include/libintl.h /tmp/xq-libintl-shim/libintl.h
+        # Three prior runs got killed with no error message partway through
+        # this step, and the follow-up "if: always()" diagnostics step never
+        # even started -- the runner itself is dying (VM crash/reboot), not
+        # compile.sh exiting with an error, so anything written only to a
+        # file is lost with it. Print df/vm_stat straight to this step's own
+        # log stream every 30s instead, so samples survive even if the
+        # runner disappears mid-build.
+        (while true; do
+          echo "=== resource-monitor $(date -u +%H:%M:%S) ==="
+          df -h /
+          vm_stat
+          sleep 30
+        done) &
+        MONITOR_PID=$!
+        ./compile.sh
+        BUILD_EXIT=$?
+        kill "${MONITOR_PID}" 2>/dev/null || true
+        exit ${BUILD_EXIT}
+
+    - name: Upload Installer PKG
+      uses: actions/upload-artifact@v4
+      with:
+        name: XQuartz-Installer
+        path: XQuartz-*.pkg
