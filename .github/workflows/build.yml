@@ -78,23 +78,35 @@ jobs:
           /opt/local-cmake
         key: ${{ steps.cache-macports.outputs.cache-primary-key }}
 
-    - name: Install LLVM via Homebrew instead of building it
+    - name: Disable llvmpipe for CI (mesa's only consumer of LLVM)
       # Building src/llvm-project from source (do_cmake_build, twice: once
       # per arch) is what's been killing the runner outright on every CI
       # attempt so far -- OOM partway through, confirmed via the
       # resource-monitor data in "Build XQuartz" below (LLVM_PARALLEL_*_JOBS
-      # and make -j1 both failed to fix it reliably). Homebrew's llvm bottle
-      # is prebuilt for this exact runner image, is built with
-      # -DLLVM_ENABLE_RTTI=ON (matching src/llvm-project.confopt's
-      # requirement for mesa's ABI) and ships both static (.a) and dylib
-      # libraries, so it's a drop-in replacement for what compile.sh would
-      # otherwise compile: point the meson cross files' llvm-config lookup
-      # (already rewritten to /opt/local-llvm above) at it directly.
+      # and make -j1 both failed to fix it reliably).
+      #
+      # Tried swapping in Homebrew's prebuilt llvm bottle instead (fixed the
+      # OOM, and its -DLLVM_ENABLE_RTTI=ON does match what mesa's ABI needs),
+      # but it's a dead end for this build specifically: Homebrew only ships
+      # native-arch packages, and this is a universal (arm64+x86_64) build --
+      # the x86_64 link of libgallium came back with hundreds of undefined
+      # LLVM-C symbols because there's no x86_64 slice of Homebrew's
+      # arm64-only libLLVM*.a to link against.
+      #
+      # llvmpipe is mesa's LLVM-JIT software rasterizer, a fallback path, not
+      # something the multi-monitor/debounce work this fork exists for
+      # depends on. Disable it for CI, and also drop compile.sh's own
+      # separate, unconditional "# Build LLVM" step -- it calls
+      # do_cmake_build for src/llvm-project regardless of what mesa.confopt
+      # says, so turning llvm off in mesa alone wouldn't stop the OOM-prone
+      # from-source build from still running. mesa.confopt itself is left
+      # alone for a real build on real hardware with room for a proper
+      # from-source universal LLVM.
       run: |
-        brew install llvm
-        sudo mkdir -p /opt/local-llvm
-        sudo rm -rf /opt/local-llvm
-        sudo ln -s "$(brew --prefix llvm)" /opt/local-llvm
+        sed -i '' \
+          -e 's/-Dllvm=enabled/-Dllvm=disabled/' \
+          -e 's/-Dgallium-drivers=softpipe,llvmpipe/-Dgallium-drivers=softpipe/' \
+          src/mesa/mesa.confopt
         sed -i '' '/^do_cmake_build src\/llvm-project LIB llvm$/d' compile.sh
 
     - name: Disable Code Signing for CI
@@ -146,26 +158,9 @@ jobs:
         # Every other component in this build should see exactly the
         # headers it already expects; only libintl.h is actually missing.
         CPATH: /tmp/xq-libintl-shim
-        # mesa's libgallium link wants "-lzstd" (llvm-config reports it as a
-        # dependency of the Homebrew llvm bottle, regardless of what meson's
-        # own dependency check for it finds), but nothing in that link
-        # command adds "-L/opt/local/lib", where MacPorts' zstd port (below)
-        # installs it -- confirmed by "ld: library 'zstd' not found" even
-        # after installing it. Same narrow-shim reasoning as CPATH above:
-        # LIBRARY_PATH=/opt/local/lib broadly would work for zstd but risks
-        # the same class of regression the LIBRARY_PATH=/opt/homebrew/lib
-        # attempt caused (MacPorts' own libintl/libiconv use the same
-        # libiconv_open-style renaming GNU gettext always uses), so only
-        # expose the one library actually missing.
-        LIBRARY_PATH: /tmp/xq-zstd-shim
       run: |
-        mkdir -p /tmp/xq-libintl-shim /tmp/xq-zstd-shim
+        mkdir -p /tmp/xq-libintl-shim
         ln -sf /opt/local/include/libintl.h /tmp/xq-libintl-shim/libintl.h
-        # zstd itself, via MacPorts (not Homebrew, for the same
-        # universal-vs-arch-native-binary reason as the LIBRARY_PATH
-        # decision above).
-        sudo /opt/local/bin/port -N install zstd
-        ln -sf /opt/local/lib/libzstd.dylib /tmp/xq-zstd-shim/libzstd.dylib
         # Three prior runs got killed with no error message partway through
         # this step, and the follow-up "if: always()" diagnostics step never
         # even started -- the runner itself is dying (VM crash/reboot), not
