@@ -109,12 +109,20 @@ jobs:
       # correctly -- but autoconf's sed detection resolves $(SED) to macOS's
       # BSD sed, which throws "RE error: illegal byte sequence" on the
       # non-ASCII bytes in libX11's locale/Compose data under LC_CTYPE=C.
-      # GNU sed just passes those bytes through. Only prepend it to PATH here
-      # (not earlier): the sed -i '' calls in prior steps are macOS/BSD sed
-      # syntax and would break under GNU sed's different -i argument handling.
+      # GNU sed just passes those bytes through.
+      #
+      # Prepending to $GITHUB_PATH alone doesn't survive: compile.sh's
+      # do_autotools_build/do_cmake_build reset PATH themselves before every
+      # component build (e.g. "${PREFIX}/bin:${BUILD_TOOLS_PREFIX_STD}/bin:
+      # /usr/bin:..."), discarding whatever the job's ambient PATH was. Both
+      # of those prefix bin/ dirs are already on that fixed list and come
+      # before /usr/bin, so drop a `sed` symlink there instead -- it survives
+      # compile.sh's own PATH resets without needing to patch compile.sh.
       run: |
         brew install gnu-sed
-        echo "$(brew --prefix gnu-sed)/libexec/gnubin" >> "$GITHUB_PATH"
+        GNU_SED="$(brew --prefix gnu-sed)/bin/gsed"
+        sudo ln -sf "${GNU_SED}" /opt/local/bin/sed
+        sudo ln -sf "${GNU_SED}" /opt/local-cmake/bin/sed
 
     - name: Build XQuartz
       run: |
