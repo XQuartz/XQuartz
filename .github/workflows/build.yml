@@ -126,24 +126,29 @@ jobs:
 
     - name: Build XQuartz
       env:
-        # Homebrew's llvm bottle is built with zstd support (ours, compiled
-        # from source, explicitly turned it off), so mesa's link of
-        # libgallium now pulls in "-lzstd" via llvm-config's reported
-        # dependencies -- confirmed by a real failure ("ld: library 'zstd'
-        # not found"). LIBRARY_PATH is read directly by clang's driver at
-        # link time (unlike LDFLAGS, which only affects flags baked in when
-        # meson/configure ran, already done by this point), so this reaches
-        # the failing link command without needing to reconfigure anything.
-        LIBRARY_PATH: /opt/homebrew/lib
         # xfd's meson build detects "Use gettext: true" but its actual
         # compile command has no -I for gettext's libintl.h -- confirmed by
         # a real failure ("fatal error: 'libintl.h' file not found"), even
         # though MacPorts' gettext port (already installed) provides it at
-        # /opt/local/include. CPATH is LIBRARY_PATH's equivalent for
-        # headers: read directly by clang's driver, same reasoning as above.
+        # /opt/local/include. CPATH is read directly by clang's driver at
+        # compile time, reaching the failing command without needing to
+        # reconfigure anything. Safe globally: MacPorts builds universal
+        # (arm64+x86_64) binaries matching the rest of this build, unlike
+        # Homebrew's arch-native-only ones (see the zstd install below).
         CPATH: /opt/local/include
       run: |
-        brew install zstd
+        # zstd, for the Homebrew llvm bottle's link-time dependency (mesa's
+        # libgallium link wants "-lzstd", confirmed by "ld: library 'zstd'
+        # not found"): install via MacPorts, not Homebrew. A first attempt
+        # with `brew install zstd` + LIBRARY_PATH=/opt/homebrew/lib fixed
+        # that but broke fontconfig's link instead -- Homebrew's libintl.dylib
+        # is arm64-only, and LIBRARY_PATH put it ahead of MacPorts' universal
+        # one for every link in the build, not just the one that needed it,
+        # so the x86_64 half of fontconfig's build lost its libintl symbols.
+        # MacPorts' zstd is already the same universal-binary architecture
+        # everything else here is, and already on the PATH/library search
+        # compile.sh itself sets up -- no env var override needed.
+        sudo /opt/local/bin/port -N install zstd
         # Three prior runs got killed with no error message partway through
         # this step, and the follow-up "if: always()" diagnostics step never
         # even started -- the runner itself is dying (VM crash/reboot), not
