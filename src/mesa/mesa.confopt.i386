@@ -1,0 +1,4 @@
+-Dc_std=c11 \
+-Degl=disabled \
+-Dllvm=disabled \
+-Dgallium-drivers=softpipe

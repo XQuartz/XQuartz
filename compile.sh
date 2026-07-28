@@ -134,6 +134,7 @@ fi
 ARCHS_EXEC="arm64 x86_64"
 ARCHS_LIB="${ARCHS_EXEC}"
 ARCHS_LIB_BINCOMPAT_2_7="x86_64"
+ARCHS_LLVM="${ARCHS_EXEC}"
 
 if [ -d "${SDKROOT_i386}" -a -d "${XCODE_i386}" ] ; then
     ARCHS_LIB="${ARCHS_LIB} i386"
@@ -888,8 +889,8 @@ if [ -n "${SANITIZER_CONFIGS}" ] ; then
     done
 fi
 
-# Build LLVM
-do_cmake_build src/llvm-project LIB llvm
+# Build LLVM (arm64/x86_64 only; llvmpipe is not built for the i386 slice, so LLVM isn't needed there)
+do_cmake_build src/llvm-project LLVM llvm
 
 # Build Sparkle
 cd ${BASE_DIR}/src/Sparkle
