@@ -218,6 +218,19 @@ remove() {
     echo "${result}"
 }
 
+# Look for <project_dir>.confopt.<arch> first, falling back to <project_dir>.confopt,
+# falling back to /dev/null if neither exists.
+find_confopt_file() {
+    local project_dir=${1}
+    local arch=${2}
+    local confopt_file="${project_dir}.confopt.${arch}"
+
+    [ -f "${confopt_file}" ] || confopt_file="${project_dir}.confopt"
+    [ -f "${confopt_file}" ] || confopt_file=/dev/null
+
+    echo "${confopt_file}"
+}
+
 setup_environment() {
     local config=${1}
     shift
@@ -302,8 +315,6 @@ do_autotools_build() {
     local archs=${!variable}
 
     local patches_dir="${project_dir}.patches"
-    local confopt_file="${project_dir}.confopt"
-    [ -f "${confopt_file}" ] || confopt_file=/dev/null
 
     cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
@@ -330,15 +341,15 @@ do_autotools_build() {
 
     if ! has i386 ${archs} ; then
         # x86_64 and arm64 can always be built together
-        do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
+        do_autotools_build_sub fat "$(find_confopt_file "${project_dir}" fat)" ${config} ${archs}
     elif ! has arm64 ${archs} && ! has ${config} ${SANITIZER_CONFIGS} ; then
         # i386 and x86_64 can be built together (against the older SDK) if we
         # don't also need an arm64 slice (eg: legacy bincompat dylibs)
-        do_autotools_build_sub fat ${confopt_file} ${config} ${archs}
+        do_autotools_build_sub fat "$(find_confopt_file "${project_dir}" fat)" ${config} ${archs}
     else
         # We need to build an x86_64 slice along with i386 in order for it to execute on Apple Silico Macs
-        do_autotools_build_sub noarm "${confopt_file}" ${config} $(remove arm64 ${archs})
-        do_autotools_build_sub no32 "${confopt_file}" ${config} $(remove i386 ${archs})
+        do_autotools_build_sub noarm "$(find_confopt_file "${project_dir}" noarm)" ${config} $(remove arm64 ${archs})
+        do_autotools_build_sub no32 "$(find_confopt_file "${project_dir}" no32)" ${config} $(remove i386 ${archs})
         do_lipo noarm i386 no32 "$(remove i386 ${archs})"
     fi
 
@@ -446,9 +457,7 @@ do_meson_build() {
     local archs=${!variable}
 
     local patches_dir="${project_dir}.patches"
-    local confopt_file="${project_dir}.confopt"
     local meson_cross_dir="${BASE_DIR}/meson_support/meson/cross"
-    [ -f "${confopt_file}" ] || confopt_file=/dev/null
 
     cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
@@ -467,7 +476,7 @@ do_meson_build() {
     # https://github.com/mesonbuild/meson/issues/8206
     for arch in ${archs} ; do
         setup_environment ${config} ${arch} || die "Failed to setup environment"
-        meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "${confopt_file}")) --cross-file ${meson_cross_dir}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
+        meson build.${arch} -Dprefix=${PREFIX} $(eval echo $(cat "$(find_confopt_file "${project_dir}" ${arch})")) --cross-file ${meson_cross_dir}/${arch}-darwin-xquartz || die "Could not configure in $(pwd)"
         ninja --verbose -C build.${arch} || die "Failed to compile in $(pwd)"
         sudo DESTDIR="${DESTDIR}.lipo.${arch}" ninja --verbose -C build.${arch} install || die "Failed to install in $(pwd)"
 
@@ -516,8 +525,6 @@ do_cmake_build() {
     local cmake_archs
 
     local patches_dir="${project_dir}.patches"
-    local confopt_file="${project_dir}.confopt"
-    [ -f "${confopt_file}" ] || confopt_file=/dev/null
 
     cd "${project_dir}" || die "Could not change directory to ${project_dir}"
 
@@ -551,7 +558,7 @@ do_cmake_build() {
               -DCMAKE_OSX_ARCHITECTURES="${cmake_archs}" \
               -DCMAKE_OSX_SYSROOT="${sdkdir}" \
               -DCMAKE_OSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET}" \
-              $(eval echo $(cat "${confopt_file}")) "../${source_subdir}" || die "Could not configure in $(pwd)"
+              $(eval echo $(cat "$(find_confopt_file "${project_dir}" ${arch})")) "../${source_subdir}" || die "Could not configure in $(pwd)"
 
         ${SCAN_BUILD} ${MAKE} ${MAKE_OPTS} VERBOSE=1 || die "Could not make in $(pwd)"
         sudo ${MAKE} install DESTDIR=${DESTDIR}.lipo.${arch} VERBOSE=1 || die "Could not make install in $(pwd)"
