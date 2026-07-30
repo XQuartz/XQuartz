@@ -698,7 +698,18 @@ do_strip_sign_dsyms() {
                 sudo "${STRIP}" -S "${file}"
             fi
 
-            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --force --preserve-metadata=entitlements,requirements,flags --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
+            # mesa's llvmpipe driver JITs shaders at runtime, so the GL clients we ship need to opt out of
+            # the hardened runtime's restriction on writable+executable memory.
+            case $(basename "${file}") in
+            glxgears|glxinfo)
+                CODESIGN_ENTITLEMENTS_OPTS="--preserve-metadata=requirements,flags --entitlements ${BASE_DIR}/llvmpipe-jit-entitlements.plist"
+                ;;
+            *)
+                CODESIGN_ENTITLEMENTS_OPTS="--preserve-metadata=entitlements,requirements,flags"
+                ;;
+            esac
+
+            sudo codesign -s "${CODESIGN_IDENTITY_APP}" --digest-algorithm=sha256 --force ${CODESIGN_ENTITLEMENTS_OPTS} --identifier "org.xquartz.$(basename "${file}")" --options runtime "${file}"
         fi
     done
 
