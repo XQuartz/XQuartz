@@ -610,3 +610,6 @@
 [submodule "src/llvm-project"]
 	path = src/llvm-project
 	url = https://github.com/llvm/llvm-project.git
+[submodule "src/wayland"]
+	path = src/wayland
+	url = https://github.com/XQuartz/wayland.git
