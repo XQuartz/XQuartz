@@ -96,6 +96,7 @@ do_macports_preifx() {
     export PATH="${BUILD_TOOLS_PREFIX}/bin:${BASE_PATH}"
 
     sudo ${BUILD_TOOLS_PREFIX}/bin/port -v selfupdate || die "Could not selfupdate macports"
+    sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v upgrade outdated || die "Could not upgrade macports installed tools"
     sudo ${BUILD_TOOLS_PREFIX}/bin/port -N -v -f install ${@} || die "Could not install basic toolchain"
 
     # cmake can mess up the way meson searches for dependnecies, so deactivate it and the rest of the recursive leaves
