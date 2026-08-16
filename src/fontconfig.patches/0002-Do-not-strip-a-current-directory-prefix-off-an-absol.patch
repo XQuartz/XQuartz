@@ -1,0 +1,215 @@
+From f478a15206a27a130215f13d5cc1edab2ce9e229 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 16 Aug 2026 21:03:56 -0700
+Subject: [PATCH 2/2] Do not strip a current directory prefix off an absolute
+ glob
+
+FcConfigGlobAdd() drops a leading current directory name that
+FcStrCopyFilename() prepends to a relative glob. That strip was applied to
+every glob, so an absolute one lost its leading components whenever the
+current directory happened to be a lexical prefix of it.
+
+Running from the root directory would therefore result in "/" being
+stripped from all paths, ultimately resulting in fc-cache walking the
+entirety of /System/Library/AssetsV2 instead of the font asset
+subdirectories selected by 05-macos.conf.
+
+Only a relative glob can have gained the prefix, so restrict the strip to
+that case.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/503
+
+Regressed-in: 8f54cb21c366a97d9c30723bff27d15e70aa7729
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+Changelog: fixed
+---
+ src/fccfg.c             | 47 +++++++++++++++++++-------------
+ test/fctest/__init__.py | 10 +++----
+ test/test_glob_cwd.py   | 60 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 94 insertions(+), 23 deletions(-)
+ create mode 100644 test/test_glob_cwd.py
+
+diff --git a/src/fccfg.c b/src/fccfg.c
+index 2f89a834..eff40591 100644
+--- a/src/fccfg.c
++++ b/src/fccfg.c
+@@ -2894,10 +2894,9 @@ FcConfigGlobAdd (FcConfig      *config,
+ {
+     FcStrSet      *set = accept ? config->acceptGlobs : config->rejectGlobs;
+     FcChar8       *realglob = FcStrCopyFilename (glob);
+-    FcChar8       *cwd = FcStrCopyFilename ((const FcChar8 *)".");
++    FcChar8       *cwd = NULL;
+     const FcChar8 *s;
+     FcBool         ret;
+-    size_t         len = 0;
+ 
+     /*
+      * FcStrCopyFilename canonicalize a path string and prepend
+@@ -2905,27 +2904,39 @@ FcConfigGlobAdd (FcConfig      *config,
+      * This isn't a desired behavior here.
+      * So drop the extra path name if they have. Otherwise use it as it is.
+      *
+-     * realglob is NULL when ~ cannot be expanded, or on allocation
+-     * failure. There is nothing to strip a prefix off in that case, so
+-     * fall back to the glob as given.
++     * Only a relative glob can have gained that prefix. An absolute one
++     * has to be kept as it is, otherwise the code below would strip its
++     * leading components whenever the current directory happens to be a
++     * lexical prefix of it. That is particularly harmful when running from
++     * the root directory, where FcStrCopyFilename(".") gives an empty
++     * string and every absolute glob would then lose its leading '/'.
+      */
+-    if (!cwd || !realglob)
+-	s = glob;
+-    else {
+-	len = strlen ((const char *)cwd);
+-	/* No need to use FC_DIR_SEPARATOR because '\\' will be
+-	 * replaced with / by FcConvertDosPath in FcStrCanonFilename
+-	 */
+-	if (strncmp ((const char *)cwd, (const char *)realglob, len) == 0 &&
+-	    realglob[len] == '/')
+-	    s = &realglob[len + 1];
+-	else
+-	    s = realglob;
++    if (FcStrIsAbsoluteFilename (glob) || FcStrUsesHome (glob)) {
++	/* Nothing to fall back on when ~ cannot be expanded */
++	if (!realglob)
++	    return FcFalse;
++	s = realglob;
++    } else {
++	cwd = FcStrCopyFilename ((const FcChar8 *)".");
++	if (!cwd || !realglob)
++	    s = glob;
++	else {
++	    size_t len = strlen ((const char *)cwd);
++	    /* No need to use FC_DIR_SEPARATOR because '\\' will be
++	     * replaced with / by FcConvertDosPath in FcStrCanonFilename
++	     */
++	    if (strncmp ((const char *)cwd, (const char *)realglob, len) == 0 &&
++	        realglob[len] == '/')
++		s = &realglob[len + 1];
++	    else
++		s = realglob;
++	}
+     }
+ 
+     ret = FcStrSetAdd (set, s);
+     FcStrFree (realglob);
+-    FcStrFree (cwd);
++    if (cwd)
++	FcStrFree (cwd);
+     return ret;
+ }
+ 
+diff --git a/test/fctest/__init__.py b/test/fctest/__init__.py
+index 2e1d75ec..c1f01304 100644
+--- a/test/fctest/__init__.py
++++ b/test/fctest/__init__.py
+@@ -272,7 +272,7 @@ class FcTest:
+             self.__bind = None
+             self._env["FONTCONFIG_FILE"] = self._conffile.name
+ 
+-    def run(self, binary, args=[], debug=False) -> Iterator[[int, str, str]]:
++    def run(self, binary, args=[], debug=False, cwd=None) -> Iterator[[int, str, str]]:
+         cmd = []
+         if self._exewrapper:
+             cmd += [self._exewrapper]
+@@ -308,7 +308,7 @@ class FcTest:
+                 boxed += ["--setenv", "FC_FONTATIONS", "1"]
+             boxed += cmd
+             self.logger.info(boxed)
+-            res = subprocess.run(boxed, capture_output=True, env=self._env)
++            res = subprocess.run(boxed, capture_output=True, env=self._env, cwd=cwd)
+         else:
+             origdebug = self._env.get("FC_DEBUG")
+             if debug:
+@@ -317,7 +317,7 @@ class FcTest:
+             if self.with_fontations:
+                 self._env["FC_FONTATIONS"] = "1"
+             self.logger.info(cmd)
+-            res = subprocess.run(cmd, capture_output=True, env=self._env)
++            res = subprocess.run(cmd, capture_output=True, env=self._env, cwd=cwd)
+             if debug:
+                 if origdebug:
+                     self._env["FC_DEBUG"] = origdebug
+@@ -330,8 +330,8 @@ class FcTest:
+                     del self._env["FC_FONTATIONS"]
+         yield res.returncode, res.stdout.decode("utf-8"), res.stderr.decode("utf-8")
+ 
+-    def run_cache(self, args, debug=False) -> Iterator[[int, str, str]]:
+-        return self.run(self._fccache, args, debug)
++    def run_cache(self, args, debug=False, cwd=None) -> Iterator[[int, str, str]]:
++        return self.run(self._fccache, args, debug, cwd)
+ 
+     def run_cat(self, args, debug=False) -> Iterator[[int, str, str]]:
+         return self.run(self._fccat, args, debug)
+diff --git a/test/test_glob_cwd.py b/test/test_glob_cwd.py
+new file mode 100644
+index 00000000..05f8f718
+--- /dev/null
++++ b/test/test_glob_cwd.py
+@@ -0,0 +1,60 @@
++#! /usr/bin/env python3
++# Copyright (C) 2026 fontconfig Authors
++# SPDX-License-Identifier: HPND
++
++import pytest
++from pathlib import Path
++from tempfile import NamedTemporaryFile
++from fctest import FcTest, FcTestFont
++
++
++@pytest.fixture
++def fctest():
++    return FcTest()
++
++
++@pytest.fixture
++def fcfont():
++    return FcTestFont()
++
++
++@pytest.mark.parametrize("cwd", ["/", "/tmp", None])
++def test_absolute_glob_is_cwd_independent(fctest, fcfont, cwd):
++    """An absolute glob has to be honoured whatever the current directory is.
++
++    FcConfigGlobAdd() used to strip a leading current directory name off
++    every glob, which also fired for an absolute glob whenever the current
++    directory happened to be a lexical prefix of it. Running from the root
++    directory made that unconditional, since the current directory name is
++    an empty string there, so every absolute glob silently lost its leading
++    separator and stopped matching anything.
++    """
++    extraconffile = NamedTemporaryFile(
++        prefix="fontconfig.", suffix=".extra.conf", mode="w", delete_on_close=False
++    )
++    fctest._extra.append(
++        f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>'
++    )
++
++    extraconffile.write(
++        f"""
++<fontconfig>
++  <selectfont>
++    <rejectfont>
++      <glob>{fctest.convert_path(fctest.fontdir.name)}</glob>
++    </rejectfont>
++  </selectfont>
++</fontconfig>
++"""
++    )
++    extraconffile.close()
++
++    fctest.setup()
++    fctest.install_font(fcfont.fonts, ".")
++    for ret, stdout, stderr in fctest.run_cache(
++        [fctest.convert_path(fctest.fontdir.name)], cwd=cwd
++    ):
++        assert ret == 0, stderr
++        assert "rejected" in stderr, stderr
++    cache_files = [f.name for f in Path(fctest.cachedir.name).glob("*cache*")]
++    assert len(cache_files) == 0
+-- 
+2.55.0
+

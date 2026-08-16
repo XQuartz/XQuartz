@@ -1,0 +1,112 @@
+From 11c7b6d89513cac466d34c1ebaecbb961689d71e Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 16 Aug 2026 21:02:33 -0700
+Subject: [PATCH 1/2] Do not dereference a NULL glob string
+
+FcStrCopyFilename() returns NULL when a ~ glob cannot be expanded because
+no home directory is available, which is commonly the case with system
+services. FcConfigGlobAdd() handed that NULL straight to strncmp() and
+crashed while parsing the configuration.
+
+The NULL check this replaces was reached only after the dereference, so it
+never fired, and it also leaked both allocations when it did.
+
+Regressed-in: 8f54cb21c366a97d9c30723bff27d15e70aa7729
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+
+Changelog: fixed
+---
+ src/fccfg.c            |  8 ++++---
+ test/test_glob_home.py | 53 ++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 58 insertions(+), 3 deletions(-)
+ create mode 100644 test/test_glob_home.py
+
+diff --git a/src/fccfg.c b/src/fccfg.c
+index 7bca51e2..2f89a834 100644
+--- a/src/fccfg.c
++++ b/src/fccfg.c
+@@ -2904,8 +2904,12 @@ FcConfigGlobAdd (FcConfig      *config,
+      * current directory name if no path included in a string.
+      * This isn't a desired behavior here.
+      * So drop the extra path name if they have. Otherwise use it as it is.
++     *
++     * realglob is NULL when ~ cannot be expanded, or on allocation
++     * failure. There is nothing to strip a prefix off in that case, so
++     * fall back to the glob as given.
+      */
+-    if (cwd == NULL)
++    if (!cwd || !realglob)
+ 	s = glob;
+     else {
+ 	len = strlen ((const char *)cwd);
+@@ -2918,8 +2922,6 @@ FcConfigGlobAdd (FcConfig      *config,
+ 	else
+ 	    s = realglob;
+     }
+-    if (!s)
+-	return FcFalse;
+ 
+     ret = FcStrSetAdd (set, s);
+     FcStrFree (realglob);
+diff --git a/test/test_glob_home.py b/test/test_glob_home.py
+new file mode 100644
+index 00000000..9fc69b9e
+--- /dev/null
++++ b/test/test_glob_home.py
+@@ -0,0 +1,53 @@
++#! /usr/bin/env python3
++# Copyright (C) 2026 fontconfig Authors
++# SPDX-License-Identifier: HPND
++
++import pytest
++from tempfile import NamedTemporaryFile
++from fctest import FcTest, FcTestFont
++
++
++@pytest.fixture
++def fctest():
++    return FcTest()
++
++
++@pytest.fixture
++def fcfont():
++    return FcTestFont()
++
++
++def test_glob_home_unexpandable(fctest, fcfont):
++    """A ~ glob must not crash when there is no home directory to expand.
++
++    FcStrCopyFilename() returns NULL for a ~ glob when no home directory is
++    available, and FcConfigGlobAdd() used to hand that NULL straight to
++    strncmp().
++    """
++    extraconffile = NamedTemporaryFile(
++        prefix="fontconfig.", suffix=".extra.conf", mode="w", delete_on_close=False
++    )
++    fctest._extra.append(
++        f'<include ignore_missing="yes">{fctest.convert_path(extraconffile.name)}</include>'
++    )
++
++    extraconffile.write(
++        """
++<fontconfig>
++  <selectfont>
++    <rejectfont>
++      <glob>~/fonts/*</glob>
++    </rejectfont>
++  </selectfont>
++</fontconfig>
++"""
++    )
++    extraconffile.close()
++
++    fctest.setup()
++    fctest.install_font(fcfont.fonts, ".")
++    fctest.env.pop("HOME", None)
++    for ret, stdout, stderr in fctest.run_cache(
++        [fctest.convert_path(fctest.fontdir.name)]
++    ):
++        assert ret == 0, f"fc-cache did not exit cleanly: {ret}: {stderr}"
+-- 
+2.55.0
+
