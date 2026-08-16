@@ -1,0 +1,165 @@
+diff --git a/src/x-screen.h b/src/x-screen.h
+index 92d3cbc..736c15d 100644
+--- a/src/x-screen.h
++++ b/src/x-screen.h
+@@ -62,7 +62,11 @@ @interface x_screen : NSObject
+ 
+     Window _net_wm_window;
+ 
++    /* Last _NET_WORKAREA we published, so we can skip redundant updates. */
++    X11Rect _workarea;
++
+     unsigned _updates_disabled :1;
++    unsigned _workarea_valid :1;
+ }
+ 
+ - (void) set_root_property:(const char *)name type:(const char *)type
+diff --git a/src/x-screen.m b/src/x-screen.m
+index 063e9e1..2d4390c 100644
+--- a/src/x-screen.m
++++ b/src/x-screen.m
+@@ -40,6 +40,7 @@
+ @interface x_screen (local)
+ - (void) net_wm_init;
+ - (void) update_net_workarea;
++- (X11Rect) rect_excluding_dock:(X11Rect)r;
+ @end
+ 
+ @implementation x_screen
+@@ -410,12 +411,70 @@ - (void) dealloc
+     [super dealloc];
+ }
+ 
++/* Trim whatever part of the dock overlaps r off of r.
++
++   [NSScreen visibleFrame] would be the obvious way to ask this question,
++   but it is not usable from quartz-wm: once xp_init() has put us in the
++   background with dock support AppKit stops refreshing its idea of the
++   screen layout, so visibleFrame reports whatever it happened to read when
++   quartz-wm started and never notices the dock again.  (The server tells us
++   when the screen parameters change -- it does not ask for dock support, so
++   it still gets those notifications -- but we have to recompute the answer
++   ourselves rather than read it back from AppKit.)  visibleFrame also has
++   <rdar://problem/6395220>, where it subtracts the dock and the menu bar
++   even while they are hidden by another application.
++
++   Asking the dock itself avoids all of that, and it is already the rect
++   validate_window_position uses to keep windows from getting lost
++   underneath it.  The menu bar is carved out of the X screen by the server,
++   so the dock is the only thing left for us to subtract. */
++- (X11Rect) rect_excluding_dock:(X11Rect)r
++{
++    X11Region avail, dock_region;
++    X11Rect dock_rect, ret;
++    xp_box dock_box;
++    pixman_box32_t *e;
++
++    dock_box = qwm_dock_get_rect();
++    dock_rect = [self CGToX11Rect:CGRectMake(dock_box.x1, dock_box.y1,
++                                             dock_box.x2 - dock_box.x1,
++                                             dock_box.y2 - dock_box.y1)];
++
++    pixman_region32_init_rect(&avail, r.x, r.y, r.width, r.height);
++    pixman_region32_init_rect(&dock_region, dock_rect.x, dock_rect.y,
++                              dock_rect.width, dock_rect.height);
++    pixman_region32_subtract(&avail, &avail, &dock_region);
++
++    e = pixman_region32_extents(&avail);
++    ret = X11RectMake(e->x1, e->y1, e->x2 - e->x1, e->y2 - e->y1);
++
++    pixman_region32_fini(&dock_region);
++    pixman_region32_fini(&avail);
++
++    return ret;
++}
++
+ - (void) update_net_workarea
+ {
+     X11Rect workarea;
+     long data[4];
+ 
+-    workarea = [self zoomed_rect];
++    /* _NET_WORKAREA can only describe one rectangle, so use the main head
++       rather than the union of every display: on a multi-head setup the
++       union's bounding box would span the dock and describe a work area
++       nothing can be placed in.  In full screen mode the dock is not over
++       the X screen at all and the whole head is usable. */
++    workarea = rootless ? [self rect_excluding_dock:_main_head] : _main_head;
++
++    /* The server sends us a root ConfigureNotify for every screen parameter
++       change, and the dock produces a flurry of them while it animates.
++       Don't wake every EWMH client up with a PropertyNotify unless the work
++       area really moved. */
++    if (_workarea_valid && X11RectEqualToRect(workarea, _workarea))
++        return;
++
++    _workarea = workarea;
++    _workarea_valid = YES;
+ 
+     data[0] = workarea.x;
+     data[1] = workarea.y;
+@@ -843,58 +902,17 @@ - (X11Rect) head_containing_point:(X11Point)p
+     return _main_head;
+ }
+ 
+-/* NSPointInRect seems to follow the standard graphics ownership model which is
+- * that the borders are owned by the region by taking an epsilon step in +x (and
+- * if still a border, another epsilon step in +y)... that would work for us
+- * if we didn't have an inverted Y.
+- */
+-static inline BOOL MyNSPointInRect(NSPoint p, NSRect r) {
+-    // Move us to the origin to eliminate headaches
+-    p.y -= r.origin.y;
+-    r.origin.y = 0;
+-
+-    // Mirror y across the center of the rect
+-    p.y = r.size.height - p.y;
+-
+-    // Now use the normal check
+-    return NSPointInRect(p, r);
+-}
+-
+ - (X11Rect) zoomed_rect:(X11Point)xp {
+-    NSPoint nsp;
+-    NSRect NSvisibleFrame;
+-#if MAC_OS_X_VERSION_MIN_REQUIRED < 1050
+-    NSEnumerator *screenEnumerator;
+-#endif
+     X11Rect ret;
+ 
+-    /* If the server is in rootless mode, we need to trim off the menu bar and dock */
+-    if(!rootless) {
+-        /* We need to jump out early here becasue of:
+-         * <rdar://problem/6395220> [NSScreen visibleFrame] subtracts dock and menubar even when hidden by another app
+-         */
+-        ret = [self head_containing_point:xp];
+-        DB("ret: (%d,%d %dx%d)", ret.x, ret.y, ret.width, ret.height);
+-        return ret;
+-    }
+-
+-    nsp = [self X11ToNSPoint:xp];
+-    NSvisibleFrame = [[NSScreen mainScreen] visibleFrame];
++    ret = [self head_containing_point:xp];
+ 
+-#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
+-    for(id screen in [NSScreen screens]) {
+-#else
+-        screenEnumerator = [[NSScreen screens] objectEnumerator];
+-        id screen;
+-        while((screen = [screenEnumerator nextObject])) {
+-#endif
+-        if(MyNSPointInRect(nsp, [screen frame])) {
+-            NSvisibleFrame = [screen visibleFrame];
+-            break;
+-        }
+-    }
++    /* In rootless mode we share the display with the dock, so trim off
++       whatever part of the head it covers.  The menu bar is not ours to
++       worry about; the server has already left it out of the X screen. */
++    if (rootless)
++        ret = [self rect_excluding_dock:ret];
+ 
+-    ret = [self NSToX11Rect:NSvisibleFrame];
+     DB("ret: (%d,%d %dx%d)", ret.x, ret.y, ret.width, ret.height);
+     return ret;
+ }
