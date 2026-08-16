@@ -1,5 +1,4 @@
 -Dxcsecurity=true \
--Dsecure-rpc=false \
 -Dxephyr=false \
 -Dxnest=false \
 -Dxorg=false \
