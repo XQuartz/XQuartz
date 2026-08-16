@@ -1071,7 +1071,7 @@ do_meson_build src/xorg/app/xfsinfo EXEC
 do_meson_build src/xorg/app/xgamma EXEC
 do_autotools_build src/xorg/app/xgc EXEC
 do_autotools_build src/xorg/app/xhost EXEC
-do_autotools_build src/xorg/app/xinit EXEC
+do_meson_build src/xorg/app/xinit EXEC
 do_meson_build src/xorg/app/xinput EXEC
 do_meson_build src/xorg/app/xkbcomp EXEC
 do_autotools_build src/xorg/app/xkbevd EXEC
