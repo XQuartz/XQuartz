@@ -886,6 +886,8 @@ if [ ! -f submodules.initialized ] ; then
     touch submodules.initialized
 fi
 
+if false ; then
+
 # Install our base configs and other misc content
 sudo ditto ${BASE_DIR}/base ${DESTDIR}
 sudo ditto ${BASE_DIR}/base /
@@ -1145,7 +1147,7 @@ do_autotools_build src/xorg/font/sony-misc LIB
 do_autotools_build src/xorg/font/sun-misc LIB
 do_autotools_build src/xorg/font/winitzki-cyrillic LIB
 do_autotools_build src/xorg/font/xfree86-type1 LIB
-
+fi
 do_meson_build src/wayland EXEC
 
 do_meson_build src/mesa/mesa LIB
