@@ -4,7 +4,6 @@
 -Dxvfb=true \
 -Dxquartz=false \
 -Dglamor=false \
--Dsecure-rpc=false \
 -Dpciaccess=false \
 -Dint10=false \
 -Ddocs=false \
