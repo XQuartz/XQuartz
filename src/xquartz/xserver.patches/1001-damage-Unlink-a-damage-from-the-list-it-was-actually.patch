@@ -1,0 +1,114 @@
+From cc402c9c5eebf3d1ba705a6666f2d5b9c884d500 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 16 Aug 2026 21:21:11 -0700
+Subject: [PATCH 1001/1002] damage: Unlink a damage from the list it was
+ actually inserted on
+
+DamageRegister() chooses which list a damage is linked onto via getDrawableDamageRef(), but DamageUnregister() and
+damageSetWindowPixmap() re-derived that list at removal time.  For a window the answer depends on the window pixmap,
+which changes while the damage is registered (Composite redirection, rootless drawing and Present flips all swap it), so
+the removal could consult a different list than the one the damage was inserted onto.  It then silently found nothing --
+DAMAGE_VALIDATE_ENABLE is off, so the diagnostic is compiled out -- and left an unregistered, often freed, damage linked
+where damageRegionAppend() would later dereference its NULL pDrawable and crash.
+
+Record the list head when linking a damage and always unlink from that, which also drops a use-after-free read of the
+old window pixmap in damageSetWindowPixmap(): rootless frees its scratch pixmap before restoring the pre-drawing window
+pixmaps, so the pixmap consulted there had already been destroyed.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/406
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ miext/damage/damage.c    | 22 +++++++++++++++++-----
+ miext/damage/damagestr.h |  6 ++++++
+ 2 files changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/miext/damage/damage.c b/miext/damage/damage.c
+index 48e6af673..498ac910e 100644
+--- a/miext/damage/damage.c
++++ b/miext/damage/damage.c
+@@ -1457,6 +1457,7 @@ damageRemoveDamage(DamagePtr * pPrev, DamagePtr pDamage)
+     while (*pPrev) {
+         if (*pPrev == pDamage) {
+             *pPrev = pDamage->pNext;
++            pDamage->pListHead = NULL;
+             return;
+         }
+         pPrev = &(*pPrev)->pNext;
+@@ -1467,6 +1468,16 @@ damageRemoveDamage(DamagePtr * pPrev, DamagePtr pDamage)
+ #endif
+ }
+ 
++/*
++ * Link pDamage onto the list headed by pPrev, remembering that list so that damageRemoveDamage() can later unlink it
++ * from the same place.
++ *
++ * The list a window's damage belongs on is chosen by getDrawableDamageRef() and depends on the window pixmap, which can
++ * change while the damage is registered (Composite redirection, rootless drawing and Present flips all swap it).
++ * Re-deriving the list at removal time can therefore consult a different list than the damage was inserted onto, in
++ * which case the removal silently does nothing and leaves an unregistered -- possibly freed -- damage linked where
++ * damageRegionAppend() will dereference its NULL pDrawable.
++ */
+ static void
+ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
+ {
+@@ -1481,6 +1492,7 @@ damageInsertDamage(DamagePtr * pPrev, DamagePtr pDamage)
+ #endif
+     pDamage->pNext = *pPrev;
+     *pPrev = pDamage;
++    pDamage->pListHead = pPrev;
+ }
+ 
+ static Bool
+@@ -1553,11 +1565,9 @@ damageSetWindowPixmap(WindowPtr pWindow, PixmapPtr pPixmap)
+     damageScrPriv(pScreen);
+ 
+     if ((pDamage = damageGetWinPriv(pWindow))) {
+-        PixmapPtr pOldPixmap = (*pScreen->GetWindowPixmap) (pWindow);
+-        DamagePtr *pPrev = getPixmapDamageRef(pOldPixmap);
+-
+         while (pDamage) {
+-            damageRemoveDamage(pPrev, pDamage);
++            if (pDamage->pListHead)
++                damageRemoveDamage(pDamage->pListHead, pDamage);
+             pDamage = pDamage->pNextWin;
+         }
+     }
+@@ -1721,6 +1731,7 @@ DamageCreate(DamageReportFunc damageReport,
+         return 0;
+     pDamage->pNext = 0;
+     pDamage->pNextWin = 0;
++    pDamage->pListHead = NULL;
+     RegionNull(&pDamage->damage);
+     RegionNull(&pDamage->pendingDamage);
+ 
+@@ -1823,7 +1834,8 @@ DamageUnregister(DamagePtr pDamage)
+ #endif
+     }
+     pDamage->pDrawable = 0;
+-    damageRemoveDamage(getDrawableDamageRef(pDrawable), pDamage);
++    if (pDamage->pListHead)
++        damageRemoveDamage(pDamage->pListHead, pDamage);
+ }
+ 
+ void
+diff --git a/miext/damage/damagestr.h b/miext/damage/damagestr.h
+index 0d07872e5..19624192e 100644
+--- a/miext/damage/damagestr.h
++++ b/miext/damage/damagestr.h
+@@ -35,6 +35,12 @@
+ typedef struct _damage {
+     DamagePtr pNext;
+     DamagePtr pNextWin;
++    /*
++     * Head of the pNext list this damage is currently linked on, or NULL if it is not linked on any list.  Recorded at
++     * insertion time so that removal always unlinks from the list the damage actually went onto; see
++     * damageInsertDamage().
++     */
++    DamagePtr *pListHead;
+     RegionRec damage;
+ 
+     DamageReportLevel damageLevel;
+-- 
+2.55.0
+

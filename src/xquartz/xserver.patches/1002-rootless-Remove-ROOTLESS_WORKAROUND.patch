@@ -1,0 +1,55 @@
+From 44f7b2338854ff7a4ad8fbb578b74d604aab196f Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 16 Aug 2026 21:25:21 -0700
+Subject: [PATCH 1002/1002] rootless: Remove ROOTLESS_WORKAROUND
+
+XQuartz was the last consumer of this 2007 workaround, which made getDrawableDamageRef() route a non-viewable window's
+damage to the screen damage list instead of the window pixmap's.  Because the answer then changed as a window's
+viewability changed, it was a source of exactly the register/unregister list mismatch the previous commit addresses --
+CrushTree() clears ->viewable before unrealizing, so a window's damage was inserted on one list and looked for on
+another during teardown.
+
+It was disabled for XWin in 20701522be803fe47e921fcf059dadf64c7f287d for breaking Composite and removed entirely in
+c89f0521044083a11d538ebfeaabee6fc7fb9a03, but that removal was reverted in de32d4dcf57c10fc100c1b33630127947a8c8460
+after a regression report, pending a proper fix in the damage layer.  That fix is now in place, so drop the workaround.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/406
+
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ include/meson.build   | 1 -
+ miext/damage/damage.c | 6 +-----
+ 2 files changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/include/meson.build b/include/meson.build
+index 4607e4a19..c51a23b05 100644
+--- a/include/meson.build
++++ b/include/meson.build
+@@ -284,7 +284,6 @@ conf_data.set_quoted('BUILDERSTRING', get_option('builder_string'))
+ 
+ if build_rootless
+     conf_data.set('ROOTLESS', build_rootless ? '1' : false)
+-    conf_data.set('ROOTLESS_WORKAROUND', 1)
+     conf_data.set('ROOTLESS_SAFEALPHA', 1)
+ endif
+ 
+diff --git a/miext/damage/damage.c b/miext/damage/damage.c
+index 498ac910e..383f2c017 100644
+--- a/miext/damage/damage.c
++++ b/miext/damage/damage.c
+@@ -91,11 +91,7 @@ getDrawableDamageRef(DrawablePtr pDrawable)
+         ScreenPtr pScreen = pDrawable->pScreen;
+ 
+         pPixmap = 0;
+-        if (pScreen->GetWindowPixmap
+-#ifdef ROOTLESS_WORKAROUND
+-            && ((WindowPtr) pDrawable)->viewable
+-#endif
+-            )
++        if (pScreen->GetWindowPixmap)
+             pPixmap = (*pScreen->GetWindowPixmap) ((WindowPtr) pDrawable);
+ 
+         if (!pPixmap) {
+-- 
+2.55.0
+
