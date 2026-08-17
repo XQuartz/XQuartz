@@ -1,0 +1,100 @@
+From 9454a89c463e834fefcda776cbcdc3b1d3a80ea7 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Mon, 17 Aug 2026 01:15:52 -0700
+Subject: [PATCH 2004/2004] xkb: Keep the group counts of a loaded keymap in
+ range
+
+Clamp the count once per key and use it everywhere the key or the keymap is indexed with it, while still reading
+every symbol the file claimed so that the stream stays in step and the symbol array is not left short.
+
+At the other end, a symbols section in which no key defines any group leaves the count at the zero it was
+allocated with.  This is how XQuartz's keyboard is initialized: model "empty" supplies a symbols section that
+defines no keys, and a section that defines nothing is still a section, so XkbInitControls() sees XkmSymbolsMask
+and skips its own single-group default.  The device only survives because DarwinKeyboardReloadHandler()
+immediately pushes a core keymap that raises the count again.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/422
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ xkb/xkmread.c | 28 +++++++++++++++++++++++-----
+ 1 file changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/xkb/xkmread.c b/xkb/xkmread.c
+index 94dd0f1ac..d736f79d8 100644
+--- a/xkb/xkmread.c
++++ b/xkb/xkmread.c
+@@ -763,12 +763,20 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
+     for (i = minKC; i <= (int) maxKC; i++) {
+         Atom typeName[XkbNumKbdGroups];
+         XkbKeyTypePtr type[XkbNumKbdGroups];
++        int nGroups;
+ 
+         if ((tmp = fread(&wireMap, SIZEOF(xkmKeySymMapDesc), 1, file)) < 1) {
+             _XkbLibError(_XkbErrBadLength, "ReadXkmSymbols", 0);
+             return -1;
+         }
+         nRead += tmp * SIZEOF(xkmKeySymMapDesc);
++        /* group_info carries the out-of-range action and number alongside the
++         * count, and the count itself is four bits wide while everything it
++         * indexes here holds only XkbNumKbdGroups entries.
++         */
++        nGroups = XkbNumGroups(wireMap.num_groups);
++        if (nGroups > XkbNumKbdGroups)
++            nGroups = XkbNumKbdGroups;
+         memset((char *) typeName, 0, XkbNumKbdGroups * sizeof(Atom));
+         memset((char *) type, 0, XkbNumKbdGroups * sizeof(XkbKeyTypePtr));
+         if (wireMap.flags & XkmKeyHasTypes) {
+@@ -796,12 +804,15 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
+             xkb->server->explicit[i] |= XkbExplicitAutoRepeatMask;
+         }
+         xkb->map->modmap[i] = wireMap.modifier_map;
+-        if (XkbNumGroups(wireMap.num_groups) > 0) {
++        if (nGroups > 0) {
+             KeySym *sym;
+             int nSyms;
+ 
+-            if (XkbNumGroups(wireMap.num_groups) > xkb->ctrls->num_groups)
+-                xkb->ctrls->num_groups = wireMap.num_groups;
++            if (nGroups > xkb->ctrls->num_groups)
++                xkb->ctrls->num_groups = nGroups;
++            /* The file still holds symbols for every group it claimed, so read
++             * and store them all even when we clamped the count above.
++             */
+             nSyms = XkbNumGroups(wireMap.num_groups) * wireMap.width;
+             sym = XkbResizeKeySyms(xkb, i, nSyms);
+             if (!sym)
+@@ -820,7 +831,7 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
+                 xkb->server->explicit[i] |= XkbExplicitInterpretMask;
+             }
+         }
+-        for (g = 0; g < XkbNumGroups(wireMap.num_groups); g++) {
++        for (g = 0; g < nGroups; g++) {
+             if (((xkb->server->explicit[i] & (1 << g)) == 0) ||
+                 (type[g] == NULL)) {
+                 KeySym *tmpSyms;
+@@ -831,7 +842,8 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
+             xkb->map->key_sym_map[i].kt_index[g] =
+                 type[g] - (&xkb->map->types[0]);
+         }
+-        xkb->map->key_sym_map[i].group_info = wireMap.num_groups;
++        xkb->map->key_sym_map[i].group_info =
++            XkbSetNumGroups(wireMap.num_groups, nGroups);
+         xkb->map->key_sym_map[i].width = wireMap.width;
+         if (wireMap.flags & XkmKeyHasBehavior) {
+             xkmBehaviorDesc b;
+@@ -843,6 +855,12 @@ ReadXkmSymbols(FILE * file, XkbDescPtr xkb)
+             xkb->server->explicit[i] |= XkbExplicitBehaviorMask;
+         }
+     }
++    /* A symbols section in which no key defines a group leaves the count at
++     * the zero it was allocated with, which would put group 0 itself out of
++     * range for the rest of the server.
++     */
++    if (xkb->ctrls->num_groups == 0)
++        xkb->ctrls->num_groups = 1;
+     if (totalVModMaps > 0) {
+         xkmVModMapDesc v;
+ 
+-- 
+2.55.0
+

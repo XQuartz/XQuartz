@@ -1,0 +1,46 @@
+From 414e1cea021c965df64cba0250a8491c0d9fdd0f Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Mon, 17 Aug 2026 00:35:52 -0700
+Subject: [PATCH 2003/2004] xkb: Never recompute a keymap's group count down to
+ zero
+
+Both places that derive ctrls->num_groups from the widest key in the map can arrive at zero.  But a keymap in
+which no key defines any symbols is legal, so ensure we declare at least one group.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/422
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ xkb/xkb.c      | 3 +++
+ xkb/xkbUtils.c | 3 +++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/xkb/xkb.c b/xkb/xkb.c
+index 7ee11bcd8..4c0c93901 100644
+--- a/xkb/xkb.c
++++ b/xkb/xkb.c
+@@ -2227,6 +2227,9 @@ SetKeySyms(ClientPtr client,
+         if (XkbKeyNumGroups(xkb, i) > s)
+             s = XkbKeyNumGroups(xkb, i);
+     }
++    /* Never drop to zero groups: a client is free to clear every key's symbols */
++    if (s == 0)
++        s = 1;
+     if (s != xkb->ctrls->num_groups) {
+         xkbControlsNotify cn;
+         XkbControlsRec old;
+diff --git a/xkb/xkbUtils.c b/xkb/xkbUtils.c
+index 1045d98b3..994163c26 100644
+--- a/xkb/xkbUtils.c
++++ b/xkb/xkbUtils.c
+@@ -2147,5 +2147,8 @@ XkbCopyControls(XkbDescPtr dst, XkbDescPtr src)
+             nTG = nG;
+         }
+     }
++    /* A keymap always has at least one group, even when no key defines any symbols */
++    if (nTG == 0)
++        nTG = 1;
+     dst->ctrls->num_groups = nTG;
+ }
+-- 
+2.55.0
+

@@ -1,0 +1,47 @@
+From c4664d27d94adfd21ffe84f18a2e15cfd5388aec Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Sun, 16 Aug 2026 23:57:26 -0700
+Subject: [PATCH 2001/2004] xkb: Guard XkbAdjustGroup() against a keymap with
+ no groups
+
+When every key in a keymap has zero groups, ctrls->num_groups is 0 and each out-of-range action here misbehaves.
+XkbWrapIntoRange divides by zero, which is the reported crash.  XkbClampIntoRange is worse: it computes -1,
+returns it through this function's unsigned type, and the callers truncate it into XkbStateRec's unsigned char
+group fields as 255, after which XkbComputeCompatState() reads map->groups[255] out of a four element array and
+reports what it finds to clients in the compat state of every core event.  The negative-group case adds zero
+forever, wedging the server thread, in one path while it holds input_lock.  XkbComputeDerivedState() treats group
+0 as out of range once num_groups is 0, so all of this is reachable from an ordinary key event.
+
+XQuartz gets there because it asks for model "empty", whose keycodes file declares no key names, so a keymap
+compiled at a client's request has no key definitions at all.
+
+Guard the arithmetic itself and not just the places that compute num_groups: groups_wrap selects between these
+actions and is client settable, and this is exported for DDXes that supply their own controls.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/422
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ xkb/xkbUtils.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/xkb/xkbUtils.c b/xkb/xkbUtils.c
+index 9ffc4553c..1045d98b3 100644
+--- a/xkb/xkbUtils.c
++++ b/xkb/xkbUtils.c
+@@ -665,6 +665,13 @@ XkbAdjustGroup(int group, XkbControlsPtr ctrls)
+ {
+     unsigned act;
+ 
++    /* A keymap with no groups leaves nothing to adjust into, and every action
++     * below misbehaves: wrapping divides by zero, clamping underflows to -1,
++     * and the negative-group loop never terminates.
++     */
++    if (ctrls->num_groups == 0)
++        return XkbGroup1Index;
++
+     act = XkbOutOfRangeGroupAction(ctrls->groups_wrap);
+     if (group < 0) {
+         while (group < 0) {
+-- 
+2.55.0
+

@@ -1,0 +1,31 @@
+From c071a0bc53538b671351da3e9b89c15c3f15ee3b Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Mon, 17 Aug 2026 01:15:52 -0700
+Subject: [PATCH 2002/2004] xkb: Default to one group whenever a keymap reports
+ none
+
+XkbInitControls() had a fallback to ensure keymaps that defined no symbols at all still resulted in one group.
+Extend this to cover the case where a keymap reports symbols but no groups.
+
+Fixes: https://github.com/XQuartz/XQuartz/issues/422
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ xkb/xkbInit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xkb/xkbInit.c b/xkb/xkbInit.c
+index bfdc90556..c33dca189 100644
+--- a/xkb/xkbInit.c
++++ b/xkb/xkbInit.c
+@@ -479,7 +479,7 @@ XkbInitControls(DeviceIntPtr pXDev, XkbSrvInfoPtr xkbi)
+     if (XkbAllocControls(xkb, XkbAllControlsMask) != Success)
+         FatalError("Couldn't allocate keyboard controls\n");
+     ctrls = xkb->ctrls;
+-    if (!(xkb->defined & XkmSymbolsMask))
++    if (!(xkb->defined & XkmSymbolsMask) || ctrls->num_groups == 0)
+         ctrls->num_groups = 1;
+     ctrls->groups_wrap = XkbSetGroupInfo(1, XkbWrapIntoRange, 0);
+     ctrls->internal.mask = 0;
+-- 
+2.55.0
+
