@@ -1,0 +1,49 @@
+XQuartz license information
+============================
+
+XQuartz is not released under a single license. It is a distribution of
+many independent components — the X.Org X server and libraries, the
+`quartz-wm` window manager, Mesa, fontconfig, FreeType, Cairo, Sparkle, and
+dozens more, each a separate git submodule under `src/` — and each carries
+whatever license its own upstream project uses. It is not practical to
+reproduce all of them here precisely; this file gives an overview and
+points to where the authoritative text lives.
+
+For the full picture, see:
+
+- The X.Org Foundation's license summary: https://www.x.org/releases/current/doc/xorg-docs/Licenses.html
+- `pkg/resources/LICENSE.txt` in this repository, installed alongside the
+  built `.pkg` and shown to end users during installation.
+- The individual license/copyright header in each source file, and each
+  submodule's own `COPYING`/`LICENSE` file where present.
+
+As a representative example, the core XQuartz application code — including
+`hw/xquartz/X11Controller.m` and `hw/xquartz/darwinEvents.c` in the
+`src/xquartz/xserver` submodule — carries Apple's MIT-style notice:
+
+> Permission is hereby granted, free of charge, to any person obtaining a
+> copy of this software and associated documentation files (the
+> "Software"), to deal in the Software without restriction, including
+> without limitation the rights to use, copy, modify, merge, publish,
+> distribute, sublicense, and/or sell copies of the Software, and to permit
+> persons to whom the Software is furnished to do so, subject to the
+> following conditions: [...] THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
+> WARRANTY OF ANY KIND, EXPRESS OR IMPLIED [...]
+
+`quartz-wm` is licensed under the Apple Public Source License version 2
+(APSL-2). Other components across the tree are licensed under MIT, BSD,
+GPL-2, or LGPL-2, among others — check the specific submodule before
+redistributing it in isolation.
+
+## New contributions
+
+Changes contributed to this repository are licensed under the same terms
+as the file(s) they modify, as stated in that file's own header comment
+where one exists. No separate restriction is added. There is no warranty
+of any kind; use at your own risk, same as the rest of the project.
+
+## Questions
+
+For licensing questions about upstream XQuartz components, the project
+directs people to the macOS X11 Users mailing list:
+https://www.xquartz.org/Support.html

@@ -1,0 +1,143 @@
+diff --git a/hw/xquartz/X11Controller.m b/hw/xquartz/X11Controller.m
+index e21aed0..b895b9b 100644
+--- a/hw/xquartz/X11Controller.m
++++ b/hw/xquartz/X11Controller.m
+@@ -57,6 +57,74 @@
+ extern aslclient aslc;
+ extern char *bundle_id_prefix;
+
++#include <pthread.h>
++#include <stdint.h>
++
++/*
++ * Coalesce bursts of kXquartzDisplayChanged events -- both waking from sleep
++ * and monitor/arrangement changes fire several of these in quick succession
++ * while macOS renegotiates the display layout -- into a single deferred
++ * screen update, instead of repositioning windows mid-transition.
++ *
++ * This state is written from the AppKit main thread (workspaceDidWake:/
++ * screenParametersDidChange:) and read/extended from the X server's own
++ * thread inside DarwinEventHandler() in darwinEvents.c, so it needs real
++ * locking rather than a bare global; pthread_mutex_t mirrors what
++ * darwinEvents.c already uses for its own cross-thread state (fd_add_lock).
++ */
++#define XQUARTZ_RECONFIG_DEBOUNCE_SECONDS 5.0
++#define XQUARTZ_RECONFIG_MAX_WAIT_SECONDS 15.0
++
++static pthread_mutex_t xquartz_reconfig_lock = PTHREAD_MUTEX_INITIALIZER;
++static uint64_t xquartz_reconfig_generation = 0;
++static NSTimeInterval xquartz_reconfig_window_start = 0;
++static Bool xquartz_reconfig_active = FALSE;
++
++Bool XQuartzDisplayReconfigDebounceActive(void)
++{
++    pthread_mutex_lock(&xquartz_reconfig_lock);
++    Bool active = xquartz_reconfig_active;
++    pthread_mutex_unlock(&xquartz_reconfig_lock);
++    return active;
++}
++
++/* Open (or extend) the debounce window. Safe to call from either thread. */
++void XQuartzDisplayReconfigDebounce(void)
++{
++    NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
++    uint64_t generation;
++    NSTimeInterval delay;
++
++    pthread_mutex_lock(&xquartz_reconfig_lock);
++    generation = ++xquartz_reconfig_generation;
++    if (!xquartz_reconfig_active) {
++        xquartz_reconfig_active = TRUE;
++        xquartz_reconfig_window_start = now;
++    }
++    /* Force a flush once we've been suppressing for too long, so a display
++     * that never settles (e.g. a flapping connection) can't starve updates
++     * forever.
++     */
++    delay = (now - xquartz_reconfig_window_start >= XQUARTZ_RECONFIG_MAX_WAIT_SECONDS) ?
++            0.0 : XQUARTZ_RECONFIG_DEBOUNCE_SECONDS;
++    pthread_mutex_unlock(&xquartz_reconfig_lock);
++
++    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)),
++                   dispatch_get_main_queue(), ^{
++        Bool shouldFlush = FALSE;
++
++        pthread_mutex_lock(&xquartz_reconfig_lock);
++        if (xquartz_reconfig_generation == generation) {
++            xquartz_reconfig_active = FALSE;
++            shouldFlush = TRUE;
++        }
++        pthread_mutex_unlock(&xquartz_reconfig_lock);
++
++        if (shouldFlush)
++            DarwinSendDDXEvent(kXquartzDisplayChanged, 0);
++    });
++}
++
+ @interface X11Controller ()
+ #ifdef XQUARTZ_SPARKLE
+ @property (nonatomic, readwrite, strong) NSMenuItem *check_for_updates_item; // Programatically enabled
+@@ -79,6 +147,16 @@ extern char *bundle_id_prefix;
+     /* Point X11Application at ourself. */
+     xapp.controller = self;
+
++    [NSWorkspace.sharedWorkspace.notificationCenter addObserver:self
++                                                       selector:@selector(workspaceDidWake:)
++                                                           name:NSWorkspaceDidWakeNotification
++                                                         object:nil];
++
++    [NSNotificationCenter.defaultCenter addObserver:self
++                                            selector:@selector(screenParametersDidChange:)
++                                                name:NSApplicationDidChangeScreenParametersNotification
++                                              object:nil];
++
+     NSUserDefaults * const defaults = NSUserDefaults.xquartzDefaults;
+     NSArray *appsMenu = [defaults arrayForKey:XQuartzPrefKeyAppsMenu];
+
+@@ -828,6 +906,16 @@ extern char *bundle_id_prefix;
+         return TRUE;
+ }
+
++- (void)workspaceDidWake:(NSNotification *)note
++{
++    XQuartzDisplayReconfigDebounce();
++}
++
++- (void)screenParametersDidChange:(NSNotification *)note
++{
++    XQuartzDisplayReconfigDebounce();
++}
++
+ - (void) applicationDidHide:(NSNotification *)notify
+ {
+     DarwinSendDDXEvent(kXquartzControllerNotify, 1, AppleWMHideAll);
+diff --git a/hw/xquartz/darwinEvents.c b/hw/xquartz/darwinEvents.c
+index 15c1bc5..acfb5df 100644
+--- a/hw/xquartz/darwinEvents.c
++++ b/hw/xquartz/darwinEvents.c
+@@ -81,6 +81,11 @@
+ extern Bool
+ QuartzModeEventHandler(int screenNum, XQuartzEvent *e, DeviceIntPtr dev);
+
++/* X11Controller.m: debounces kXquartzDisplayChanged around display
++ * reconfiguration (wake from sleep, monitor/arrangement changes). */
++extern Bool XQuartzDisplayReconfigDebounceActive(void);
++extern void XQuartzDisplayReconfigDebounce(void);
++
+ int darwin_all_modifier_flags = 0;  // last known modifier state
+ int darwin_all_modifier_mask = 0;
+ int darwin_x11_modifier_mask = 0;
+@@ -294,6 +299,13 @@ DarwinEventHandler(int screenNum, InternalEvent *ie, DeviceIntPtr dev)
+
+     case kXquartzDisplayChanged:
+         DEBUG_LOG("kXquartzDisplayChanged\n");
++        if (XQuartzDisplayReconfigDebounceActive()) {
++            DEBUG_LOG("Deferring kXquartzDisplayChanged: reconfig debounce active\n");
++            /* Extend the debounce window: the display is still settling. */
++            XQuartzDisplayReconfigDebounce();
++            break;
++        }
++
+         QuartzUpdateScreens();
+
+         /* Update our RandR info */
