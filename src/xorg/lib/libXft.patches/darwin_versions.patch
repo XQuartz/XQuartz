@@ -1,0 +1,12 @@
+diff --git a/meson.build b/meson.build
+index e79435b..c6f8c62 100644
+--- a/meson.build
++++ b/meson.build
+@@ -123,6 +123,7 @@ lib = library(
+                  dep_xproto],
+   sources: xft_h,
+   version: xft_version,
++  darwin_versions: [ '6.0.0', '6.7.0' ],
+   install: true,
+ )
+ 

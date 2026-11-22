@@ -1,0 +1,12 @@
+diff --git a/meson.build b/meson.build
+index 63360ef..f2e51bf 100644
+--- a/meson.build
++++ b/meson.build
+@@ -52,6 +52,7 @@ lib = library(
+   include_directories: 'include',
+   dependencies: [dep_libx11, dep_libxext, dep_xextproto, dep_videoproto],
+   version: '1.0.0',
++  darwin_versions: [ '2.0.0', '2.0.0' ],
+   install: true,
+ )
+ 

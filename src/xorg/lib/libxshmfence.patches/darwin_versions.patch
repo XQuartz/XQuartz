@@ -1,0 +1,12 @@
+diff --git a/meson.build b/meson.build
+index 65c1844..09a4414 100644
+--- a/meson.build
++++ b/meson.build
+@@ -151,6 +151,7 @@ libxshmfence = library(
+   gnu_symbol_visibility: visibility,
+   include_directories: 'src',
+   version: '1.0.0',
++  darwin_versions: [ '2.0.0', '2.0.0' ],
+   install: true,
+ )
+ 

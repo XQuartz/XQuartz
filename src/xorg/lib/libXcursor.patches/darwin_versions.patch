@@ -1,0 +1,12 @@
+diff --git a/meson.build b/meson.build
+index 03bd429..a2fe650 100644
+--- a/meson.build
++++ b/meson.build
+@@ -136,6 +136,7 @@ lib = library(
+   include_directories: 'include',
+   dependencies: [dep_xrender, dep_libxfixes, dep_libx11, dep_fixesproto],
+   version: '1.0.2',
++  darwin_versions: [ '2.0.0', '2.2.0' ],
+   install: true,
+ )
+ 
