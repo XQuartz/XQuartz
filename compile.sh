@@ -957,7 +957,7 @@ do_autotools_build src/xorg/util/lndir EXEC
 do_autotools_build src/xorg/font/util LIB
 
 do_autotools_build src/xorg/lib/libxtrans LIB
-do_autotools_build src/xorg/lib/pthread-stubs LIB
+do_meson_build src/xorg/lib/pthread-stubs LIB
 
 do_meson_build src/xorg/lib/libXau LIB
 
