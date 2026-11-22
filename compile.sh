@@ -1101,7 +1101,7 @@ do_autotools_build src/xorg/app/xsm EXEC
 do_autotools_build src/xorg/app/xstdcmap EXEC
 do_autotools_build src/xorg/app/xvinfo EXEC
 do_autotools_build src/xorg/app/xwd EXEC
-do_autotools_build src/xorg/app/xwininfo EXEC
+do_meson_build src/xorg/app/xwininfo EXEC
 do_autotools_build src/xorg/app/xwud EXEC
 
 do_autotools_build src/xterm EXEC
