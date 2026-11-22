@@ -41,7 +41,9 @@ bootstrap_base() {
         fi
 
         ./configure --prefix="${BUILD_TOOLS_PREFIX}" --with-applications-dir="${BUILD_TOOLS_PREFIX}/Applications" --without-startupitems || die "Could not configure macports"
-        make -j$(sysctl -n hw.activecpu) || die "macports-base build failed"
+        # Workaround: rdar://193468370 (/usr/bin/curl-config --cflags prints out invalid values, breaking OSS projects)
+        # The system curl-config prints the literal "@LIBCURL_PC_CFLAGS@" for --cflags.
+        make -j$(sysctl -n hw.activecpu) CURL_CFLAGS= || die "macports-base build failed"
         sudo make install || die "macports-base install failed into ${BUILD_TOOLS_PREFIX}"
     fi
 
