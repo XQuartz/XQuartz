@@ -952,7 +952,7 @@ do_meson_build src/xorg/proto/xorgproto EXEC
 do_autotools_build src/xorg/proto/xcbproto EXEC
 
 do_autotools_build src/xorg/util/bdftopcf EXEC
-do_autotools_build src/xorg/util/lndir EXEC
+do_meson_build src/xorg/util/lndir EXEC
 
 do_autotools_build src/xorg/font/util LIB
 
