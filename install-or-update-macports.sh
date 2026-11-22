@@ -87,7 +87,7 @@ do_sign_update() {
     sudo ditto "${SPARKLE_DSTROOT}" /
 }
 
-do_macports_preifx() {
+do_macports_prefix() {
     local BUILD_TOOLS_PREFIX=$1
     shift
 
@@ -116,7 +116,7 @@ set -x
 for CONFIG in ${BUILD_TOOLS_CONFIGS} ; do
    BUILD_TOOLS_PREFIX_VAR=BUILD_TOOLS_PREFIX_${CONFIG}
    PORTS_VAR=PORTS_${CONFIG}
-   do_macports_preifx "${!BUILD_TOOLS_PREFIX_VAR}" ${!PORTS_VAR}
+   do_macports_prefix "${!BUILD_TOOLS_PREFIX_VAR}" ${!PORTS_VAR}
 done
 
 sudo ${BUILD_TOOLS_PREFIX_STD}/bin/port select python3 python313 || die "Could not select python3"
