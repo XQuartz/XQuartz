@@ -1049,7 +1049,7 @@ do_meson_build src/xorg/app/showfont EXEC
 do_meson_build src/xorg/app/smproxy EXEC
 do_meson_build src/xorg/app/twm EXEC
 do_meson_build src/xorg/app/viewres EXEC
-do_autotools_build src/xorg/app/xauth EXEC
+do_meson_build src/xorg/app/xauth EXEC
 do_autotools_build src/xorg/app/xbacklight EXEC
 do_meson_build src/xorg/app/xcalc EXEC
 do_autotools_build src/xorg/app/xclipboard EXEC
