@@ -1,0 +1,185 @@
+From 7e382aa515ae69cb4c4f88250ac6174838e9eb95 Mon Sep 17 00:00:00 2001
+From: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+Date: Mon, 23 Nov 2026 17:22:04 -0800
+Subject: [PATCH] glx/apple: Work around SkyLight placing an OpenGL surface at
+ the window bottom
+
+On macOS 26 and later, SkyLight places the layer of an OpenGL surface at the bottom of its window each time
+CGLUpdateContext() binds the surface. It then skips a set of the same bounds, so the server cannot correct the position.
+A GL child window that does not fill its top-level window draws shifted down.
+
+After xp_update_gl_context(), the client now reads the surface bounds with CGSGetSurfaceBounds, moves the surface one
+pixel and back with CGSMoveSurface, and flushes the drawable. SkyLight then places the layer from the real bounds. The
+flush is needed because the move blanks the layer until the next flush. The client skips all of this when the surface
+touches the window bottom, because the layer is already in the right place. The moves change nothing on a macOS release
+that already places the layer correctly.
+
+rdar://193529565 (XQuartz: GL child surface is pinned to the window bottom on macOS 26 and later)
+
+Closes: https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523
+Backport-to: *
+Assisted-by: Claude Code (Claude Sonnet 5.5)
+Signed-off-by: Jeremy Huddleston Sequoia <jeremyhu@apple.com>
+---
+ src/glx/apple/apple_glx_context.c  |  5 ++++
+ src/glx/apple/apple_glx_drawable.h | 12 ++++++++
+ src/glx/apple/apple_glx_surface.c  | 47 ++++++++++++++++++++++++++++++
+ src/glx/apple/meson.build          |  4 ++-
+ 4 files changed, 67 insertions(+), 1 deletion(-)
+
+diff --git a/src/glx/apple/apple_glx_context.c b/src/glx/apple/apple_glx_context.c
+index 034e00b2623..6e374b379b9 100644
+--- a/src/glx/apple/apple_glx_context.c
++++ b/src/glx/apple/apple_glx_context.c
+@@ -570,6 +570,8 @@ apple_glx_context_surface_changed(unsigned int uid, pthread_t caller)
+                                  uid);
+ 
+             xp_update_gl_context(ac->context_obj);
++            /* Workaround for a macOS 26 bug.  See https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523 */
++            apple_glx_surface_fix_position(&ac->drawable->types.surface, ac->context_obj);
+          }
+          else {
+             ac->need_update = true;
+@@ -603,6 +605,9 @@ apple_glx_context_update(Display * dpy, void *ptr)
+ 
+    if (ac->need_update) {
+       xp_update_gl_context(ac->context_obj);
++      /* Workaround for a macOS 26 bug.  See https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523 */
++      if (ac->drawable && APPLE_GLX_DRAWABLE_SURFACE == ac->drawable->type)
++         apple_glx_surface_fix_position(&ac->drawable->types.surface, ac->context_obj);
+       ac->need_update = false;
+ 
+       apple_glx_log_debug("%s: updating context %p", __func__, ptr);
+diff --git a/src/glx/apple/apple_glx_drawable.h b/src/glx/apple/apple_glx_drawable.h
+index af79e0590e1..66122ee9567 100644
+--- a/src/glx/apple/apple_glx_drawable.h
++++ b/src/glx/apple/apple_glx_drawable.h
+@@ -63,6 +63,10 @@ struct apple_glx_surface
+ {
+    xp_surface_id surface_id;
+    unsigned int uid;
++   /* CGS window and surface IDs from the server.  Only the macOS 26 workaround uses them.  See
++    * https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523
++    */
++   unsigned int key[2];
+    bool pending_destroy;
+ };
+ 
+@@ -188,6 +192,14 @@ bool apple_glx_surface_create(Display * dpy, int screen, GLXDrawable drawable,
+ 
+ void apple_glx_surface_destroy(unsigned int uid);
+ 
++/* Workaround for a macOS 26 regression.  See https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523
++ *
++ * SkyLight places the surface at the window bottom after each CGLUpdateContext().  This function moves the surface to
++ * its real position and flushes the drawable.  Call it after xp_update_gl_context().  It does nothing on earlier macOS
++ * releases.
++ */
++void apple_glx_surface_fix_position(const struct apple_glx_surface *s, CGLContextObj context_obj);
++
+ /* Pbuffers */
+ 
+ /* Returns true if an error occurred. */
+diff --git a/src/glx/apple/apple_glx_surface.c b/src/glx/apple/apple_glx_surface.c
+index 4c2cc754f07..ebc25dedbbe 100644
+--- a/src/glx/apple/apple_glx_surface.c
++++ b/src/glx/apple/apple_glx_surface.c
+@@ -27,10 +27,13 @@
+  prior written authorization.
+ */
+ #include <assert.h>
++#include <CoreGraphics/CGGeometry.h>
++#include <CoreGraphics/CGError.h>
+ #include "glxclient.h"
+ #include "apple_glx.h"
+ #include "appledri.h"
+ #include "apple_glx_drawable.h"
++#include "apple_cgl.h"
+ 
+ static bool surface_make_current(struct apple_glx_context *ac,
+                                  struct apple_glx_drawable *d);
+@@ -56,6 +59,47 @@ update_viewport_and_scissor(Display * dpy, GLXDrawable drawable)
+    apple_glapi_oglfw_viewport_scissor(0, 0, width, height);
+ }
+ 
++/* Workaround for a macOS 26 bug.  See https://gitlab.freedesktop.org/mesa/mesa/-/work_items/16523
++ *
++ * SkyLight on macOS 26 and later places the layer of an OpenGL surface at the bottom of the window each time
++ * CGLUpdateContext() binds the surface.  It skips a set of the same bounds after that.  A move of one pixel and
++ * back makes SkyLight place the layer from the real bounds.  The moves change nothing when SkyLight already places
++ * the layer correctly.  Call this after xp_update_gl_context().  A call after xp_attach_gl_context() blanks the layer.
++ * The move also blanks the layer until the next flush, so the function flushes the drawable.
++ */
++/* These CoreGraphics functions are not public API, so no header declares them.  The workaround for the macOS 26 bug
++ * needs them.
++ */
++extern CGError CGSGetSurfaceBounds(uint32_t cid, uint32_t wid, uint32_t sid, CGRect *bounds);
++extern CGError CGSMoveSurface(uint32_t cid, uint32_t wid, uint32_t sid, CGPoint location);
++extern CGError CGSGetWindowBounds(uint32_t cid, uint32_t wid, CGRect *bounds);
++
++void
++apple_glx_surface_fix_position(const struct apple_glx_surface *s, CGLContextObj context_obj)
++{
++   if (__builtin_available(macOS 26.0, *)) {
++      xp_client_id cid = apple_glx_get_client_id();
++      CGRect bounds, window_bounds;
++
++      if (cid == 0)
++         return;
++
++      /* The client does not know the bounds.  The server sets them. */
++      if (CGSGetSurfaceBounds(cid, s->key[0], s->key[1], &bounds) != kCGErrorSuccess ||
++          bounds.size.width <= 0 || bounds.size.height <= 0)
++         return;
++
++      /* SkyLight puts the layer at the window bottom.  That is correct when the surface touches the window bottom. */
++      if (CGSGetWindowBounds(cid, s->key[0], &window_bounds) == kCGErrorSuccess &&
++          bounds.origin.y + bounds.size.height == window_bounds.size.height)
++         return;
++
++      CGSMoveSurface(cid, s->key[0], s->key[1], CGPointMake(bounds.origin.x, bounds.origin.y + 1));
++      CGSMoveSurface(cid, s->key[0], s->key[1], bounds.origin);
++      apple_cgl.flush_drawable(context_obj);
++   }
++}
++
+ static bool
+ surface_make_current(struct apple_glx_context *ac,
+                      struct apple_glx_drawable *d)
+@@ -149,6 +193,9 @@ create_surface(Display * dpy, int screen, struct apple_glx_drawable *d)
+          return true;
+       }
+ 
++      s->key[0] = key[0];
++      s->key[1] = key[1];
++
+       apple_glx_log_debug("%s: created a surface for drawable 0x%lx with uid %u",
+                           __func__, d->drawable, s->uid);
+       return false;             /*success */
+diff --git a/src/glx/apple/meson.build b/src/glx/apple/meson.build
+index ce4a4a614e3..39d3ba7e51c 100644
+--- a/src/glx/apple/meson.build
++++ b/src/glx/apple/meson.build
+@@ -31,8 +31,10 @@ files_libappleglx = files(
+ )
+ 
+ dep_xplugin = null_dep
++dep_coregraphics = null_dep
+ if with_dri_platform == 'apple'
+   dep_xplugin = meson.get_compiler('c').find_library('Xplugin')
++  dep_coregraphics = dependency('appleframeworks', modules : ['CoreGraphics'])
+ endif
+ 
+ libappleglx = static_library(
+@@ -40,7 +42,7 @@ libappleglx = static_library(
+   [files_libappleglx, main_dispatch_h],
+   include_directories: [inc_mesa, inc_glx, inc_src, inc_include, inc_glapi, inc_gallium, inc_loader],
+   c_args: ['-DGL_SILENCE_DEPRECATION'],
+-  dependencies: [dep_xext, dep_xplugin],
++  dependencies: [dep_xext, dep_xplugin, dep_coregraphics],
+   gnu_symbol_visibility : 'hidden',
+   build_by_default: false,
+ )
+-- 
+2.54.0 (Apple Git-156)
+
