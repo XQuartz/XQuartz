@@ -1065,7 +1065,7 @@ do_meson_build src/xorg/app/xedit EXEC
 do_meson_build src/xorg/app/xev EXEC
 do_meson_build src/xorg/app/xeyes EXEC
 do_meson_build src/xorg/app/xfd EXEC
-do_autotools_build src/xorg/app/xfontsel EXEC
+do_meson_build src/xorg/app/xfontsel EXEC
 do_autotools_build src/xorg/app/xfs EXEC
 do_meson_build src/xorg/app/xfsinfo EXEC
 do_meson_build src/xorg/app/xgamma EXEC
