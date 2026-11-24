@@ -1089,7 +1089,7 @@ do_meson_build src/xorg/app/xmessage EXEC
 do_autotools_build src/xorg/app/xmh EXEC
 do_meson_build src/xorg/app/xmodmap EXEC
 do_autotools_build src/xorg/app/xmore EXEC
-do_autotools_build src/xorg/app/xpr EXEC
+do_meson_build src/xorg/app/xpr EXEC
 do_autotools_build src/xorg/app/xprop EXEC
 do_meson_build src/xorg/app/xrandr EXEC
 do_autotools_build src/xorg/app/xrdb EXEC
