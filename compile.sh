@@ -1054,7 +1054,7 @@ do_meson_build src/xorg/app/xbacklight EXEC
 do_meson_build src/xorg/app/xcalc EXEC
 do_meson_build src/xorg/app/xclipboard EXEC
 do_meson_build src/xorg/app/xclock EXEC
-do_autotools_build src/xorg/app/xcmsdb EXEC
+do_meson_build src/xorg/app/xcmsdb EXEC
 do_autotools_build src/xorg/app/xcompmgr EXEC
 do_autotools_build src/xorg/app/xconsole EXEC
 do_meson_build src/xorg/app/xcursorgen EXEC
