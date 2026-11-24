@@ -1087,7 +1087,7 @@ do_meson_build src/xorg/app/xmag EXEC
 do_autotools_build src/xorg/app/xman EXEC
 do_meson_build src/xorg/app/xmessage EXEC
 do_autotools_build src/xorg/app/xmh EXEC
-do_autotools_build src/xorg/app/xmodmap EXEC
+do_meson_build src/xorg/app/xmodmap EXEC
 do_autotools_build src/xorg/app/xmore EXEC
 do_autotools_build src/xorg/app/xpr EXEC
 do_autotools_build src/xorg/app/xprop EXEC
