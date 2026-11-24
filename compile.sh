@@ -1081,7 +1081,7 @@ do_meson_build src/xorg/app/xkill EXEC
 do_meson_build src/xorg/app/xload EXEC
 do_meson_build src/xorg/app/xlogo EXEC
 do_meson_build src/xorg/app/xlsatoms EXEC
-do_autotools_build src/xorg/app/xlsclients EXEC
+do_meson_build src/xorg/app/xlsclients EXEC
 do_autotools_build src/xorg/app/xlsfonts EXEC
 do_autotools_build src/xorg/app/xmag EXEC
 do_autotools_build src/xorg/app/xman EXEC
