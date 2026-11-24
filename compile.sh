@@ -1079,7 +1079,7 @@ do_meson_build src/xorg/app/xkbprint EXEC
 do_meson_build src/xorg/app/xkbutils EXEC
 do_meson_build src/xorg/app/xkill EXEC
 do_meson_build src/xorg/app/xload EXEC
-do_autotools_build src/xorg/app/xlogo EXEC
+do_meson_build src/xorg/app/xlogo EXEC
 do_autotools_build src/xorg/app/xlsatoms EXEC
 do_autotools_build src/xorg/app/xlsclients EXEC
 do_autotools_build src/xorg/app/xlsfonts EXEC
