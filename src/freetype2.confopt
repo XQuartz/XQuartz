@@ -1,2 +1,3 @@
+-Dhvf=enabled \
 -Dpng=disabled \
 -Dzlib=system
