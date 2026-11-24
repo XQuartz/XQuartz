@@ -1069,7 +1069,7 @@ do_meson_build src/xorg/app/xfontsel EXEC
 do_autotools_build src/xorg/app/xfs EXEC
 do_meson_build src/xorg/app/xfsinfo EXEC
 do_meson_build src/xorg/app/xgamma EXEC
-do_autotools_build src/xorg/app/xgc EXEC
+do_meson_build src/xorg/app/xgc EXEC
 do_autotools_build src/xorg/app/xhost EXEC
 do_meson_build src/xorg/app/xinit EXEC
 do_meson_build src/xorg/app/xinput EXEC
