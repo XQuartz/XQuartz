@@ -1062,7 +1062,7 @@ do_meson_build src/xorg/app/xditview EXEC
 do_meson_build src/xorg/app/xdm EXEC
 do_meson_build src/xorg/app/xdpyinfo EXEC
 do_meson_build src/xorg/app/xedit EXEC
-do_autotools_build src/xorg/app/xev EXEC
+do_meson_build src/xorg/app/xev EXEC
 do_meson_build src/xorg/app/xeyes EXEC
 do_meson_build src/xorg/app/xfd EXEC
 do_autotools_build src/xorg/app/xfontsel EXEC
