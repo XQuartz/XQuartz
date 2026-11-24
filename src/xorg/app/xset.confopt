@@ -1,1 +1,1 @@
---without-xf86misc --without-fontcache
+-Dxf86misc=disabled -Dfontcache=disabled
