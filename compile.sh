@@ -1076,7 +1076,7 @@ do_meson_build src/xorg/app/xinput EXEC
 do_meson_build src/xorg/app/xkbcomp EXEC
 do_meson_build src/xorg/app/xkbevd EXEC
 do_meson_build src/xorg/app/xkbprint EXEC
-do_autotools_build src/xorg/app/xkbutils EXEC
+do_meson_build src/xorg/app/xkbutils EXEC
 do_meson_build src/xorg/app/xkill EXEC
 do_autotools_build src/xorg/app/xload EXEC
 do_autotools_build src/xorg/app/xlogo EXEC
