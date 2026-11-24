@@ -1032,7 +1032,7 @@ do_meson_build src/xorg/data/bitmaps EXEC
 do_meson_build src/xorg/app/appres EXEC
 do_meson_build src/xorg/app/bitmap EXEC
 do_meson_build src/xorg/app/editres EXEC
-do_autotools_build src/xorg/app/fonttosfnt EXEC
+do_meson_build src/xorg/app/fonttosfnt EXEC
 do_meson_build src/xorg/app/fslsfonts EXEC
 do_meson_build src/xorg/app/fstobdf EXEC
 do_meson_build src/xorg/app/iceauth EXEC
