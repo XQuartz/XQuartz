@@ -1083,7 +1083,7 @@ do_meson_build src/xorg/app/xlogo EXEC
 do_meson_build src/xorg/app/xlsatoms EXEC
 do_meson_build src/xorg/app/xlsclients EXEC
 do_meson_build src/xorg/app/xlsfonts EXEC
-do_autotools_build src/xorg/app/xmag EXEC
+do_meson_build src/xorg/app/xmag EXEC
 do_autotools_build src/xorg/app/xman EXEC
 do_autotools_build src/xorg/app/xmessage EXEC
 do_autotools_build src/xorg/app/xmh EXEC
