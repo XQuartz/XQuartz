@@ -1092,7 +1092,7 @@ do_autotools_build src/xorg/app/xmore EXEC
 do_meson_build src/xorg/app/xpr EXEC
 do_meson_build src/xorg/app/xprop EXEC
 do_meson_build src/xorg/app/xrandr EXEC
-do_autotools_build src/xorg/app/xrdb EXEC
+do_meson_build src/xorg/app/xrdb EXEC
 do_autotools_build src/xorg/app/xrefresh EXEC
 do_autotools_build src/xorg/app/xscope EXEC
 do_autotools_build src/xorg/app/xset EXEC
